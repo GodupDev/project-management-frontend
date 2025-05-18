@@ -14,7 +14,7 @@ const SearchBar = () => {
       className={`w-full h-8 flex items-center gap-3 px-3 rounded-sm border transition-all
     ${
       focused
-        ? "border-[#9A93B3]/10 ring ring-[#9A93B3]/30"
+        ? "border-[#9A93B3]/10 ring ring-[#9A93B3]/30 font-medium"
         : "border-[#9A93B3]/50 hover:ring-[#9A93B3]/30"
     }
   `}
@@ -22,7 +22,7 @@ const SearchBar = () => {
       <IconSearch />
 
       <Input
-        className="!bg-transparent !border-none !shadow-none !text-[#787486] !placeholder-[#787486/10] !p-0 !text-[0.65rem]"
+        className="!bg-transparent !border-none !shadow-none !text-[#787486] !placeholder-[#787486/10] !p-0 !text-[0.8rem]"
         placeholder="Search for anything..."
         value={value}
         allowClear

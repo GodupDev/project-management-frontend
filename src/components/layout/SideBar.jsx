@@ -30,7 +30,7 @@ const SideBar = () => {
                      px-1 py-2 rounded-md 
                      hover:text-blue-600 hover:bg-blue-100 
                      transition-colors duration-300 ease-in-out
-                      focus:bg-blue-100  focus:ring-blue-400"
+                      focus:bg-blue-100  focus:ring-blue-400 focus:font-bold"
           aria-label={label}
           onClick={() => {
             console.log(`${label} clicked`);
