@@ -3,3 +3,13 @@
 body {
   background-color: #f0f6ff;
 }
+
+.searchbar input::placeholder {
+  color: var(--color-text-tertiary) !important;
+  opacity: 0.5 !important;
+}
+
+.login input::placeholder {
+  color: var(--color-text-tertiary) !important;
+  opacity: 0.5 !important;
+}

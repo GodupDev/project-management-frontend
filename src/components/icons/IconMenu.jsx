@@ -1,4 +1,4 @@
-const IconProject = ({ className = "w-5 h-5" }) => {
+const IconMenu = ({ className = "w-5 h-5" }) => {
   return (
     <svg
       className={className}
@@ -11,10 +11,10 @@ const IconProject = ({ className = "w-5 h-5" }) => {
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}
-        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+        d="M4 6h16M4 12h16M4 18h16"
       />
     </svg>
   );
 };
 
-export default IconProject;
+export default IconMenu;
