@@ -21,7 +21,7 @@ const IconThemeToggle = () => {
                  shadow-[var(--shadow-sm)] cursor-pointer"
       aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
     >
-      {theme === "dark" ? (
+      {theme === "light" ? (
         // Moon icon for dark mode
         <svg
           className="w-5 h-5 text-[var(--color-text-primary)]"

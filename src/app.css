@@ -1,15 +1,146 @@
 @import "tailwindcss";
 
+:root {
+  --transition-base: all 0.3s ease;
+  --shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-active: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+    0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
 body {
-  background-color: #f0f6ff;
+  background-color: var(--color-background-default);
+  transition: var(--transition-base);
 }
 
-.searchbar input::placeholder {
-  color: var(--color-text-tertiary) !important;
-  opacity: 0.5 !important;
-}
-
+/* Input Placeholders */
+.searchbar input::placeholder,
 .login input::placeholder {
   color: var(--color-text-tertiary) !important;
   opacity: 0.5 !important;
+  transition: var(--transition-base);
+}
+
+/* Card Styles */
+.ant-card {
+  transition: var(--transition-base);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.ant-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Button Styles */
+.ant-btn {
+  transition: var(--transition-base);
+  border-radius: 0.5rem;
+  font-weight: 500;
+}
+
+.ant-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hover);
+}
+
+.ant-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-active);
+}
+
+/* Pagination Styles */
+.custom-pagination {
+  .ant-pagination-item {
+    color: var(--color-text-secondary);
+    background-color: transparent;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    transition: var(--transition-base);
+    margin: 0 4px;
+  }
+
+  .ant-pagination-item:hover {
+    background-color: var(--color-background-elevated) !important;
+    color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+    transform: translateY(-1px);
+  }
+
+  .ant-pagination-item-active {
+    background-color: var(--color-primary) !important;
+    color: var(--color-primary-contrast) !important;
+    box-shadow: var(--shadow-hover) !important;
+    border: none;
+    transform: translateY(-1px);
+  }
+
+  .ant-pagination-prev,
+  .ant-pagination-next {
+    color: var(--color-text-primary) !important;
+    transition: var(--transition-base);
+    border-radius: 0.5rem;
+  }
+
+  .ant-pagination-prev:hover,
+  .ant-pagination-next:hover {
+    color: red !important;
+    background-color: var(--color-background-elevated) !important;
+    transform: translateY(-1px);
+  }
+}
+
+/* Tag Styles */
+.ant-tag {
+  transition: var(--transition-base);
+  border-radius: 0.5rem;
+  padding: 2px 8px;
+}
+
+.ant-tag:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Avatar Styles */
+.ant-avatar {
+  transition: var(--transition-base);
+  border: 2px solid var(--color-background-paper);
+}
+
+.ant-avatar:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Input Styles */
+.ant-input {
+  transition: var(--transition-base);
+  border-radius: 0.5rem;
+}
+
+.ant-input:hover,
+.ant-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background-default);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-text-tertiary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
 }

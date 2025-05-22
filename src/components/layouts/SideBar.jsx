@@ -21,10 +21,14 @@ const SideBar = () => {
     <Motion.div
       initial={{ scale: 0.95, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      className={`fixed top-[4.5rem] left-0 bottom-0 bg-[var(--color-background-paper)] w-fit px-2 py-4 space-y-3
+      className={`fixed top-[4.5rem] left-0 bottom-0
+        bg-[var(--color-background-paper)] w-fit px-2 py-4 space-y-3
         shadow-[var(--shadow-md)] border-r border-[var(--color-border-main)]
         overflow-y-auto
-        transition-all duration-300 ease-in-out`}
+        transition-all duration-300 ease-in-out
+        flex flex-col
+         ${isOpen ? "" : "pt-[8rem]"}
+      `}
     >
       {items.map(({ icon: Icon, label }) => (
         <Motion.button
@@ -35,7 +39,7 @@ const SideBar = () => {
             ${
               isOpen
                 ? "min-w-[19rem] justify-start pl-[1em]"
-                : "min-w-[4rem] justify-center"
+                : "min-w-[4rem] justify-center h-[5rem]"
             }
             hover:text-[var(--color-primary-main)]
             hover:bg-[var(--color-action-hover)]

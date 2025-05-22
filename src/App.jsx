@@ -1,10 +1,11 @@
 import "./app.css";
-import Header from "./components/layout/Header";
-import SideBar from "./components/layout/SideBar";
+import Header from "./components/layouts/Header";
+import SideBar from "./components/layouts/SideBar";
 import { ThemeProvider } from "./context/ThemeContext";
 import { SidebarProvider, useSidebar } from "./context/SidebarContext";
+import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import ProjectManagement from "./pages/project/ProjectManagement";
 
 function AppContent() {
   const { isOpen } = useSidebar();
@@ -19,12 +20,10 @@ function AppContent() {
             isOpen ? "ml-[20rem]" : "ml-[5rem]"
           }`}
         >
-          <h1 className="text-2xl font-bold mb-4 text-[var(--color-text-primary)]">
-            Content is here
-          </h1>
-          <p className="text-[var(--color-text-secondary)]">
-            Welcome to our Project Manager System app!
-          </p>
+          <Routes>
+            <Route path="/" />
+            <Route path="/projects" element={<ProjectManagement />} />
+          </Routes>
         </div>
       </div>
     </div>
@@ -36,8 +35,8 @@ function App() {
     <ThemeProvider>
       <SidebarProvider>
         <Routes>
-          <Route path="/" element={<AppContent />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/*" element={<AppContent />} />
         </Routes>
       </SidebarProvider>
     </ThemeProvider>
