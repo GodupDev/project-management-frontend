@@ -14,8 +14,7 @@ body {
 }
 
 /* Input Placeholders */
-.searchbar input::placeholder,
-.login input::placeholder {
+input::placeholder {
   color: var(--color-text-tertiary) !important;
   opacity: 0.5 !important;
   transition: var(--transition-base);

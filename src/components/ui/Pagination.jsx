@@ -14,7 +14,7 @@ const Pagination = ({ current, pageSize, total, onChange }) => {
       <button
         onClick={() => current > 1 && onChange(current - 1)}
         disabled={current === 1}
-        className={`px-3 py-1 rounded-md border 
+        className={`px-3 py-1 rounded-md 
           ${
             current === 1
               ? "border-gray-300 text-gray-400 cursor-not-allowed"
@@ -44,11 +44,11 @@ const Pagination = ({ current, pageSize, total, onChange }) => {
       <button
         onClick={() => current < totalPages && onChange(current + 1)}
         disabled={current === totalPages}
-        className={`px-3 py-1 rounded-md border 
+        className={`px-3 py-1 rounded-md 
           ${
             current === totalPages
-              ? "border-gray-300 text-gray-400 cursor-not-allowed"
-              : "border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-primary)] cursor-pointer"
+              ? " text-gray-400 cursor-not-allowed"
+              : " text-[var(--color-text-primary)] cursor-pointer"
           }`}
       >
         <RightOutlined />

@@ -27,7 +27,7 @@ const SideBar = () => {
         overflow-y-auto
         transition-all duration-300 ease-in-out
         flex flex-col
-         ${isOpen ? "" : "pt-[8rem]"}
+         ${isOpen ? "" : "pt-[7.5rem]"}
       `}
     >
       {items.map(({ icon: Icon, label }) => (

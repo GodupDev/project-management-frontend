@@ -6,109 +6,117 @@ import Pagination from "../../components/ui/Pagination";
 
 const { Title } = Typography;
 
-const projects = new Array(12).fill(null).map((_, idx) => ({
+// Dummy data
+const projects = Array.from({ length: 12 }, (_, idx) => ({
   id: idx + 1,
   name: "Adoddle",
-  description:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum.",
+  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
   status: idx % 2 === 0 ? "on track" : "off track",
-  date: `2025-04-${(idx % 30) + 1}`,
-  team: [
-    "https://i.pravatar.cc/40?img=1",
-    "https://i.pravatar.cc/40?img=2",
-    "https://i.pravatar.cc/40?img=3",
-    "https://i.pravatar.cc/40?img=4",
-    "https://i.pravatar.cc/40?img=5",
-  ],
+  date: `2025-04-${((idx % 30) + 1).toString().padStart(2, "0")}`,
+  team: Array.from(
+    { length: 5 },
+    (_, i) => `https://i.pravatar.cc/40?img=${i + 1}`,
+  ),
   issues: Math.floor(Math.random() * 20),
 }));
 
 const ProjectManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("newest");
+  const [sortOption, setSortOption] = useState("newest");
   const pageSize = 6;
 
-  const filtered = projects.filter((project) => {
-    const matchesSearch = project.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || project.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredProjects = projects.filter(
+    (project) => statusFilter === "all" || project.status === statusFilter,
+  );
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (sortBy === "newest") {
-      return new Date(b.date) - new Date(a.date);
-    } else if (sortBy === "oldest") {
-      return new Date(a.date) - new Date(b.date);
-    } else if (sortBy === "mostIssues") {
-      return b.issues - a.issues;
-    } else if (sortBy === "fewestIssues") {
-      return a.issues - b.issues;
+  const sortedProjects = [...filteredProjects].sort((a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    switch (sortOption) {
+      case "newest":
+        return dateB - dateA;
+      case "oldest":
+        return dateA - dateB;
+      case "mostIssues":
+        return b.issues - a.issues;
+      case "fewestIssues":
+        return a.issues - b.issues;
+      default:
+        return 0;
     }
-    return 0;
   });
 
-  const paginated = sorted.slice(
+  const displayedProjects = sortedProjects.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize,
   );
 
   return (
-    <div className="p-6 min-h-screen bg-[var(--color-background-default)]">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-2 min-h-screen bg-[var(--color-background-default)]">
+      <div className="flex justify-between items-center mb-2">
         <Title level={3} className="!text-[var(--color-text-primary)]">
           Projects
         </Title>
       </div>
 
-      <div className="flex flex-wrap gap-4 justify-between mb-6">
-        <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-4 mb-6 justify-between">
+        <div className="flex gap-5">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 rounded-md bg-[var(--color-background-paper)] w-[9rem]"
+            className="px-3 py-2 rounded-md !bg-[var(--color-background-paper)] text-sm outline-none border-[var(--color-border)] hover:shadow-md transition-shadow duration-200 cursor-pointer"
           >
-            <option value="all">All Statuses</option>
-            <option value="on track">On Track</option>
-            <option value="off track">Off Track</option>
+            <option key="all" value="all">
+              All Statuses
+            </option>
+            <option key="on-track" value="on track">
+              On Track
+            </option>
+            <option key="off-track" value="off track">
+              Off Track
+            </option>
           </select>
 
           <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="px-4 py-2 rounded-md bg-[var(--color-background-paper)] w-[9rem]"
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+            className="px-3 py-2 rounded-md bg-[var(--color-background-paper)] text-sm outline-none border-[var(--color-border)] hover:shadow-md transition-shadow duration-200 cursor-pointer"
           >
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-            <option value="mostIssues">Most Issues</option>
-            <option value="fewestIssues">Fewest Issues</option>
+            <option key="newest" value="newest">
+              Newest
+            </option>
+            <option key="oldest" value="oldest">
+              Oldest
+            </option>
+            <option key="mostIssues" value="mostIssues">
+              Most Issues
+            </option>
+            <option key="fewestIssues" value="fewestIssues">
+              Fewest Issues
+            </option>
           </select>
         </div>
-
         <Button
           type="primary"
           icon={<PlusOutlined />}
-          className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] border-none px-4 py-2"
+          className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] border-none"
         >
           Create
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {paginated.map((project) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {displayedProjects.map((project) => (
           <ProjectCard key={project.id} project={project} />
         ))}
       </div>
 
-      <div className="flex justify-center mt-8">
+      <div className="flex justify-center mt-3">
         <Pagination
           current={currentPage}
           pageSize={pageSize}
-          total={filtered.length}
+          total={filteredProjects.length}
           onChange={setCurrentPage}
         />
       </div>

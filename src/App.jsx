@@ -6,6 +6,8 @@ import { SidebarProvider, useSidebar } from "./context/SidebarContext";
 import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import ProjectManagement from "./pages/project/ProjectManagement";
+import CreateProject from "./pages/project/CreateProject";
+import ProjectSpecific from "./pages/project/ProjectSpecific";
 
 function AppContent() {
   const { isOpen } = useSidebar();
@@ -23,6 +25,11 @@ function AppContent() {
           <Routes>
             <Route path="/" />
             <Route path="/projects" element={<ProjectManagement />} />
+            <Route path="/projects/create" element={<CreateProject />} />
+            <Route
+              path="/projects/:projectName"
+              element={<ProjectSpecific />}
+            />
           </Routes>
         </div>
       </div>
