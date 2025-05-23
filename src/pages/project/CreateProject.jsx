@@ -50,10 +50,6 @@ const CreateProject = () => {
 
   return (
     <div className="p-2 min-h-screen bg-[var(--color-background-default)]">
-      <Title level={3} className="!text-[var(--color-text-primary)] mb-4">
-        Projects / Create Project
-      </Title>
-
       <div className="p-6 mt-10">
         <Form layout="vertical" form={form} onFinish={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

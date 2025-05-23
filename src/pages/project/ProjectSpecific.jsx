@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
 import {
   Typography,
   Button,
@@ -45,8 +44,6 @@ const calculateTotalTime = () => {
 };
 
 const ProjectSpecific = () => {
-  const { projectName } = useParams();
-
   const [members, setMembers] = useState(["John", "Emma"]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newMember, setNewMember] = useState("");
@@ -80,11 +77,6 @@ const ProjectSpecific = () => {
 
   return (
     <div className="p-2 min-h-screen">
-      {/* Title */}
-      <Title level={3} className="mb-4 text-gray-800 w-full">
-        Projects / {projectName}
-      </Title>
-
       {/* Project Info */}
       <div className="flex flex-wrap justify-between items-center p-4 rounded-md mb-2 w-full gap-4">
         <Tag color="green" className="rounded-lg px-3 py-1 font-medium">

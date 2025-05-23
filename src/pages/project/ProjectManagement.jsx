@@ -56,12 +56,6 @@ const ProjectManagement = () => {
 
   return (
     <div className="p-2 min-h-screen bg-[var(--color-background-default)]">
-      <div className="flex justify-between items-center mb-2">
-        <Title level={3} className="!text-[var(--color-text-primary)]">
-          Projects
-        </Title>
-      </div>
-
       <div className="flex flex-wrap gap-4 mb-6 justify-between">
         <div className="flex gap-5">
           <select
