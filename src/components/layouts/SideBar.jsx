@@ -1,5 +1,6 @@
 import { motion as Motion } from "framer-motion";
 import { useSidebar } from "../../context/SidebarContext";
+import { useNavigate } from "react-router-dom";
 import IconProject from "../icons/IconProject";
 import IconTask from "../icons/IconTask";
 import IconWorkLogs from "../icons/IconWorkLogs";
@@ -8,13 +9,14 @@ import IconSetting from "../icons/IconSetting";
 
 const SideBar = () => {
   const { isOpen } = useSidebar();
+  const navigate = useNavigate();
 
   const items = [
-    { icon: IconProject, label: "Projects" },
-    { icon: IconTask, label: "Tasks" },
-    { icon: IconWorkLogs, label: "Work Logs" },
-    { icon: IconPerformance, label: "Performance" },
-    { icon: IconSetting, label: "Setting" },
+    { icon: IconProject, label: "Projects", path: "/projects" },
+    { icon: IconTask, label: "Tasks", path: "/tasks" },
+    { icon: IconWorkLogs, label: "Work Logs", path: "/worklogs" },
+    { icon: IconPerformance, label: "Performance", path: "/performance" },
+    { icon: IconSetting, label: "Setting", path: "/settings" },
   ];
 
   return (
@@ -30,7 +32,7 @@ const SideBar = () => {
          ${isOpen ? "" : "pt-[7.5rem]"}
       `}
     >
-      {items.map(({ icon: Icon, label }) => (
+      {items.map(({ icon: Icon, label, path }) => (
         <Motion.button
           key={label}
           whileTap={{ scale: 0.95 }}
@@ -49,9 +51,7 @@ const SideBar = () => {
             focus:font-medium
             active:bg-[var(--color-action-selected)]`}
           aria-label={label}
-          onClick={() => {
-            console.log(`${label} clicked`);
-          }}
+          onClick={() => navigate(path)}
         >
           <Icon className="w-6 h-6 flex-shrink-0" />
           {isOpen && (

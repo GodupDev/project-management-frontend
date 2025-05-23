@@ -5,9 +5,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { SidebarProvider, useSidebar } from "./context/SidebarContext";
 import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
-import ProjectManagement from "./pages/project/ProjectManagement";
-import CreateProject from "./pages/project/CreateProject";
-import ProjectSpecific from "./pages/project/ProjectSpecific";
+import ProjectMain from "./pages/project/main";
 
 function AppContent() {
   const { isOpen } = useSidebar();
@@ -24,12 +22,7 @@ function AppContent() {
         >
           <Routes>
             <Route path="/" />
-            <Route path="/projects" element={<ProjectManagement />} />
-            <Route path="/projects/create" element={<CreateProject />} />
-            <Route
-              path="/projects/:projectName"
-              element={<ProjectSpecific />}
-            />
+            <Route path="/projects/*" element={<ProjectMain />} />
           </Routes>
         </div>
       </div>

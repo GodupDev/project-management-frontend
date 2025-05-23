@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button, Typography } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import ProjectCard from "../../components/ui/project/ProjectCard";
 import Pagination from "../../components/ui/Pagination";
 
@@ -21,6 +22,7 @@ const projects = Array.from({ length: 12 }, (_, idx) => ({
 }));
 
 const ProjectManagement = () => {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOption, setSortOption] = useState("newest");
@@ -100,6 +102,7 @@ const ProjectManagement = () => {
         <Button
           type="primary"
           icon={<PlusOutlined />}
+          onClick={() => navigate("/projects/create")}
           className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] border-none"
         >
           Create

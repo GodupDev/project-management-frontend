@@ -82,7 +82,7 @@ const ProjectSpecific = () => {
     <div className="p-2 min-h-screen">
       {/* Title */}
       <Title level={3} className="mb-4 text-gray-800 w-full">
-        Project / {projectName}
+        Projects / {projectName}
       </Title>
 
       {/* Project Info */}
