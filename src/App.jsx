@@ -7,8 +7,8 @@ import LayoutWithBreadcrumb from "./components/layouts/LayoutWithBreadcrumb";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 import Login from "./pages/Login";
-import Projects from "./pages/project/Main";
-import Tasks from "./pages/task/Main";
+import Projects from "./pages/project/main";
+import Tasks from "./pages/task/main";
 import WorkLogs from "./pages/WorkLogs";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
