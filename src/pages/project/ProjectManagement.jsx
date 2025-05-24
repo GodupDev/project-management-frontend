@@ -1,49 +1,39 @@
 import React, { useState } from "react";
-import { Button, Typography } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { Button, Typography, Modal, Card, Tag, Avatar, message } from "antd";
+import { PlusOutlined, UserOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import ProjectCard from "../../components/ui/project/ProjectCard";
 import Pagination from "../../components/ui/Pagination";
+import CreateProject from "../../components/modals/CreateProject";
+import { projects, projectTypes, projectStatuses } from "../../mockdata";
 
 const { Title } = Typography;
-
-// Dummy data
-const projects = Array.from({ length: 12 }, (_, idx) => ({
-  id: idx + 1,
-  name: "Adoddle",
-  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  status: idx % 2 === 0 ? "on track" : "off track",
-  date: `2025-04-${((idx % 30) + 1).toString().padStart(2, "0")}`,
-  team: Array.from(
-    { length: 5 },
-    (_, i) => `https://i.pravatar.cc/40?img=${i + 1}`,
-  ),
-  issues: Math.floor(Math.random() * 20),
-}));
 
 const ProjectManagement = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOption, setSortOption] = useState("newest");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [projectList, setProjectList] = useState(projects);
   const pageSize = 6;
 
-  const filteredProjects = projects.filter(
+  const filteredProjects = projectList.filter(
     (project) => statusFilter === "all" || project.status === statusFilter,
   );
 
   const sortedProjects = [...filteredProjects].sort((a, b) => {
-    const dateA = new Date(a.date);
-    const dateB = new Date(b.date);
+    const dateA = new Date(a.startDate);
+    const dateB = new Date(b.startDate);
     switch (sortOption) {
       case "newest":
         return dateB - dateA;
       case "oldest":
         return dateA - dateB;
       case "mostIssues":
-        return b.issues - a.issues;
+        return b.totalTasks - a.totalTasks;
       case "fewestIssues":
-        return a.issues - b.issues;
+        return a.totalTasks - b.totalTasks;
       default:
         return 0;
     }
@@ -54,8 +44,18 @@ const ProjectManagement = () => {
     currentPage * pageSize,
   );
 
+  const handleCreateProject = (newProject) => {
+    setProjectList((prevProjects) => [
+      ...prevProjects,
+      { ...newProject, id: Date.now() },
+    ]);
+    setIsCreateModalOpen(false);
+    message.success("Project created successfully!");
+    navigate(`/projects/${newProject.name}`);
+  };
+
   return (
-    <div className="p-2 min-h-screen bg-[var(--color-background-default)]">
+    <div className="p-5 mx-auto space-y-8">
       <div className="flex flex-wrap gap-4 mb-6 justify-between">
         <div className="flex gap-5">
           <select
@@ -63,60 +63,131 @@ const ProjectManagement = () => {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 rounded-md !bg-[var(--color-background-paper)] text-sm outline-none border-[var(--color-border)] hover:shadow-md transition-shadow duration-200 cursor-pointer"
           >
-            <option key="all" value="all">
-              All Statuses
-            </option>
-            <option key="on-track" value="on track">
-              On Track
-            </option>
-            <option key="off-track" value="off track">
-              Off Track
-            </option>
+            <option value="all">All Status</option>
+            {projectStatuses.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
           </select>
 
           <select
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}
-            className="px-3 py-2 rounded-md bg-[var(--color-background-paper)] text-sm outline-none border-[var(--color-border)] hover:shadow-md transition-shadow duration-200 cursor-pointer"
+            className="px-3 py-2 rounded-md !bg-[var(--color-background-paper)] text-sm outline-none border-[var(--color-border)] hover:shadow-md transition-shadow duration-200 cursor-pointer"
           >
-            <option key="newest" value="newest">
-              Newest
-            </option>
-            <option key="oldest" value="oldest">
-              Oldest
-            </option>
-            <option key="mostIssues" value="mostIssues">
-              Most Issues
-            </option>
-            <option key="fewestIssues" value="fewestIssues">
-              Fewest Issues
-            </option>
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="mostIssues">Most Tasks</option>
+            <option value="fewestIssues">Fewest Tasks</option>
           </select>
         </div>
+
         <Button
-          type="primary"
           icon={<PlusOutlined />}
-          onClick={() => navigate("/projects/create")}
-          className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] border-none"
+          onClick={() => setIsCreateModalOpen(true)}
+          className="!text-[var(--color-primary-contrast)] 
+        transition-all duration-300
+          focus:!ring-2 focus:!ring-[var(--color-primary-light)] focus:!ring-opacity-50"
+          type="primary"
         >
-          Create
+          Create Project
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {displayedProjects.map((project) => (
-          <ProjectCard key={project.id} project={project} />
+          <Card
+            key={project.id}
+            className="hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+            onClick={() => navigate(`/projects/${project.name}`)}
+          >
+            <div className="flex flex-col h-full">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">{project.name}</h3>
+                  <p className="text-gray-600 text-sm line-clamp-2">
+                    {project.description}
+                  </p>
+                </div>
+                <Tag
+                  color={
+                    project.status === "Completed"
+                      ? "green"
+                      : project.status === "In Progress"
+                      ? "blue"
+                      : project.status === "On Hold"
+                      ? "orange"
+                      : "gray"
+                  }
+                >
+                  {project.status}
+                </Tag>
+              </div>
+
+              <div className="mt-auto">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm text-gray-500">
+                    {new Date(project.startDate).toLocaleDateString()}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    {project.completedTasks}/{project.totalTasks} tasks
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex -space-x-2">
+                    {project.members?.map((member) => (
+                      <Avatar
+                        key={member.user?.id || member.id}
+                        src={member.user?.avatar}
+                        size="small"
+                        className="border-2 border-white"
+                        icon={<UserOutlined />}
+                      >
+                        {member.user?.fullName?.charAt(0) ||
+                          member.name?.charAt(0)}
+                      </Avatar>
+                    ))}
+                  </div>
+                  <Button
+                    type="link"
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/projects/${project.name}`);
+                    }}
+                  >
+                    View Details
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Card>
         ))}
       </div>
 
-      <div className="flex justify-center mt-3">
-        <Pagination
-          current={currentPage}
-          pageSize={pageSize}
-          total={filteredProjects.length}
-          onChange={setCurrentPage}
+      <Pagination
+        current={currentPage}
+        total={filteredProjects.length}
+        pageSize={pageSize}
+        onChange={setCurrentPage}
+      />
+
+      <Modal
+        title="Create New Project"
+        open={isCreateModalOpen}
+        onCancel={() => setIsCreateModalOpen(false)}
+        footer={null}
+        width={800}
+        className="create-project-modal"
+      >
+        <CreateProject
+          onSuccess={handleCreateProject}
+          projectTypes={projectTypes}
+          projectStatuses={projectStatuses}
         />
-      </div>
+      </Modal>
     </div>
   );
 };

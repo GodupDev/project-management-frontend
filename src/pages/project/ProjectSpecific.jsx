@@ -1,181 +1,322 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
+  Card,
   Typography,
-  Button,
   Tag,
-  Modal,
-  Input,
-  Tooltip,
-  Avatar,
-  message,
+  Button,
   Select,
+  DatePicker,
+  Input,
   Space,
+  message,
+  Divider,
+  Row,
+  Col,
+  Avatar,
+  Tooltip,
+  Progress,
 } from "antd";
 import {
-  PlusOutlined,
-  UserAddOutlined,
-  ClockCircleOutlined,
-  CalendarOutlined,
+  ArrowLeftOutlined,
   UserOutlined,
+  ClockCircleOutlined,
+  TeamOutlined,
+  TagOutlined,
 } from "@ant-design/icons";
-import TaskCard from "../../components/ui/project/TaskCard";
+import moment from "moment";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { projects, tasks, projectStatuses, users } from "../../mockdata";
+import TaskBoard from "../../components/ui/task/TaskBoard";
 
-const { Title, Text } = Typography;
+const { Title, Text, Paragraph } = Typography;
+const { Option } = Select;
+const { TextArea } = Input;
 
-const tasks = Array(4).fill({
-  title: "Implement payment API integration",
-  status1: "Completed",
-  status2: "Cancelled",
-  timeSpent: "00:45:00",
-  assignee: "John Doe",
-});
+export default function ProjectSpecific() {
+  const { projectName } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const projectData = location.state?.projectData;
 
-const calculateTotalTime = () => {
-  let totalMinutes = 0;
-  for (const task of tasks) {
-    const [h, m] = task.timeSpent.split(":").map(Number);
-    totalMinutes += h * 60 + m;
+  const [project, setProject] = useState(null);
+  const [projectTasks, setProjectTasks] = useState([]);
+  const [editMode, setEditMode] = useState(false);
+  const [editedProject, setEditedProject] = useState(null);
+
+  useEffect(() => {
+    if (projectData) {
+      setProject(projectData);
+      setEditedProject({ ...projectData });
+    } else {
+      const foundProject = projects.find((p) => p.name === projectName);
+      if (foundProject) {
+        setProject(foundProject);
+        setEditedProject({ ...foundProject });
+      }
+    }
+  }, [projectData, projectName]);
+
+  useEffect(() => {
+    // Filter tasks for this project
+    const projectTasks = tasks.filter((t) => t.project.id === project?.id);
+    setProjectTasks(projectTasks);
+  }, [project]);
+
+  const handleChange = (field, value) => {
+    setEditedProject((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleSave = () => {
+    setProject(editedProject);
+    setEditMode(false);
+    message.success("Project updated successfully");
+  };
+
+  const handleTaskClick = (task) => {
+    navigate(`/projects/${projectName}/${task.name}`, {
+      state: { taskData: task },
+    });
+  };
+
+  if (!project) {
+    return (
+      <Card style={{ maxWidth: 700, margin: "auto", marginTop: 50 }}>
+        <Text type="danger">Project không tồn tại hoặc không tìm thấy.</Text>
+        <Button type="link" onClick={() => navigate("/projects")}>
+          Quay lại danh sách
+        </Button>
+      </Card>
+    );
   }
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return `${hours.toString().padStart(2, "0")}:${minutes
-    .toString()
-    .padStart(2, "0")}:00`;
-};
-
-const ProjectSpecific = () => {
-  const [members, setMembers] = useState(["John", "Emma"]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newMember, setNewMember] = useState("");
-  const [filterStatus, setFilterStatus] = useState("All");
-
-  const handleAddMember = () => {
-    const name = newMember.trim();
-    if (!name) {
-      message.error("Member name cannot be empty");
-      return;
-    }
-    if (members.includes(name)) {
-      message.warning("This member already exists");
-      return;
-    }
-    setMembers([...members, name]);
-    setNewMember("");
-    setIsModalOpen(false);
-    message.success("Member added successfully");
-  };
-
-  const removeMember = (name) => {
-    setMembers(members.filter((m) => m !== name));
-    message.success(`${name} removed`);
-  };
-
-  const filteredTasks =
-    filterStatus === "All"
-      ? tasks
-      : tasks.filter((task) => task.status1 === filterStatus);
 
   return (
-    <div className="p-2 min-h-screen">
-      {/* Project Info */}
-      <div className="flex flex-wrap justify-between items-center p-4 rounded-md mb-2 w-full gap-4">
-        <Tag color="green" className="rounded-lg px-3 py-1 font-medium">
-          On Track
-        </Tag>
-        <Text
-          type="secondary"
-          className="flex items-center gap-1 text-sm whitespace-nowrap"
-        >
-          <ClockCircleOutlined /> Time Spent:{" "}
-          <strong>{calculateTotalTime()}</strong>
-        </Text>
-        <Text
-          type="secondary"
-          className="flex items-center gap-1 text-sm whitespace-nowrap"
-        >
-          <CalendarOutlined /> Deadline: <strong>6M : 0W : 0D</strong>
-        </Text>
-        <Text type="secondary" className="text-sm whitespace-nowrap">
-          Started: Jan 12, 2025
-        </Text>
-      </div>
-
-      {/* Members */}
-      <div className="mb-10 w-full">
-        <div className="flex justify-between items-center mb-2 w-full">
-          <Text strong className="text-gray-700 text-base">
-            Team Members
-          </Text>
-        </div>
-        <div className="flex">
-          <div className="flex gap-3 flex-wrap w-full">
-            {members.map((name) => (
-              <Tooltip title={`Remove ${name}`} key={name}>
-                <Avatar
-                  className="bg-blue-600 text-white cursor-pointer"
-                  onClick={() => removeMember(name)}
-                >
-                  {name[0].toUpperCase()}
-                </Avatar>
-              </Tooltip>
-            ))}
-          </div>
-          <Button
-            className="h-4"
-            icon={<UserAddOutlined />}
-            size="small"
-            onClick={() => setIsModalOpen(true)}
-          >
-            Add Member
-          </Button>
-        </div>
-      </div>
-
-      {/* Filter + Assign */}
-      <div className="flex justify-between items-center mb-4 w-full">
-        <Select
-          size="small"
-          value={filterStatus}
-          onChange={setFilterStatus}
-          options={[
-            { label: "All Tasks", value: "All" },
-            { label: "Completed", value: "Completed" },
-            { label: "Cancelled", value: "Cancelled" },
-          ]}
-          className="w-40"
-        />
-        <Button size="small" type="primary" icon={<PlusOutlined />}>
-          Assign Task
-        </Button>
-      </div>
-
-      {/* Task List */}
-      <div className="space-y-3 w-full">
-        {filteredTasks.map((task, index) => (
-          <TaskCard key={index} {...task} />
-        ))}
-      </div>
-
-      {/* Add Member Modal */}
-      <Modal
-        title="Add New Member"
-        open={isModalOpen}
-        onOk={handleAddMember}
-        onCancel={() => setIsModalOpen(false)}
-        okText="Add"
-        cancelText="Cancel"
+    <div className="!p-5 mx-auto space-y-8">
+      <Card
+        title={
+          <Space>
+            <Button
+              type="text"
+              icon={<ArrowLeftOutlined />}
+              onClick={() => navigate("/projects")}
+            />
+            {editMode ? "Chỉnh sửa dự án" : "Chi tiết dự án"}
+          </Space>
+        }
+        extra={
+          editMode ? (
+            <>
+              <Button
+                onClick={() => {
+                  setEditMode(false);
+                  setEditedProject({ ...project });
+                }}
+                style={{ marginRight: 8 }}
+              >
+                Hủy
+              </Button>
+              <Button type="primary" onClick={handleSave}>
+                Lưu
+              </Button>
+            </>
+          ) : (
+            <Button onClick={() => setEditMode(true)} type="primary" ghost>
+              Sửa
+            </Button>
+          )
+        }
       >
-        <Input
-          placeholder="Enter member name"
-          value={newMember}
-          onChange={(e) => setNewMember(e.target.value)}
-          onPressEnter={handleAddMember}
-          size="middle"
-          className="w-full"
-        />
-      </Modal>
+        {/* Tên dự án */}
+        <div>
+          <Title level={4}>Tên dự án</Title>
+          {!editMode ? (
+            <Text strong style={{ fontSize: 16 }}>
+              {project.name}
+            </Text>
+          ) : (
+            <Input
+              value={editedProject.name}
+              onChange={(e) => handleChange("name", e.target.value)}
+              placeholder="Tên dự án"
+              autoFocus
+            />
+          )}
+        </div>
+
+        <Divider />
+
+        {/* Mô tả */}
+        <div>
+          <Title level={4}>Mô tả</Title>
+          {!editMode ? (
+            <Paragraph style={{ whiteSpace: "pre-wrap" }}>
+              {project.description || "Chưa có mô tả."}
+            </Paragraph>
+          ) : (
+            <TextArea
+              rows={5}
+              value={editedProject.description}
+              onChange={(e) => handleChange("description", e.target.value)}
+              placeholder="Mô tả chi tiết dự án"
+            />
+          )}
+        </div>
+
+        <Divider />
+
+        <Row gutter={[24, 24]}>
+          {/* Người quản lý */}
+          <Col xs={24} sm={12}>
+            <Title level={5}>
+              <UserOutlined /> Người quản lý
+            </Title>
+            {!editMode ? (
+              <Avatar.Group max={{ count: 3 }}>
+                {project.managers?.map((manager) => (
+                  <Tooltip
+                    key={`manager-${manager?.id || "unknown"}`}
+                    title={manager?.fullName || "Unknown User"}
+                  >
+                    <Avatar
+                      src={manager?.avatar}
+                      icon={!manager?.avatar && <UserOutlined />}
+                    >
+                      {!manager?.avatar && (manager?.fullName?.[0] || "?")}
+                    </Avatar>
+                  </Tooltip>
+                ))}
+              </Avatar.Group>
+            ) : (
+              <Select
+                mode="multiple"
+                style={{ width: "100%" }}
+                placeholder="Chọn người quản lý"
+                value={
+                  editedProject.managers?.map((m) => m?.id).filter(Boolean) ||
+                  []
+                }
+                onChange={(ids) =>
+                  handleChange(
+                    "managers",
+                    ids
+                      .map((id) => users.find((u) => u.id === id))
+                      .filter(Boolean),
+                  )
+                }
+              >
+                {users.map((user) => (
+                  <Option key={`user-${user.id}`} value={user.id}>
+                    {user.fullName}
+                  </Option>
+                ))}
+              </Select>
+            )}
+          </Col>
+
+          {/* Trạng thái */}
+          <Col xs={24} sm={12}>
+            <Title level={5}>
+              <TagOutlined /> Trạng thái
+            </Title>
+            {!editMode ? (
+              <Tag
+                color={
+                  project.status === "Completed"
+                    ? "green"
+                    : project.status === "In Progress"
+                    ? "blue"
+                    : project.status === "On Hold"
+                    ? "orange"
+                    : project.status === "Cancelled"
+                    ? "red"
+                    : "default"
+                }
+              >
+                {project.status}
+              </Tag>
+            ) : (
+              <Select
+                value={editedProject.status}
+                onChange={(val) => handleChange("status", val)}
+                style={{ width: "100%" }}
+              >
+                {projectStatuses.map((status) => (
+                  <Option key={`status-${status}`} value={status}>
+                    {status}
+                  </Option>
+                ))}
+              </Select>
+            )}
+          </Col>
+
+          {/* Ngày bắt đầu */}
+          <Col xs={24} sm={12}>
+            <Title level={5}>
+              <ClockCircleOutlined /> Ngày bắt đầu
+            </Title>
+            {!editMode ? (
+              <Text>
+                {project.startDate
+                  ? moment(project.startDate).format("DD/MM/YYYY")
+                  : "Chưa xác định"}
+              </Text>
+            ) : (
+              <DatePicker
+                value={
+                  editedProject.startDate
+                    ? moment(editedProject.startDate)
+                    : null
+                }
+                onChange={(date) =>
+                  handleChange("startDate", date ? date.toISOString() : null)
+                }
+                style={{ width: "100%" }}
+                format="DD/MM/YYYY"
+              />
+            )}
+          </Col>
+
+          {/* Ngày kết thúc dự kiến */}
+          <Col xs={24} sm={12}>
+            <Title level={5}>
+              <ClockCircleOutlined /> Ngày kết thúc dự kiến
+            </Title>
+            {!editMode ? (
+              <Text>
+                {project.expectedEndDate
+                  ? moment(project.expectedEndDate).format("DD/MM/YYYY")
+                  : "Chưa xác định"}
+              </Text>
+            ) : (
+              <DatePicker
+                value={
+                  editedProject.expectedEndDate
+                    ? moment(editedProject.expectedEndDate)
+                    : null
+                }
+                onChange={(date) =>
+                  handleChange(
+                    "expectedEndDate",
+                    date ? date.toISOString() : null,
+                  )
+                }
+                style={{ width: "100%" }}
+                format="DD/MM/YYYY"
+              />
+            )}
+          </Col>
+        </Row>
+
+        <Divider />
+
+        {/* Danh sách task */}
+        <div>
+          <Title level={4}>Tasks</Title>
+          <TaskBoard tasks={projectTasks} onTaskClick={handleTaskClick} />
+        </div>
+      </Card>
     </div>
   );
-};
-
-export default ProjectSpecific;
+}

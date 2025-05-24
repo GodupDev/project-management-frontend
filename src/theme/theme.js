@@ -8,7 +8,7 @@ export const theme = {
         contrast: "#ffffff",
       },
       background: {
-        default: "#e5e7eb", // slate-200
+        default: "#f5f5f5", // slate-200
         paper: "#ffffff", // white
         elevated: "#e2e8f0", // slate-200
       },

@@ -1,50 +1,30 @@
-import {
-  Routes,
-  Route,
-  Navigate,
-  useParams,
-  useLocation,
-  Outlet,
-} from "react-router-dom";
+import { Routes, Route, Navigate, useParams, Outlet } from "react-router-dom";
 import { Typography } from "antd";
 import ProjectManagement from "./ProjectManagement";
-import CreateProject from "./CreateProject";
 import ProjectSpecific from "./ProjectSpecific";
+import TaskSpecific from "../task/TaskSpecific";
 
 const { Title } = Typography;
 
-const TemplateProject = () => {
-  const { projectName } = useParams();
-  const location = useLocation();
-
-  let titleSuffix = "Management";
-  if (location.pathname.includes("/create")) {
-    titleSuffix = "Create Project";
-  } else if (projectName) {
-    titleSuffix = projectName;
-  }
-
-  return (
-    <div className="p-2 min-h-screen">
-      <Title
-        level={3}
-        className="mb-4 !text-[var(--color-text-primary)] w-full"
-      >
-        Projects / {titleSuffix}
-      </Title>
-      <Outlet />
-    </div>
-  );
-};
+// Define base path constant for better maintainability
+const PROJECTS_BASE_PATH = "/projects";
 
 const Main = () => {
   return (
     <Routes>
-      <Route element={<TemplateProject />}>
-        <Route index element={<ProjectManagement />} />
-        <Route path="create" element={<CreateProject />} />
-        <Route path=":projectName" element={<ProjectSpecific />} />
-      </Route>
+      <Route index element={<ProjectManagement />} />
+      <Route path=":projectName" element={<ProjectSpecific />} />
+      <Route path=":projectName/:taskName" element={<TaskSpecific />} />
+      <Route
+        path="*"
+        element={
+          <Navigate
+            to={PROJECTS_BASE_PATH}
+            replace
+            state={{ from: "invalid-route" }}
+          />
+        }
+      />
     </Routes>
   );
 };

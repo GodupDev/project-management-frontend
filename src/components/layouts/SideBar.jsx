@@ -6,12 +6,14 @@ import IconTask from "../icons/IconTask";
 import IconWorkLogs from "../icons/IconWorkLogs";
 import IconPerformance from "../icons/IconPerformance";
 import IconSetting from "../icons/IconSetting";
+import IconHome from "../icons/IconHome";
 
 const SideBar = () => {
   const { isOpen } = useSidebar();
   const navigate = useNavigate();
 
   const items = [
+    { icon: IconHome, label: "Home", path: "/" },
     { icon: IconProject, label: "Projects", path: "/projects" },
     { icon: IconTask, label: "Tasks", path: "/tasks" },
     { icon: IconWorkLogs, label: "Work Logs", path: "/worklogs" },
