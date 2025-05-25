@@ -33,7 +33,7 @@ const MyProfile = () => {
       });
       message.success("Profile updated successfully");
       setIsEditing(false);
-    } catch (error) {
+    } catch {
       message.error("Failed to update profile");
     }
   };

@@ -5,20 +5,23 @@ import { useNavigate } from "react-router-dom";
 import ProjectCard from "../../components/ui/project/ProjectCard";
 import Pagination from "../../components/ui/Pagination";
 import CreateProject from "../../components/modals/CreateProject";
-import { projects, projectTypes, projectStatuses } from "../../mockdata";
+import { useMockData } from "../../context/MockDataContext";
 
 const { Title } = Typography;
 
 const ProjectManagement = () => {
   const navigate = useNavigate();
+  const { projects, updateProjects } = useMockData();
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOption, setSortOption] = useState("newest");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [projectList, setProjectList] = useState(projects);
   const pageSize = 6;
 
-  const filteredProjects = projectList.filter(
+  const projectStatuses = ["In Progress", "Completed", "On Hold", "Cancelled"];
+  const projectTypes = ["Development", "Design", "Marketing", "Research"];
+
+  const filteredProjects = projects.filter(
     (project) => statusFilter === "all" || project.status === statusFilter,
   );
 
@@ -45,10 +48,8 @@ const ProjectManagement = () => {
   );
 
   const handleCreateProject = (newProject) => {
-    setProjectList((prevProjects) => [
-      ...prevProjects,
-      { ...newProject, id: Date.now() },
-    ]);
+    const updatedProjects = [...projects, { ...newProject, id: Date.now() }];
+    updateProjects(updatedProjects);
     setIsCreateModalOpen(false);
     message.success("Project created successfully!");
     navigate(`/projects/${newProject.name}`);

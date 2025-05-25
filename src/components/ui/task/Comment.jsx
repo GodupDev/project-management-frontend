@@ -14,7 +14,7 @@ const { TextArea } = Input;
 
 export default function Comment({ comments = [], onAddComment }) {
   const [newComment, setNewComment] = React.useState("");
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const commentsEndRef = useRef(null);
   const commentsContainerRef = useRef(null);
 

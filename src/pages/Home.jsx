@@ -13,10 +13,69 @@ import {
   SmileOutlined,
 } from "@ant-design/icons";
 import { motion as Motion } from "framer-motion";
+import { useMockData } from "../context/MockDataContext";
 
 const { Title, Text } = Typography;
 
+const SummaryCard = ({ icon, title, description }) => (
+  <Card className="hover:shadow-lg transition-shadow duration-200">
+    <div className="flex items-center gap-4">
+      <div className="text-2xl text-blue-500">{icon}</div>
+      <div>
+        <Text className="text-gray-500">{title}</Text>
+        <div className="text-xl font-semibold">{description}</div>
+      </div>
+    </div>
+  </Card>
+);
+
+const CardSection = ({ title, items, icon }) => (
+  <Card
+    title={
+      <div className="flex items-center gap-2">
+        {icon}
+        <span>{title}</span>
+      </div>
+    }
+    className="hover:shadow-lg transition-shadow duration-200"
+  >
+    <ul className="space-y-2">
+      {items.map((item, index) => (
+        <li key={index} className="flex items-center gap-2">
+          <ThunderboltOutlined className="text-blue-500" />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  </Card>
+);
+
 export default function Home() {
+  const { projects, tasks, users, notifications } = useMockData();
+
+  // Calculate summary statistics
+  const ongoingProjects = projects.filter(
+    (p) => p.status === "in-progress",
+  ).length;
+  const completedTasksToday = tasks.filter((t) => {
+    const today = new Date().toISOString().split("T")[0];
+    return t.status === "completed" && t.dueDate === today;
+  }).length;
+  const activeMembers = users.length;
+  const recentNotifications = notifications.slice(0, 2);
+
+  // Get today's tasks
+  const todayTasks = tasks.filter((task) => {
+    const today = new Date().toISOString().split("T")[0];
+    return task.dueDate === today;
+  });
+
+  // Get recent activities
+  const recentActivities = [
+    ...recentNotifications.map((notif) => notif.message),
+    ...todayTasks.map((task) => `Due today: ${task.title}`),
+  ];
+
   return (
     <div className="p-4 mx-auto space-y-12">
       {/* Welcome Message */}
@@ -27,10 +86,10 @@ export default function Home() {
         className="text-center"
       >
         <Title level={2} className="!text-3xl">
-          Welcome back, Tien 👋
+          Welcome back, {users[0].fullName} 👋
         </Title>
         <Text type="secondary" className="text-gray-500">
-          Here’s a quick overview of your day
+          Here's a quick overview of your day
         </Text>
       </Motion.div>
 
@@ -44,17 +103,17 @@ export default function Home() {
         <SummaryCard
           icon={<ProjectOutlined />}
           title="Projects"
-          description="8 ongoing"
+          description={`${ongoingProjects} ongoing`}
         />
         <SummaryCard
           icon={<CheckCircleOutlined />}
           title="Completed Tasks"
-          description="5 today"
+          description={`${completedTasksToday} today`}
         />
         <SummaryCard
           icon={<TeamOutlined />}
           title="Active Members"
-          description="12 members"
+          description={`${activeMembers} members`}
         />
         <SummaryCard
           icon={<BarChartOutlined />}
@@ -72,11 +131,7 @@ export default function Home() {
       >
         <CardSection
           title="Today's Schedule"
-          items={[
-            "09:00 – Weekly Meeting",
-            "14:00 – Submit Design Draft",
-            "17:30 – Code Review Session",
-          ]}
+          items={todayTasks.map((task) => `${task.dueDate} – ${task.title}`)}
           icon={<CalendarOutlined />}
         />
       </Motion.div>
@@ -89,7 +144,7 @@ export default function Home() {
       >
         <CardSection
           title="Recent Activity"
-          items={["Edited: “Homepage Revamp”", "Commented: “Sprint Plan”"]}
+          items={recentActivities}
           icon={<HistoryOutlined />}
         />
       </Motion.div>
@@ -105,41 +160,11 @@ export default function Home() {
         <div className="inline-flex items-center justify-center gap-2 text-gray-600 text-base italic">
           <SmileOutlined />
           <span>
-            “The best way to get started is to quit talking and begin doing.” –
+            "The best way to get started is to quit talking and begin doing." –
             Walt Disney
           </span>
         </div>
       </Motion.div>
     </div>
-  );
-}
-
-// Summary Card
-function SummaryCard({ icon, title, description }) {
-  return (
-    <Card className="rounded-3xl shadow-md hover:shadow-xl transition-shadow duration-300 bg-white/80 backdrop-blur">
-      <Text strong className="flex items-center gap-2 text-lg text-gray-800">
-        {icon} {title}
-      </Text>
-      <div className="mt-2 text-gray-600 text-sm">{description}</div>
-    </Card>
-  );
-}
-
-// Section Card
-function CardSection({ title, items, icon }) {
-  return (
-    <Card className="rounded-3xl shadow-md hover:shadow-xl transition-shadow duration-300 bg-white/80 backdrop-blur">
-      <Text strong className="text-lg flex items-center gap-2 text-gray-800">
-        {icon} {title}
-      </Text>
-      <div className="mt-4 space-y-2 text-gray-600 text-sm pl-1">
-        {items.map((item, idx) => (
-          <div key={idx} className="ml-2">
-            • {item}
-          </div>
-        ))}
-      </div>
-    </Card>
   );
 }

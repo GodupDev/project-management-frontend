@@ -25,7 +25,7 @@ import {
 } from "@ant-design/icons";
 import moment from "moment";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { projects, tasks, projectStatuses, users } from "../../mockdata";
+import { useMockData } from "../../context/MockDataContext";
 import TaskBoard from "../../components/ui/task/TaskBoard";
 
 const { Title, Text, Paragraph } = Typography;
@@ -37,11 +37,14 @@ export default function ProjectSpecific() {
   const navigate = useNavigate();
   const location = useLocation();
   const projectData = location.state?.projectData;
+  const { projects, tasks, users, updateProjects } = useMockData();
 
   const [project, setProject] = useState(null);
   const [projectTasks, setProjectTasks] = useState([]);
   const [editMode, setEditMode] = useState(false);
   const [editedProject, setEditedProject] = useState(null);
+
+  const projectStatuses = ["In Progress", "Completed", "On Hold", "Cancelled"];
 
   useEffect(() => {
     if (projectData) {
@@ -54,13 +57,13 @@ export default function ProjectSpecific() {
         setEditedProject({ ...foundProject });
       }
     }
-  }, [projectData, projectName]);
+  }, [projectData, projectName, projects]);
 
   useEffect(() => {
     // Filter tasks for this project
     const projectTasks = tasks.filter((t) => t.project.id === project?.id);
     setProjectTasks(projectTasks);
-  }, [project]);
+  }, [project, tasks]);
 
   const handleChange = (field, value) => {
     setEditedProject((prev) => ({
@@ -70,6 +73,10 @@ export default function ProjectSpecific() {
   };
 
   const handleSave = () => {
+    const updatedProjects = projects.map((p) =>
+      p.id === editedProject.id ? editedProject : p,
+    );
+    updateProjects(updatedProjects);
     setProject(editedProject);
     setEditMode(false);
     message.success("Project updated successfully");

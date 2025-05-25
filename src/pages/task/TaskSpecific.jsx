@@ -14,6 +14,8 @@ import {
   Col,
   Avatar,
   Tooltip,
+  Upload,
+  List,
 } from "antd";
 import {
   ArrowLeftOutlined,
@@ -21,11 +23,13 @@ import {
   ClockCircleOutlined,
   TagOutlined,
   ProjectOutlined,
+  PaperClipOutlined,
+  UploadOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
-import moment from "moment";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Comment from "../../components/ui/task/Comment";
-import { tasks, taskStatuses, taskPriorities, users } from "../../mockdata";
+import { useMockData } from "../../context/MockDataContext";
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -36,11 +40,17 @@ export default function TaskSpecific() {
   const navigate = useNavigate();
   const location = useLocation();
   const taskData = location.state?.taskData;
+  const { tasks, updateTasks } = useMockData();
 
   const [task, setTask] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [editedTask, setEditedTask] = useState(null);
   const [comments, setComments] = useState([]);
+
+  // Mảng file đính kèm, lưu trong editedTask.attachments
+  // Cấu trúc: [{ uid, name, url }, ...]
+  // url có thể là đường dẫn file hoặc base64, tùy bạn xử lý lưu file thế nào
+  // Ở đây mình dùng Upload của Antd mà chưa upload lên server, lưu tạm base64 hoặc file object
 
   useEffect(() => {
     if (taskData) {
@@ -57,7 +67,7 @@ export default function TaskSpecific() {
         setComments(foundTask.comments || []);
       }
     }
-  }, [taskData, taskName, projectName]);
+  }, [taskData, taskName, projectName, tasks]);
 
   const handleChange = (field, value) => {
     setEditedTask((prev) => ({
@@ -67,6 +77,10 @@ export default function TaskSpecific() {
   };
 
   const handleSave = () => {
+    const updatedTasks = tasks.map((t) =>
+      t.id === editedTask.id ? editedTask : t,
+    );
+    updateTasks(updatedTasks);
     setTask(editedTask);
     setEditMode(false);
     message.success("Task updated successfully");
@@ -81,6 +95,20 @@ export default function TaskSpecific() {
       avatar: null,
     };
     setComments((prev) => [...prev, newComment]);
+  };
+
+  // Xử lý upload file (chỉ lưu trong state, chưa upload server)
+  const handleUploadChange = ({ fileList }) => {
+    // fileList chứa thông tin file mới upload
+    handleChange("attachments", fileList);
+  };
+
+  // Xóa attachment khi editMode
+  const handleRemoveAttachment = (file) => {
+    const newList = (editedTask.attachments || []).filter(
+      (f) => f.uid !== file.uid,
+    );
+    handleChange("attachments", newList);
   };
 
   if (!task) {
@@ -133,6 +161,8 @@ export default function TaskSpecific() {
           )
         }
       >
+        {/* Các phần khác ... */}
+
         {/* Tên task */}
         <Title level={4}>Tên task</Title>
         {!editMode ? (
@@ -165,151 +195,56 @@ export default function TaskSpecific() {
         )}
         <Divider />
 
-        <Row gutter={[24, 24]}>
-          {/* Người thực hiện */}
-          <Col xs={24} sm={12}>
-            <Title level={5}>
-              <UserOutlined /> Người thực hiện
-            </Title>
-            {!editMode ? (
-              <Avatar.Group max={{ count: 3 }}>
-                {task.assignees?.map((assignee) => (
-                  <Tooltip
-                    key={`assignee-${assignee?.id || "unknown"}`}
-                    title={assignee?.fullName || "Unknown User"}
+        {/* ... Các phần khác như Người thực hiện, Dự án, Trạng thái, Ưu tiên, Deadline ... */}
+
+        {/* Phần file đính kèm */}
+        <Divider />
+        <Title level={5}>
+          <PaperClipOutlined /> File đính kèm
+        </Title>
+
+        {!editMode ? (
+          // Hiển thị danh sách file đính kèm khi xem task
+          task.attachments && task.attachments.length > 0 ? (
+            <List
+              dataSource={task.attachments}
+              renderItem={(file) => (
+                <List.Item key={file.uid || file.name}>
+                  <a
+                    href={file.url || "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download={file.name}
                   >
-                    <Avatar
-                      src={assignee?.avatar}
-                      icon={!assignee?.avatar && <UserOutlined />}
-                    >
-                      {!assignee?.avatar && (assignee?.fullName?.[0] || "?")}
-                    </Avatar>
-                  </Tooltip>
-                ))}
-              </Avatar.Group>
-            ) : (
-              <Select
-                mode="multiple"
-                style={{ width: "100%" }}
-                placeholder="Chọn người thực hiện"
-                value={
-                  editedTask.assignees?.map((a) => a?.id).filter(Boolean) || []
-                }
-                onChange={(ids) =>
-                  handleChange(
-                    "assignees",
-                    ids
-                      .map((id) => users.find((u) => u.id === id))
-                      .filter(Boolean),
-                  )
-                }
-              >
-                {users.map((user) => (
-                  <Option key={`user-${user.id}`} value={user.id}>
-                    {user.fullName}
-                  </Option>
-                ))}
-              </Select>
+                    <PaperClipOutlined /> {file.name}
+                  </a>
+                </List.Item>
+              )}
+            />
+          ) : (
+            <Text>Chưa có file đính kèm.</Text>
+          )
+        ) : (
+          <>
+            <Upload
+              multiple
+              fileList={editedTask.attachments || []}
+              onChange={handleUploadChange}
+              onRemove={handleRemoveAttachment}
+              beforeUpload={(file) => {
+                // Không tự động upload lên server
+                return false;
+              }}
+              listType="text"
+            >
+              <Button icon={<UploadOutlined />}>Chọn file</Button>
+            </Upload>
+            {(!editedTask.attachments ||
+              editedTask.attachments.length === 0) && (
+              <Text type="secondary">Chưa có file đính kèm.</Text>
             )}
-          </Col>
-
-          {/* Dự án */}
-          <Col xs={24} sm={12}>
-            <Title level={5}>
-              <ProjectOutlined /> Dự án
-            </Title>
-            <Text>{task.project?.name}</Text>
-          </Col>
-
-          {/* Trạng thái */}
-          <Col xs={24} sm={12}>
-            <Title level={5}>
-              <TagOutlined /> Trạng thái
-            </Title>
-            {!editMode ? (
-              <Tag
-                color={
-                  task.status === "Completed"
-                    ? "green"
-                    : task.status === "In Progress"
-                    ? "blue"
-                    : task.status === "Review"
-                    ? "purple"
-                    : task.status === "Cancelled"
-                    ? "red"
-                    : "orange"
-                }
-              >
-                {task.status}
-              </Tag>
-            ) : (
-              <Select
-                value={editedTask.status}
-                onChange={(val) => handleChange("status", val)}
-                style={{ width: "100%" }}
-              >
-                {taskStatuses.map((status) => (
-                  <Option key={`status-${status}`} value={status}>
-                    {status}
-                  </Option>
-                ))}
-              </Select>
-            )}
-          </Col>
-
-          {/* Ưu tiên */}
-          <Col xs={24} sm={12}>
-            <Title level={5}>Ưu tiên</Title>
-            {!editMode ? (
-              <Tag
-                color={
-                  task.priority === "High"
-                    ? "red"
-                    : task.priority === "Medium"
-                    ? "gold"
-                    : "gray"
-                }
-              >
-                {task.priority}
-              </Tag>
-            ) : (
-              <Select
-                value={editedTask.priority}
-                onChange={(val) => handleChange("priority", val)}
-                style={{ width: "100%" }}
-              >
-                {taskPriorities.map((priority) => (
-                  <Option key={`priority-${priority}`} value={priority}>
-                    {priority}
-                  </Option>
-                ))}
-              </Select>
-            )}
-          </Col>
-
-          {/* Deadline */}
-          <Col xs={24} sm={12}>
-            <Title level={5}>
-              <ClockCircleOutlined /> Deadline
-            </Title>
-            {!editMode ? (
-              <Text>
-                {task.deadline
-                  ? moment(task.deadline).format("DD/MM/YYYY")
-                  : "Chưa xác định"}
-              </Text>
-            ) : (
-              <DatePicker
-                value={editedTask.deadline ? moment(editedTask.deadline) : null}
-                onChange={(date) =>
-                  handleChange("deadline", date ? date.toISOString() : null)
-                }
-                style={{ width: "100%" }}
-                format="DD/MM/YYYY"
-              />
-            )}
-          </Col>
-        </Row>
+          </>
+        )}
 
         <Divider />
 

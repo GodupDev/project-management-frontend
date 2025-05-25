@@ -1,9 +1,9 @@
 export const userProfile = {
   id: "1",
-  fullName: "John Doe",
-  email: "john.doe@example.com",
+  fullName: "Nguyễn Trọng Tiến",
+  email: "tien.nguyen@example.com",
   avatar: "https://i.pravatar.cc/150?img=1",
-  role: "Project Manager",
+  role: "Admin",
   department: "Engineering",
   location: "Ho Chi Minh City",
   phone: "+84 123 456 789",

@@ -1,17 +1,9 @@
 import React, { createContext, useContext, useState } from "react";
-import {
-  userProfile,
-  notificationPreferences,
-  appearanceSettings,
-  securitySettings,
-  privacySettings,
-  timeZoneSettings,
-} from "../mockdata/settings";
+import { settings } from "../mockdata/settings";
 import { projects } from "../mockdata/projects";
 import { tasks } from "../mockdata/tasks";
 import { users } from "../mockdata/users";
 import { worklogs } from "../mockdata/worklogs";
-import { settings } from "../mockdata/settings";
 
 const MockDataContext = createContext();
 

@@ -15,50 +15,7 @@ import {
   LineChart,
   Line,
 } from "recharts";
-
-const projectsData = [
-  {
-    key: "1",
-    name: "Project Alpha",
-    status: "In Progress",
-    progress: 75,
-    startDate: "2025-01-01",
-    endDate: "2025-06-30",
-    manager: "John Doe",
-    completedTasks: 30,
-    overdueTasks: 2,
-  },
-  {
-    key: "2",
-    name: "Project Beta",
-    status: "Completed",
-    progress: 100,
-    startDate: "2024-05-15",
-    endDate: "2024-12-31",
-    manager: "Jane Smith",
-    completedTasks: 50,
-    overdueTasks: 0,
-  },
-  {
-    key: "3",
-    name: "Project Gamma",
-    status: "Delayed",
-    progress: 40,
-    startDate: "2025-03-01",
-    endDate: "2025-09-30",
-    manager: "Alice",
-    completedTasks: 15,
-    overdueTasks: 5,
-  },
-];
-
-// Tổng số task mỗi trạng thái (giả lập)
-const taskStatusData = [
-  { name: "Completed", value: 95 },
-  { name: "In Progress", value: 40 },
-  { name: "Overdue", value: 7 },
-  { name: "Open", value: 30 },
-];
+import { useMockData } from "../context/MockDataContext";
 
 const COLORS = ["#0088FE", "#00C49F", "#FF8042", "#FFBB28"];
 
@@ -82,18 +39,84 @@ const columns = [
   { title: "Overdue Tasks", dataIndex: "overdueTasks", key: "overdueTasks" },
 ];
 
-// Giả lập dữ liệu tiến độ theo tháng (Line chart)
-const monthlyProgressData = [
-  { month: "Jan", progress: 30 },
-  { month: "Feb", progress: 45 },
-  { month: "Mar", progress: 50 },
-  { month: "Apr", progress: 65 },
-  { month: "May", progress: 70 },
-  { month: "Jun", progress: 85 },
-  { month: "Jul", progress: 90 },
-];
-
 export default function PerformancePage() {
+  const { projects, tasks, users } = useMockData();
+
+  // Map project data for the table
+  const projectsData = projects.map((project) => {
+    const projectTasks = tasks.filter((task) => task.project.id === project.id);
+    const completedTasks = projectTasks.filter(
+      (task) => task.status === "completed",
+    ).length;
+    const overdueTasks = projectTasks.filter((task) => {
+      const dueDate = new Date(task.deadline);
+      const today = new Date();
+      return task.status !== "completed" && dueDate < today;
+    }).length;
+
+    return {
+      key: project.id,
+      name: project.name,
+      status: project.status,
+      progress: project.progress,
+      startDate: project.startDate,
+      endDate: project.endDate,
+      manager:
+        project.members.find((member) => member.role === "Project Manager")
+          ?.user.fullName || "Unknown",
+      completedTasks,
+      overdueTasks,
+    };
+  });
+
+  // Calculate task status distribution
+  const taskStatusData = [
+    {
+      name: "Completed",
+      value: tasks.filter((task) => task.status === "completed").length,
+    },
+    {
+      name: "In Progress",
+      value: tasks.filter((task) => task.status === "in-progress").length,
+    },
+    {
+      name: "Overdue",
+      value: tasks.filter((task) => {
+        const dueDate = new Date(task.deadline);
+        const today = new Date();
+        return task.status !== "completed" && dueDate < today;
+      }).length,
+    },
+    {
+      name: "Open",
+      value: tasks.filter((task) => task.status === "todo").length,
+    },
+  ];
+
+  // Calculate monthly progress data
+  const monthlyProgressData = projects.reduce((acc, project) => {
+    const startDate = new Date(project.startDate);
+    const endDate = new Date(project.endDate);
+    const months = [];
+
+    let currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+      const month = currentDate.toLocaleString("default", { month: "short" });
+      const existingMonth = acc.find((item) => item.month === month);
+
+      if (existingMonth) {
+        existingMonth.progress =
+          (existingMonth.progress + project.progress) / 2;
+      } else {
+        acc.push({ month, progress: project.progress });
+      }
+
+      currentDate.setMonth(currentDate.getMonth() + 1);
+    }
+
+    return acc;
+  }, []);
+
   return (
     <Motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -101,21 +124,18 @@ export default function PerformancePage() {
       transition={{ duration: 0.5 }}
       style={{ padding: 24 }}
     >
-      {/* Tổng quan số liệu */}
+      {/* Summary Statistics */}
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col span={6}>
           <Card>
-            <Statistic title="Total Projects" value={projectsData.length} />
+            <Statistic title="Total Projects" value={projects.length} />
           </Card>
         </Col>
         <Col span={6}>
           <Card>
             <Statistic
               title="Completed Tasks"
-              value={projectsData.reduce(
-                (acc, cur) => acc + cur.completedTasks,
-                0,
-              )}
+              value={tasks.filter((task) => task.status === "completed").length}
             />
           </Card>
         </Col>
@@ -123,10 +143,13 @@ export default function PerformancePage() {
           <Card>
             <Statistic
               title="Overdue Tasks"
-              value={projectsData.reduce(
-                (acc, cur) => acc + cur.overdueTasks,
-                0,
-              )}
+              value={
+                tasks.filter((task) => {
+                  const dueDate = new Date(task.deadline);
+                  const today = new Date();
+                  return task.status !== "completed" && dueDate < today;
+                }).length
+              }
             />
           </Card>
         </Col>
@@ -135,83 +158,60 @@ export default function PerformancePage() {
             <Statistic
               title="Average Progress"
               value={`${Math.round(
-                projectsData.reduce((acc, cur) => acc + cur.progress, 0) /
-                  projectsData.length,
+                projects.reduce((acc, cur) => acc + cur.progress, 0) /
+                  projects.length,
               )}%`}
             />
           </Card>
         </Col>
       </Row>
 
-      {/* Bảng chi tiết dự án */}
+      {/* Project Performance Table */}
       <Card title="Project Performance Overview" style={{ marginBottom: 24 }}>
         <Table columns={columns} dataSource={projectsData} pagination={false} />
       </Card>
 
-      {/* Biểu đồ cột tiến độ từng project */}
-      <Row gutter={24} style={{ marginBottom: 24 }}>
-        <Col xs={24} md={12}>
-          <Card title="Progress per Project (Bar Chart)">
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={projectsData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              >
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="progress" fill="#8884d8" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
-        </Col>
-
-        {/* Biểu đồ tròn trạng thái task */}
-        <Col xs={24} md={12}>
-          <Card title="Task Status Distribution (Pie Chart)">
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={taskStatusData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label
-                >
-                  {taskStatusData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend verticalAlign="bottom" height={36} />
-              </PieChart>
-            </ResponsiveContainer>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Biểu đồ đường tiến độ theo tháng */}
-      <Card title="Monthly Average Progress (Line Chart)">
+      {/* Task Status Distribution */}
+      <Card title="Task Status Distribution" style={{ marginBottom: 24 }}>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart
-            data={monthlyProgressData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-          >
+          <PieChart>
+            <Pie
+              data={taskStatusData}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              outerRadius={80}
+              fill="#8884d8"
+              dataKey="value"
+              label={({ name, percent }) =>
+                `${name} ${(percent * 100).toFixed(0)}%`
+              }
+            >
+              {taskStatusData.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[index % COLORS.length]}
+                />
+              ))}
+            </Pie>
+            <Tooltip />
+          </PieChart>
+        </ResponsiveContainer>
+      </Card>
+
+      {/* Monthly Progress Chart */}
+      <Card title="Monthly Progress" style={{ marginBottom: 24 }}>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={monthlyProgressData}>
             <XAxis dataKey="month" />
-            <YAxis domain={[0, 100]} />
+            <YAxis />
             <Tooltip />
             <Legend />
             <Line
               type="monotone"
               dataKey="progress"
-              stroke="#82ca9d"
-              strokeWidth={3}
+              stroke="#8884d8"
+              name="Progress"
             />
           </LineChart>
         </ResponsiveContainer>

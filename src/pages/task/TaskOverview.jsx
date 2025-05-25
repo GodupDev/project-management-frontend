@@ -4,17 +4,19 @@ import { PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import TaskBoard from "../../components/ui/task/TaskBoard";
 import CreateTask from "../../components/modals/CreateTask";
-import { tasks, taskStatuses } from "../../mockdata";
+import { useMockData } from "../../context/MockDataContext";
 
 const { Search } = Input;
 const { Option } = Select;
 
 export default function TaskOverview() {
   const navigate = useNavigate();
+  const { tasks, updateTasks } = useMockData();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [taskList, setTaskList] = useState(tasks);
+
+  const taskStatuses = ["todo", "in-progress", "completed", "blocked"];
 
   const handleCreateTask = (newTask) => {
     const taskWithId = {
@@ -23,7 +25,8 @@ export default function TaskOverview() {
       comments: [],
       createdAt: new Date().toISOString().split("T")[0],
     };
-    setTaskList((prevTasks) => [...prevTasks, taskWithId]);
+    const updatedTasks = [...tasks, taskWithId];
+    updateTasks(updatedTasks);
     setIsCreateModalOpen(false);
     message.success("Task created successfully!");
   };
@@ -34,7 +37,7 @@ export default function TaskOverview() {
     });
   };
 
-  const filteredTasks = taskList.filter((task) => {
+  const filteredTasks = tasks.filter((task) => {
     const matchesStatus =
       statusFilter === "all" || task.status === statusFilter;
     const matchesSearch =
