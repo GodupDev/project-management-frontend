@@ -30,6 +30,7 @@ import {
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Comment from "../../components/ui/task/Comment";
 import { useMockData } from "../../context/MockDataContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { motion as Motion } from "framer-motion";
 
 const { Title, Text, Paragraph } = Typography;
@@ -42,6 +43,7 @@ export default function TaskSpecific() {
   const location = useLocation();
   const taskData = location.state?.taskData;
   const { tasks, updateTasks } = useMockData();
+  const { t } = useLanguage();
 
   const [task, setTask] = useState(null);
   const [editMode, setEditMode] = useState(false);
@@ -84,15 +86,15 @@ export default function TaskSpecific() {
     updateTasks(updatedTasks);
     setTask(editedTask);
     setEditMode(false);
-    message.success("Task updated successfully");
+    message.success(t("taskUpdatedSuccess"));
   };
 
   const handleAddComment = (content) => {
     const newComment = {
       id: comments.length + 1,
-      sender: "Bạn",
+      sender: t("you"),
       content,
-      timeAgo: "Vừa xong",
+      timeAgo: t("justNow"),
       avatar: null,
     };
     setComments((prev) => [...prev, newComment]);
@@ -115,12 +117,12 @@ export default function TaskSpecific() {
   if (!task) {
     return (
       <Card style={{ maxWidth: 700, margin: "auto", marginTop: 50 }}>
-        <Text type="danger">Task không tồn tại hoặc không tìm thấy.</Text>
+        <Text type="danger">{t("taskNotFound")}</Text>
         <Button
           type="link"
           onClick={() => navigate(`/projects/${projectName}`)}
         >
-          Quay lại dự án
+          {t("backToProject")}
         </Button>
       </Card>
     );
@@ -141,7 +143,7 @@ export default function TaskSpecific() {
                 icon={<ArrowLeftOutlined />}
                 onClick={() => navigate(`/projects/${projectName}`)}
               />
-              {editMode ? "Chỉnh sửa task" : "Chi tiết task"}
+              {editMode ? t("editTask") : t("taskDetails")}
             </Space>
           }
           extra={
@@ -154,23 +156,21 @@ export default function TaskSpecific() {
                   }}
                   style={{ marginRight: 8 }}
                 >
-                  Hủy
+                  {t("cancel")}
                 </Button>
                 <Button type="primary" onClick={handleSave}>
-                  Lưu
+                  {t("save")}
                 </Button>
               </>
             ) : (
               <Button onClick={() => setEditMode(true)} type="primary" ghost>
-                Sửa
+                {t("edit")}
               </Button>
             )
           }
         >
-          {/* Các phần khác ... */}
-
-          {/* Tên task */}
-          <Title level={4}>Tên task</Title>
+          {/* Task Name */}
+          <Title level={4}>{t("taskName")}</Title>
           {!editMode ? (
             <Text strong style={{ fontSize: 16 }}>
               {task.name}
@@ -179,38 +179,35 @@ export default function TaskSpecific() {
             <Input
               value={editedTask.name}
               onChange={(e) => handleChange("name", e.target.value)}
-              placeholder="Tên task"
+              placeholder={t("taskName")}
               autoFocus
             />
           )}
           <Divider />
 
-          {/* Mô tả */}
-          <Title level={4}>Mô tả</Title>
+          {/* Description */}
+          <Title level={4}>{t("description")}</Title>
           {!editMode ? (
             <Paragraph style={{ whiteSpace: "pre-wrap" }}>
-              {task.description || "Chưa có mô tả."}
+              {task.description || t("noDescription")}
             </Paragraph>
           ) : (
             <TextArea
               rows={5}
               value={editedTask.description}
               onChange={(e) => handleChange("description", e.target.value)}
-              placeholder="Mô tả chi tiết task"
+              placeholder={t("taskDescriptionPlaceholder")}
             />
           )}
           <Divider />
 
-          {/* ... Các phần khác như Người thực hiện, Dự án, Trạng thái, Ưu tiên, Deadline ... */}
-
-          {/* Phần file đính kèm */}
+          {/* Attachments */}
           <Divider />
           <Title level={5}>
-            <PaperClipOutlined /> File đính kèm
+            <PaperClipOutlined /> {t("attachments")}
           </Title>
 
           {!editMode ? (
-            // Hiển thị danh sách file đính kèm khi xem task
             task.attachments && task.attachments.length > 0 ? (
               <List
                 dataSource={task.attachments}
@@ -228,7 +225,7 @@ export default function TaskSpecific() {
                 )}
               />
             ) : (
-              <Text>Chưa có file đính kèm.</Text>
+              <Text>{t("noAttachments")}</Text>
             )
           ) : (
             <>
@@ -237,28 +234,25 @@ export default function TaskSpecific() {
                 fileList={editedTask.attachments || []}
                 onChange={handleUploadChange}
                 onRemove={handleRemoveAttachment}
-                beforeUpload={(file) => {
-                  // Không tự động upload lên server
-                  return false;
-                }}
+                beforeUpload={() => false}
                 listType="text"
               >
-                <Button icon={<UploadOutlined />}>Chọn file</Button>
+                <Button icon={<UploadOutlined />}>{t("selectFile")}</Button>
               </Upload>
               {(!editedTask.attachments ||
                 editedTask.attachments.length === 0) && (
-                <Text type="secondary">Chưa có file đính kèm.</Text>
+                <Text type="secondary">{t("noAttachments")}</Text>
               )}
             </>
           )}
 
+          {/* Comments */}
           <Divider />
-
-          {/* Bình luận */}
+          <Title level={5}>{t("comments")}</Title>
           <Comment
-            key={`comments-${task.id}`}
             comments={comments}
             onAddComment={handleAddComment}
+            currentUser={t("you")}
           />
         </Card>
       </div>

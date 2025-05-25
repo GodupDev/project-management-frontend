@@ -1,31 +1,22 @@
-import React from "react";
-import { Form, Input, Select, Button, Space, message } from "antd";
+import React, { useState } from "react";
+import { Typography, Input, Select, Button, Form, Space, message } from "antd";
 import { motion as Motion } from "framer-motion";
+import { useLanguage } from "../../context/LanguageContext";
 
+const { Title } = Typography;
 const { Option } = Select;
 
 const roleOptions = ["Team Lead", "Developer", "Tester", "Designer", "QA"];
 
-const AddMember = ({ onSuccess, existingMembers = [] }) => {
+const AddMember = ({ onSuccess }) => {
   const [form] = Form.useForm();
+  const { t } = useLanguage();
 
   const handleSubmit = (values) => {
-    const name = values.name.trim();
-    const role = values.role;
-
-    if (!name) {
-      message.error("Member name cannot be empty");
-      return;
-    }
-    if (
-      existingMembers.some((m) => m.name.toLowerCase() === name.toLowerCase())
-    ) {
-      message.warning("This member already exists");
-      return;
-    }
-
-    onSuccess?.({ name, role });
+    console.log("Submitted Member:", values);
+    message.success(t("memberAddedSuccess"));
     form.resetFields();
+    onSuccess?.();
   };
 
   return (
@@ -34,14 +25,14 @@ const AddMember = ({ onSuccess, existingMembers = [] }) => {
         <Form.Item
           label={
             <span className="!text-[var(--color-text-primary)] font-semibold">
-              Member Name
+              {t("modalMemberName")}
             </span>
           }
           name="name"
-          rules={[{ required: true, message: "Please input member name" }]}
+          rules={[{ required: true, message: t("modalInputMemberName") }]}
         >
           <Input
-            placeholder="Enter member name"
+            placeholder={t("modalEnterMemberName")}
             className="!bg-transparent !py-2 !border !border-[var(--color-border)] !rounded-lg 
             placeholder:!text-[var(--color-text-secondary)] placeholder:opacity-50 
             !text-[var(--color-text-primary)] transition-all duration-300
@@ -52,15 +43,15 @@ const AddMember = ({ onSuccess, existingMembers = [] }) => {
 
         <Form.Item
           label={
-            <span className="!text-[var(--color-text-primary)] font-semibold">
-              Role
+            <span className="text-[var(--color-text-primary)] font-semibold">
+              {t("modalMemberRole")}
             </span>
           }
           name="role"
-          rules={[{ required: true, message: "Please select role" }]}
+          rules={[{ required: true, message: t("modalSelectMemberRole") }]}
         >
           <Select
-            placeholder="Select role"
+            placeholder={t("modalSelectRole")}
             className="!bg-transparent !py-2 !border !border-[var(--color-border)] !rounded-lg 
             placeholder:!text-[var(--color-text-secondary)] placeholder:opacity-50 
             !text-[var(--color-text-primary)] transition-all duration-300
@@ -75,6 +66,28 @@ const AddMember = ({ onSuccess, existingMembers = [] }) => {
           </Select>
         </Form.Item>
 
+        <Form.Item
+          label={
+            <span className="text-[var(--color-text-primary)] font-semibold">
+              {t("modalMemberEmail")}
+            </span>
+          }
+          name="email"
+          rules={[
+            { required: true, message: t("modalInputMemberEmail") },
+            { type: "email", message: t("modalInvalidEmail") },
+          ]}
+        >
+          <Input
+            placeholder={t("modalEnterMemberEmail")}
+            className="!bg-transparent !py-2 !border !border-[var(--color-border)] !rounded-lg 
+            placeholder:!text-[var(--color-text-secondary)] placeholder:opacity-50 
+            !text-[var(--color-text-primary)] transition-all duration-300
+            hover:!border-[var(--color-primary)] focus:!border-[var(--color-primary)]
+            focus:!ring-2 focus:!ring-[var(--color-primary-light)] focus:!ring-opacity-50"
+          />
+        </Form.Item>
+
         <Form.Item className="flex justify-center mt-8">
           <Space>
             <Motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -85,15 +98,16 @@ const AddMember = ({ onSuccess, existingMembers = [] }) => {
                 hover:!bg-[var(--color-primary-hover)] transition-all duration-300
                 focus:!ring-2 focus:!ring-[var(--color-primary-light)] focus:!ring-opacity-50"
               >
-                Add
+                {t("modalAdd")}
               </Button>
             </Motion.div>
             <Button
               htmlType="button"
+              danger
               onClick={() => form.resetFields()}
               className="hover:!bg-[var(--color-action-hover)] transition-all duration-300"
             >
-              Clear
+              {t("modalClear")}
             </Button>
           </Space>
         </Form.Item>

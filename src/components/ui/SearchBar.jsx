@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Input } from "antd";
 import IconSearch from "../icons/IconSearch";
 import { motion as Motion } from "framer-motion";
+import { useLanguage } from "../../context/LanguageContext";
 
 const Wrapper = styled.div`
   .ant-input {
@@ -25,6 +26,7 @@ const Wrapper = styled.div`
 const SearchBar = () => {
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
+  const { t } = useLanguage();
 
   return (
     <Motion.div
@@ -42,7 +44,7 @@ const SearchBar = () => {
       <Wrapper className="searchbar w-full">
         <Input
           className="!bg-transparent !border-none !shadow-none !p-0 !text-[0.8rem] !text-[var(--color-text)] placeholder:!text-[var(--color-text)] placeholder:opacity-100"
-          placeholder="Search for anything..."
+          placeholder={t("searchPlaceholder")}
           value={value}
           allowClear
           onChange={(e) => setValue(e.target.value)}

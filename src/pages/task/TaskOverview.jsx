@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import TaskBoard from "../../components/ui/task/TaskBoard";
 import CreateTask from "../../components/modals/CreateTask";
 import { useMockData } from "../../context/MockDataContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { motion as Motion } from "framer-motion";
 
 const { Search } = Input;
@@ -13,11 +14,17 @@ const { Option } = Select;
 const TaskOverview = () => {
   const navigate = useNavigate();
   const { tasks, updateTasks } = useMockData();
+  const { t } = useLanguage();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const taskStatuses = ["todo", "in-progress", "completed", "blocked"];
+  const taskStatuses = [
+    t("todo"),
+    t("inProgress"),
+    t("completed"),
+    t("blocked"),
+  ];
 
   const handleCreateTask = (newTask) => {
     const taskWithId = {
@@ -29,7 +36,7 @@ const TaskOverview = () => {
     const updatedTasks = [...tasks, taskWithId];
     updateTasks(updatedTasks);
     setIsCreateModalOpen(false);
-    message.success("Task created successfully!");
+    message.success(t("taskCreatedSuccess"));
   };
 
   const handleTaskClick = (task) => {
@@ -60,7 +67,7 @@ const TaskOverview = () => {
           <div className="flex justify-between items-center mb-4">
             <Space>
               <Search
-                placeholder="Tìm kiếm task..."
+                placeholder={t("searchTasks")}
                 allowClear
                 onSearch={setSearchText}
                 style={{ width: 200 }}
@@ -70,7 +77,7 @@ const TaskOverview = () => {
                 style={{ width: 120 }}
                 onChange={setStatusFilter}
               >
-                <Option value="all">Tất cả</Option>
+                <Option value="all">{t("all")}</Option>
                 {taskStatuses.map((status) => (
                   <Option key={status} value={status}>
                     {status}
@@ -83,7 +90,7 @@ const TaskOverview = () => {
               icon={<PlusOutlined />}
               onClick={() => setIsCreateModalOpen(true)}
             >
-              Tạo Task
+              {t("createTask")}
             </Button>
           </div>
 
@@ -91,7 +98,7 @@ const TaskOverview = () => {
         </Card>
 
         <Modal
-          title="Tạo Task Mới"
+          title={t("createNewTask")}
           open={isCreateModalOpen}
           onCancel={() => setIsCreateModalOpen(false)}
           footer={null}

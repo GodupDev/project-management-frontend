@@ -2,38 +2,41 @@
 import React from "react";
 import { Card, Tag, Avatar, Tooltip } from "antd";
 import { UserOutlined } from "@ant-design/icons";
+import { useLanguage } from "../../../context/LanguageContext";
 
 const TaskBoard = ({ tasks = [], onTaskClick }) => {
+  const { t } = useLanguage();
+
   const columns = [
     {
-      title: "To Do",
-      tasks: tasks.filter((task) => task.status === "To Do"),
+      title: t("todo"),
+      tasks: tasks.filter((task) => task.status === t("toDo")),
       color: "default",
     },
     {
-      title: "In Progress",
-      tasks: tasks.filter((task) => task.status === "In Progress"),
+      title: t("inProgress"),
+      tasks: tasks.filter((task) => task.status === t("inProgress")),
       color: "processing",
     },
     {
-      title: "Review",
-      tasks: tasks.filter((task) => task.status === "Review"),
+      title: t("review"),
+      tasks: tasks.filter((task) => task.status === t("review")),
       color: "warning",
     },
     {
-      title: "Completed",
-      tasks: tasks.filter((task) => task.status === "Completed"),
+      title: t("completed"),
+      tasks: tasks.filter((task) => task.status === t("completed")),
       color: "success",
     },
   ];
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case "High":
+      case t("high"):
         return "red";
-      case "Medium":
+      case t("medium"):
         return "gold";
-      case "Low":
+      case t("low"):
         return "green";
       default:
         return "default";
@@ -64,9 +67,9 @@ const TaskBoard = ({ tasks = [], onTaskClick }) => {
                   <div className="flex items-center justify-between">
                     <Tag
                       color={
-                        task.priority === "High"
+                        task.priority === t("high")
                           ? "red"
-                          : task.priority === "Medium"
+                          : task.priority === t("medium")
                           ? "gold"
                           : "gray"
                       }
@@ -77,7 +80,7 @@ const TaskBoard = ({ tasks = [], onTaskClick }) => {
                       {task.assignees?.map((assignee) => (
                         <Tooltip
                           key={`assignee-${assignee?.id || "unknown"}`}
-                          title={assignee?.fullName || "Unknown User"}
+                          title={assignee?.fullName || t("unknownUser")}
                         >
                           <Avatar
                             src={assignee?.avatar}

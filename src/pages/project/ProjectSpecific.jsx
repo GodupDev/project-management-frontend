@@ -26,6 +26,7 @@ import {
 import moment from "moment";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useMockData } from "../../context/MockDataContext";
+import { useLanguage } from "../../context/LanguageContext";
 import TaskBoard from "../../components/ui/task/TaskBoard";
 
 const { Title, Text, Paragraph } = Typography;
@@ -38,13 +39,19 @@ export default function ProjectSpecific() {
   const location = useLocation();
   const projectData = location.state?.projectData;
   const { projects, tasks, users, updateProjects } = useMockData();
+  const { t } = useLanguage();
 
   const [project, setProject] = useState(null);
   const [projectTasks, setProjectTasks] = useState([]);
   const [editMode, setEditMode] = useState(false);
   const [editedProject, setEditedProject] = useState(null);
 
-  const projectStatuses = ["In Progress", "Completed", "On Hold", "Cancelled"];
+  const projectStatuses = [
+    t("inProgress"),
+    t("completed"),
+    t("onHold"),
+    t("cancelled"),
+  ];
 
   useEffect(() => {
     if (projectData) {
@@ -79,7 +86,7 @@ export default function ProjectSpecific() {
     updateProjects(updatedProjects);
     setProject(editedProject);
     setEditMode(false);
-    message.success("Project updated successfully");
+    message.success(t("projectUpdatedSuccess"));
   };
 
   const handleTaskClick = (task) => {
@@ -91,9 +98,9 @@ export default function ProjectSpecific() {
   if (!project) {
     return (
       <Card style={{ maxWidth: 700, margin: "auto", marginTop: 50 }}>
-        <Text type="danger">Project không tồn tại hoặc không tìm thấy.</Text>
+        <Text type="danger">{t("projectNotFound")}</Text>
         <Button type="link" onClick={() => navigate("/projects")}>
-          Quay lại danh sách
+          {t("backToList")}
         </Button>
       </Card>
     );
@@ -109,7 +116,7 @@ export default function ProjectSpecific() {
               icon={<ArrowLeftOutlined />}
               onClick={() => navigate("/projects")}
             />
-            {editMode ? "Chỉnh sửa dự án" : "Chi tiết dự án"}
+            {editMode ? t("editProject") : t("projectDetails")}
           </Space>
         }
         extra={
@@ -122,22 +129,22 @@ export default function ProjectSpecific() {
                 }}
                 style={{ marginRight: 8 }}
               >
-                Hủy
+                {t("cancel")}
               </Button>
               <Button type="primary" onClick={handleSave}>
-                Lưu
+                {t("save")}
               </Button>
             </>
           ) : (
             <Button onClick={() => setEditMode(true)} type="primary" ghost>
-              Sửa
+              {t("edit")}
             </Button>
           )
         }
       >
-        {/* Tên dự án */}
+        {/* Project Name */}
         <div>
-          <Title level={4}>Tên dự án</Title>
+          <Title level={4}>{t("projectName")}</Title>
           {!editMode ? (
             <Text strong style={{ fontSize: 16 }}>
               {project.name}
@@ -146,7 +153,7 @@ export default function ProjectSpecific() {
             <Input
               value={editedProject.name}
               onChange={(e) => handleChange("name", e.target.value)}
-              placeholder="Tên dự án"
+              placeholder={t("projectName")}
               autoFocus
             />
           )}
@@ -154,19 +161,19 @@ export default function ProjectSpecific() {
 
         <Divider />
 
-        {/* Mô tả */}
+        {/* Description */}
         <div>
-          <Title level={4}>Mô tả</Title>
+          <Title level={4}>{t("description")}</Title>
           {!editMode ? (
             <Paragraph style={{ whiteSpace: "pre-wrap" }}>
-              {project.description || "Chưa có mô tả."}
+              {project.description || t("noDescription")}
             </Paragraph>
           ) : (
             <TextArea
               rows={5}
               value={editedProject.description}
               onChange={(e) => handleChange("description", e.target.value)}
-              placeholder="Mô tả chi tiết dự án"
+              placeholder={t("projectDescriptionPlaceholder")}
             />
           )}
         </div>
@@ -174,17 +181,17 @@ export default function ProjectSpecific() {
         <Divider />
 
         <Row gutter={[24, 24]}>
-          {/* Người quản lý */}
+          {/* Project Manager */}
           <Col xs={24} sm={12}>
             <Title level={5}>
-              <UserOutlined /> Người quản lý
+              <UserOutlined /> {t("projectManager")}
             </Title>
             {!editMode ? (
               <Avatar.Group max={{ count: 3 }}>
                 {project.managers?.map((manager) => (
                   <Tooltip
                     key={`manager-${manager?.id || "unknown"}`}
-                    title={manager?.fullName || "Unknown User"}
+                    title={manager?.fullName || t("unknown")}
                   >
                     <Avatar
                       src={manager?.avatar}
@@ -199,7 +206,7 @@ export default function ProjectSpecific() {
               <Select
                 mode="multiple"
                 style={{ width: "100%" }}
-                placeholder="Chọn người quản lý"
+                placeholder={t("selectManagers")}
                 value={
                   editedProject.managers?.map((m) => m?.id).filter(Boolean) ||
                   []
@@ -222,21 +229,21 @@ export default function ProjectSpecific() {
             )}
           </Col>
 
-          {/* Trạng thái */}
+          {/* Status */}
           <Col xs={24} sm={12}>
             <Title level={5}>
-              <TagOutlined /> Trạng thái
+              <TagOutlined /> {t("status")}
             </Title>
             {!editMode ? (
               <Tag
                 color={
-                  project.status === "Completed"
+                  project.status === t("completed")
                     ? "green"
-                    : project.status === "In Progress"
+                    : project.status === t("inProgress")
                     ? "blue"
-                    : project.status === "On Hold"
+                    : project.status === t("onHold")
                     ? "orange"
-                    : project.status === "Cancelled"
+                    : project.status === t("cancelled")
                     ? "red"
                     : "default"
                 }
@@ -250,7 +257,7 @@ export default function ProjectSpecific() {
                 style={{ width: "100%" }}
               >
                 {projectStatuses.map((status) => (
-                  <Option key={`status-${status}`} value={status}>
+                  <Option key={status} value={status}>
                     {status}
                   </Option>
                 ))}
@@ -258,16 +265,16 @@ export default function ProjectSpecific() {
             )}
           </Col>
 
-          {/* Ngày bắt đầu */}
+          {/* Start Date */}
           <Col xs={24} sm={12}>
             <Title level={5}>
-              <ClockCircleOutlined /> Ngày bắt đầu
+              <ClockCircleOutlined /> {t("startDate")}
             </Title>
             {!editMode ? (
               <Text>
                 {project.startDate
                   ? moment(project.startDate).format("DD/MM/YYYY")
-                  : "Chưa xác định"}
+                  : t("notSpecified")}
               </Text>
             ) : (
               <DatePicker
@@ -285,16 +292,16 @@ export default function ProjectSpecific() {
             )}
           </Col>
 
-          {/* Ngày kết thúc dự kiến */}
+          {/* Expected End Date */}
           <Col xs={24} sm={12}>
             <Title level={5}>
-              <ClockCircleOutlined /> Ngày kết thúc dự kiến
+              <ClockCircleOutlined /> {t("expectedEndDate")}
             </Title>
             {!editMode ? (
               <Text>
                 {project.expectedEndDate
                   ? moment(project.expectedEndDate).format("DD/MM/YYYY")
-                  : "Chưa xác định"}
+                  : t("notSpecified")}
               </Text>
             ) : (
               <DatePicker
@@ -318,10 +325,14 @@ export default function ProjectSpecific() {
 
         <Divider />
 
-        {/* Danh sách task */}
+        {/* Task List */}
         <div>
-          <Title level={4}>Tasks</Title>
-          <TaskBoard tasks={projectTasks} onTaskClick={handleTaskClick} />
+          <Title level={4}>{t("tasks")}</Title>
+          <TaskBoard
+            tasks={projectTasks}
+            onTaskClick={handleTaskClick}
+            projectId={project.id}
+          />
         </div>
       </Card>
     </div>

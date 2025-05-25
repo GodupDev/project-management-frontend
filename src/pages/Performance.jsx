@@ -16,31 +16,37 @@ import {
   Line,
 } from "recharts";
 import { useMockData } from "../context/MockDataContext";
+import { useLanguage } from "../context/LanguageContext";
 
 const COLORS = ["#0088FE", "#00C49F", "#FF8042", "#FFBB28"];
 
-const columns = [
-  { title: "Project Name", dataIndex: "name", key: "name" },
-  { title: "Status", dataIndex: "status", key: "status" },
-  {
-    title: "Progress",
-    dataIndex: "progress",
-    key: "progress",
-    render: (value) => <Progress percent={value} size="small" />,
-  },
-  { title: "Start Date", dataIndex: "startDate", key: "startDate" },
-  { title: "End Date", dataIndex: "endDate", key: "endDate" },
-  { title: "Manager", dataIndex: "manager", key: "manager" },
-  {
-    title: "Completed Tasks",
-    dataIndex: "completedTasks",
-    key: "completedTasks",
-  },
-  { title: "Overdue Tasks", dataIndex: "overdueTasks", key: "overdueTasks" },
-];
-
 const Performance = () => {
   const { projects, tasks, users } = useMockData();
+  const { t } = useLanguage();
+
+  const columns = [
+    { title: t("projectName"), dataIndex: "name", key: "name" },
+    { title: t("status"), dataIndex: "status", key: "status" },
+    {
+      title: t("progress"),
+      dataIndex: "progress",
+      key: "progress",
+      render: (value) => <Progress percent={value} size="small" />,
+    },
+    { title: t("startDate"), dataIndex: "startDate", key: "startDate" },
+    { title: t("endDate"), dataIndex: "endDate", key: "endDate" },
+    { title: t("manager"), dataIndex: "manager", key: "manager" },
+    {
+      title: t("completedTasks"),
+      dataIndex: "completedTasks",
+      key: "completedTasks",
+    },
+    {
+      title: t("overdueTasks"),
+      dataIndex: "overdueTasks",
+      key: "overdueTasks",
+    },
+  ];
 
   // Map project data for the table
   const projectsData = projects.map((project) => {
@@ -57,13 +63,13 @@ const Performance = () => {
     return {
       key: project.id,
       name: project.name,
-      status: project.status,
+      status: t(project.status),
       progress: project.progress,
       startDate: project.startDate,
       endDate: project.endDate,
       manager:
         project.members.find((member) => member.role === "Project Manager")
-          ?.user.fullName || "Unknown",
+          ?.user.fullName || t("unknown"),
       completedTasks,
       overdueTasks,
     };
@@ -72,15 +78,15 @@ const Performance = () => {
   // Calculate task status distribution
   const taskStatusData = [
     {
-      name: "Completed",
+      name: t("completed"),
       value: tasks.filter((task) => task.status === "completed").length,
     },
     {
-      name: "In Progress",
+      name: t("inProgress"),
       value: tasks.filter((task) => task.status === "in-progress").length,
     },
     {
-      name: "Overdue",
+      name: t("overdue"),
       value: tasks.filter((task) => {
         const dueDate = new Date(task.deadline);
         const today = new Date();
@@ -88,7 +94,7 @@ const Performance = () => {
       }).length,
     },
     {
-      name: "Open",
+      name: t("open"),
       value: tasks.filter((task) => task.status === "todo").length,
     },
   ];
@@ -122,18 +128,19 @@ const Performance = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      className="p-6"
     >
       {/* Summary Statistics */}
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col span={6}>
           <Card>
-            <Statistic title="Total Projects" value={projects.length} />
+            <Statistic title={t("totalProjects")} value={projects.length} />
           </Card>
         </Col>
         <Col span={6}>
           <Card>
             <Statistic
-              title="Completed Tasks"
+              title={t("completedTasks")}
               value={tasks.filter((task) => task.status === "completed").length}
             />
           </Card>
@@ -141,7 +148,7 @@ const Performance = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="Overdue Tasks"
+              title={t("overdueTasks")}
               value={
                 tasks.filter((task) => {
                   const dueDate = new Date(task.deadline);
@@ -155,7 +162,7 @@ const Performance = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="Average Progress"
+              title={t("averageProgress")}
               value={`${Math.round(
                 projects.reduce((acc, cur) => acc + cur.progress, 0) /
                   projects.length,
@@ -166,12 +173,15 @@ const Performance = () => {
       </Row>
 
       {/* Project Performance Table */}
-      <Card title="Project Performance Overview" style={{ marginBottom: 24 }}>
+      <Card
+        title={t("projectPerformanceOverview")}
+        style={{ marginBottom: 24 }}
+      >
         <Table columns={columns} dataSource={projectsData} pagination={false} />
       </Card>
 
       {/* Task Status Distribution */}
-      <Card title="Task Status Distribution" style={{ marginBottom: 24 }}>
+      <Card title={t("taskStatusDistribution")} style={{ marginBottom: 24 }}>
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
@@ -199,7 +209,7 @@ const Performance = () => {
       </Card>
 
       {/* Monthly Progress Chart */}
-      <Card title="Monthly Progress" style={{ marginBottom: 24 }}>
+      <Card title={t("monthlyProgress")} style={{ marginBottom: 24 }}>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={monthlyProgressData}>
             <XAxis dataKey="month" />
@@ -210,7 +220,7 @@ const Performance = () => {
               type="monotone"
               dataKey="progress"
               stroke="#8884d8"
-              name="Progress"
+              name={t("progress")}
             />
           </LineChart>
         </ResponsiveContainer>

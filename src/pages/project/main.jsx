@@ -5,6 +5,7 @@ import ProjectManagement from "./ProjectManagement";
 import ProjectSpecific from "./ProjectSpecific";
 import TaskSpecific from "../task/TaskSpecific";
 import { motion as Motion } from "framer-motion";
+import { useLanguage } from "../../context/LanguageContext";
 
 const { Title } = Typography;
 
@@ -12,6 +13,8 @@ const { Title } = Typography;
 const PROJECTS_BASE_PATH = "/projects";
 
 const Main = () => {
+  const { t } = useLanguage();
+
   return (
     <Motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -28,7 +31,7 @@ const Main = () => {
             <Navigate
               to={PROJECTS_BASE_PATH}
               replace
-              state={{ from: "invalid-route" }}
+              state={{ from: t("invalidRoute") }}
             />
           }
         />

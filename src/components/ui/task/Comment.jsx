@@ -8,6 +8,7 @@ import {
   UpOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
+import { useLanguage } from "../../../context/LanguageContext";
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -17,6 +18,7 @@ export default function Comment({ comments = [], onAddComment }) {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const commentsEndRef = useRef(null);
   const commentsContainerRef = useRef(null);
+  const { t } = useLanguage();
 
   // Smooth scroll to bottom when new comment is added
   useEffect(() => {
@@ -46,7 +48,7 @@ export default function Comment({ comments = [], onAddComment }) {
     const senderName =
       typeof item.sender === "string"
         ? item.sender
-        : item.sender?.name || "Unknown";
+        : item.sender?.name || t("unknown");
     const initials = senderName.charAt(0).toUpperCase();
 
     return (
@@ -90,15 +92,15 @@ export default function Comment({ comments = [], onAddComment }) {
                   size="small"
                   className="text-gray-500 hover:text-blue-500 p-0 h-auto flex items-center"
                 >
-                  <span className="text-sm ml-1.5">Thích</span>
+                  <span className="text-sm ml-1.5">{t("like")}</span>
                 </Button>
                 <Button
                   type="text"
                   size="small"
                   className="text-gray-500 hover:text-blue-500 p-0 h-auto"
-                  onClick={() => message.info("Tính năng đang phát triển")}
+                  onClick={() => message.info(t("featureInDevelopment"))}
                 >
-                  <span className="text-sm">Trả lời</span>
+                  <span className="text-sm">{t("reply")}</span>
                 </Button>
               </div>
             </>
@@ -120,10 +122,10 @@ export default function Comment({ comments = [], onAddComment }) {
             className="m-0 font-medium text-gray-800"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
-            Bình luận
+            {t("comments")}
           </Typography.Title>
           <Text className="text-gray-500 text-sm bg-gray-50 px-3 py-1 rounded-full">
-            {comments.length} bình luận
+            {comments.length} {t("comments")}
           </Text>
         </div>
         <Button
@@ -150,9 +152,7 @@ export default function Comment({ comments = [], onAddComment }) {
                 <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-3">
                   <UserOutlined className="text-xl text-blue-500" />
                 </div>
-                <Text className="text-gray-400 text-sm">
-                  Chưa có bình luận nào
-                </Text>
+                <Text className="text-gray-400 text-sm">{t("noComments")}</Text>
               </div>
             ) : (
               <List
@@ -169,7 +169,7 @@ export default function Comment({ comments = [], onAddComment }) {
             <div className="flex gap-3">
               <TextArea
                 rows={2}
-                placeholder="Viết bình luận..."
+                placeholder={t("writeComment")}
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 onPressEnter={(e) => {

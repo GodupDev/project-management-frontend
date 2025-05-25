@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Form, Input, Button, Card, Typography } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { motion as Motion } from "framer-motion";
+import { useLanguage } from "../context/LanguageContext";
 
 const Login = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const { t } = useLanguage();
 
   const onFinish = (values) => {
     console.log("Success:", values);
@@ -23,10 +25,10 @@ const Login = () => {
         <Card className="w-full max-w-md">
           <div className="text-center mb-8">
             <Typography.Title level={2} className="text-gray-900">
-              Project Management
+              {t("projectManagement")}
             </Typography.Title>
             <Typography.Text className="text-gray-500">
-              Sign in to your account
+              {t("signInToAccount")}
             </Typography.Text>
           </div>
 
@@ -40,31 +42,29 @@ const Login = () => {
             <Form.Item
               name="email"
               rules={[
-                { required: true, message: "Please input your email!" },
-                { type: "email", message: "Please enter a valid email!" },
+                { required: true, message: t("pleaseInputEmail") },
+                { type: "email", message: t("pleaseEnterValidEmail") },
               ]}
             >
               <Input
                 prefix={<UserOutlined className="text-gray-400" />}
-                placeholder="Email"
+                placeholder={t("email")}
               />
             </Form.Item>
 
             <Form.Item
               name="password"
-              rules={[
-                { required: true, message: "Please input your password!" },
-              ]}
+              rules={[{ required: true, message: t("pleaseInputPassword") }]}
             >
               <Input.Password
                 prefix={<LockOutlined className="text-gray-400" />}
-                placeholder="Password"
+                placeholder={t("password")}
               />
             </Form.Item>
 
             <Form.Item>
               <Button type="primary" htmlType="submit" className="w-full">
-                Sign in
+                {t("signIn")}
               </Button>
             </Form.Item>
           </Form>

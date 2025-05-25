@@ -7,15 +7,17 @@ import {
   TeamOutlined,
   ClockCircleOutlined,
 } from "@ant-design/icons";
+import { useLanguage } from "../../context/LanguageContext";
 
 const { Text, Title } = Typography;
 
 const ProfileModal = ({ isOpen, onClose, user }) => {
+  const { t } = useLanguage();
   if (!user) return null;
 
   return (
     <Modal
-      title="User Profile"
+      title={t("profileEdit")}
       open={isOpen}
       onCancel={onClose}
       footer={null}
@@ -40,7 +42,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
             <MailOutlined className="text-gray-500 text-lg" />
             <div>
               <Text type="secondary" className="block text-sm">
-                Email
+                {t("profileEmail")}
               </Text>
               <Text>{user.email}</Text>
             </div>
@@ -52,7 +54,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
             <PhoneOutlined className="text-gray-500 text-lg" />
             <div>
               <Text type="secondary" className="block text-sm">
-                Phone
+                {t("profilePhone")}
               </Text>
               <Text>{user.phone}</Text>
             </div>
@@ -64,7 +66,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
             <EnvironmentOutlined className="text-gray-500 text-lg" />
             <div>
               <Text type="secondary" className="block text-sm">
-                Location
+                {t("profileLocation")}
               </Text>
               <Text>{user.location}</Text>
             </div>
@@ -76,7 +78,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
             <TeamOutlined className="text-gray-500 text-lg" />
             <div>
               <Text type="secondary" className="block text-sm">
-                Department
+                {t("profileRole")}
               </Text>
               <Text>{user.department}</Text>
             </div>
@@ -88,7 +90,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
             <ClockCircleOutlined className="text-gray-500 text-lg" />
             <div>
               <Text type="secondary" className="block text-sm">
-                Joined Date
+                {t("joinedDate")}
               </Text>
               <Text>{user.joinedDate}</Text>
             </div>
@@ -98,7 +100,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
         {user.bio && (
           <Col span={24}>
             <Text type="secondary" className="block mb-2">
-              About
+              {t("profileAbout")}
             </Text>
             <Text>{user.bio}</Text>
           </Col>

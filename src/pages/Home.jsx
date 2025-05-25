@@ -14,6 +14,7 @@ import {
 } from "@ant-design/icons";
 import { motion as Motion } from "framer-motion";
 import { useMockData } from "../context/MockDataContext";
+import { useLanguage } from "../context/LanguageContext";
 
 const { Title, Text } = Typography;
 
@@ -52,6 +53,7 @@ const CardSection = ({ title, items, icon }) => (
 
 const Home = () => {
   const { projects, tasks, users, notifications } = useMockData();
+  const { t } = useLanguage();
 
   // Calculate summary statistics
   const ongoingProjects = projects.filter(
@@ -91,10 +93,10 @@ const Home = () => {
           className="text-center"
         >
           <Title level={2} className="!text-3xl">
-            Welcome back, {users[0].fullName} 👋
+            {t("welcomeBack")}, {users[0].fullName} 👋
           </Title>
           <Text type="secondary" className="text-gray-500">
-            Here's a quick overview of your day
+            {t("quickOverview")}
           </Text>
         </Motion.div>
 
@@ -107,23 +109,23 @@ const Home = () => {
         >
           <SummaryCard
             icon={<ProjectOutlined />}
-            title="Projects"
-            description={`${ongoingProjects} ongoing`}
+            title={t("projects")}
+            description={`${ongoingProjects} ${t("ongoing")}`}
           />
           <SummaryCard
             icon={<CheckCircleOutlined />}
-            title="Completed Tasks"
-            description={`${completedTasksToday} today`}
+            title={t("completedTasks")}
+            description={`${completedTasksToday} ${t("today")}`}
           />
           <SummaryCard
             icon={<TeamOutlined />}
-            title="Active Members"
-            description={`${activeMembers} members`}
+            title={t("activeMembers")}
+            description={`${activeMembers} ${t("members")}`}
           />
           <SummaryCard
             icon={<BarChartOutlined />}
-            title="Reports"
-            description="2 generated"
+            title={t("reports")}
+            description={`2 ${t("generated")}`}
           />
         </Motion.div>
 
@@ -135,7 +137,7 @@ const Home = () => {
           className="grid grid-cols-1 gap-6"
         >
           <CardSection
-            title="Today's Schedule"
+            title={t("todaySchedule")}
             items={todayTasks.map((task) => `${task.dueDate} – ${task.title}`)}
             icon={<CalendarOutlined />}
           />
@@ -148,7 +150,7 @@ const Home = () => {
           transition={{ duration: 0.8 }}
         >
           <CardSection
-            title="Recent Activity"
+            title={t("recentActivity")}
             items={recentActivities}
             icon={<HistoryOutlined />}
           />
@@ -164,10 +166,7 @@ const Home = () => {
           <Divider />
           <div className="inline-flex items-center justify-center gap-2 text-gray-600 text-base italic">
             <SmileOutlined />
-            <span>
-              "The best way to get started is to quit talking and begin doing."
-              – Walt Disney
-            </span>
+            <span>{t("quote")}</span>
           </div>
         </Motion.div>
       </div>

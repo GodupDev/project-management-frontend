@@ -6,20 +6,32 @@ import ProjectCard from "../../components/ui/project/ProjectCard";
 import Pagination from "../../components/ui/Pagination";
 import CreateProject from "../../components/modals/CreateProject";
 import { useMockData } from "../../context/MockDataContext";
+import { useLanguage } from "../../context/LanguageContext";
 
 const { Title } = Typography;
 
 const ProjectManagement = () => {
   const navigate = useNavigate();
   const { projects, updateProjects } = useMockData();
+  const { t } = useLanguage();
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOption, setSortOption] = useState("newest");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const pageSize = 6;
 
-  const projectStatuses = ["In Progress", "Completed", "On Hold", "Cancelled"];
-  const projectTypes = ["Development", "Design", "Marketing", "Research"];
+  const projectStatuses = [
+    t("inProgress"),
+    t("completed"),
+    t("onHold"),
+    t("cancelled"),
+  ];
+  const projectTypes = [
+    t("development"),
+    t("design"),
+    t("marketing"),
+    t("research"),
+  ];
 
   const filteredProjects = projects.filter(
     (project) => statusFilter === "all" || project.status === statusFilter,
@@ -51,7 +63,7 @@ const ProjectManagement = () => {
     const updatedProjects = [...projects, { ...newProject, id: Date.now() }];
     updateProjects(updatedProjects);
     setIsCreateModalOpen(false);
-    message.success("Project created successfully!");
+    message.success(t("projectCreatedSuccess"));
     navigate(`/projects/${newProject.name}`);
   };
 
@@ -64,7 +76,7 @@ const ProjectManagement = () => {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 rounded-md !bg-[var(--color-background-paper)] text-sm outline-none border-[var(--color-border)] hover:shadow-md transition-shadow duration-200 cursor-pointer"
           >
-            <option value="all">All Status</option>
+            <option value="all">{t("allStatus")}</option>
             {projectStatuses.map((status) => (
               <option key={status} value={status}>
                 {status}
@@ -77,10 +89,10 @@ const ProjectManagement = () => {
             onChange={(e) => setSortOption(e.target.value)}
             className="px-3 py-2 rounded-md !bg-[var(--color-background-paper)] text-sm outline-none border-[var(--color-border)] hover:shadow-md transition-shadow duration-200 cursor-pointer"
           >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="mostIssues">Most Tasks</option>
-            <option value="fewestIssues">Fewest Tasks</option>
+            <option value="newest">{t("newestFirst")}</option>
+            <option value="oldest">{t("oldestFirst")}</option>
+            <option value="mostIssues">{t("mostTasks")}</option>
+            <option value="fewestIssues">{t("fewestTasks")}</option>
           </select>
         </div>
 
@@ -92,7 +104,7 @@ const ProjectManagement = () => {
           focus:!ring-2 focus:!ring-[var(--color-primary-light)] focus:!ring-opacity-50"
           type="primary"
         >
-          Create Project
+          {t("createProject")}
         </Button>
       </div>
 
@@ -113,11 +125,11 @@ const ProjectManagement = () => {
                 </div>
                 <Tag
                   color={
-                    project.status === "Completed"
+                    project.status === t("completed")
                       ? "green"
-                      : project.status === "In Progress"
+                      : project.status === t("inProgress")
                       ? "blue"
-                      : project.status === "On Hold"
+                      : project.status === t("onHold")
                       ? "orange"
                       : "gray"
                   }
@@ -132,7 +144,7 @@ const ProjectManagement = () => {
                     {new Date(project.startDate).toLocaleDateString()}
                   </span>
                   <span className="text-sm text-gray-500">
-                    {project.completedTasks}/{project.totalTasks} tasks
+                    {project.completedTasks}/{project.totalTasks} {t("tasks")}
                   </span>
                 </div>
 
@@ -159,7 +171,7 @@ const ProjectManagement = () => {
                       navigate(`/projects/${project.name}`);
                     }}
                   >
-                    View Details
+                    {t("viewDetails")}
                   </Button>
                 </div>
               </div>
@@ -176,7 +188,7 @@ const ProjectManagement = () => {
       />
 
       <Modal
-        title="Create New Project"
+        title={t("createNewProject")}
         open={isCreateModalOpen}
         onCancel={() => setIsCreateModalOpen(false)}
         footer={null}

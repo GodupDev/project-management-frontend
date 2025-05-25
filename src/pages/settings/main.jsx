@@ -7,6 +7,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { Layout, Menu } from "antd";
+import styled from "styled-components";
 import {
   UserOutlined,
   BellOutlined,
@@ -16,6 +17,7 @@ import {
   SettingOutlined,
 } from "@ant-design/icons";
 import { motion as Motion } from "framer-motion";
+import { useLanguage } from "../../context/LanguageContext";
 import MyProfile from "./MyProfile";
 import NotificationSettings from "./NotificationSettings";
 import AppearanceSettings from "./AppearanceSettings";
@@ -25,55 +27,71 @@ import SecuritySettings from "./SecuritySettings";
 
 const { Content, Sider } = Layout;
 
-const menuItems = [
-  {
-    key: "profile",
-    icon: <UserOutlined />,
-    label: "My Profile",
-  },
-  {
-    key: "notifications",
-    icon: <BellOutlined />,
-    label: "Notifications",
-  },
-  {
-    key: "appearance",
-    icon: <SettingOutlined />,
-    label: "Appearance",
-  },
-  {
-    key: "privacy",
-    icon: <EyeOutlined />,
-    label: "Privacy",
-  },
-  {
-    key: "timezone",
-    icon: <GlobalOutlined />,
-    label: "Time Zone",
-  },
-  {
-    key: "security",
-    icon: <LockOutlined />,
-    label: "Security",
-  },
-];
+// Styled Components
+const StyledLayout = styled(Layout)`
+  min-height: 80vh;
+  padding: 1rem;
+`;
 
-const routes = [
-  { path: "profile", element: <MyProfile /> },
-  { path: "notifications", element: <NotificationSettings /> },
-  { path: "appearance", element: <AppearanceSettings /> },
-  { path: "privacy", element: <PrivacySettings /> },
-  { path: "timezone", element: <TimeZoneSettings /> },
-  { path: "security", element: <SecuritySettings /> },
-];
+const StyledSider = styled(Sider)`
+  background: white;
+  border-right: 1px solid #f0f0f0;
+  border-radius: 8px;
+`;
+
+const StyledMenu = styled(Menu)`
+  border-radius: 8px;
+`;
 
 const SettingsMain = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const pathParts = location.pathname.split("/").filter(Boolean);
-  // pathParts[0] = 'settings', pathParts[1] = 'profile' | 'notifications' | ...
   const selectedKey = pathParts[1] || "profile";
+
+  const menuItems = [
+    {
+      key: "profile",
+      icon: <UserOutlined />,
+      label: t("myProfile"),
+    },
+    {
+      key: "notifications",
+      icon: <BellOutlined />,
+      label: t("notifications"),
+    },
+    {
+      key: "appearance",
+      icon: <SettingOutlined />,
+      label: t("appearance"),
+    },
+    {
+      key: "privacy",
+      icon: <EyeOutlined />,
+      label: t("privacy"),
+    },
+    {
+      key: "timezone",
+      icon: <GlobalOutlined />,
+      label: t("timeZone"),
+    },
+    {
+      key: "security",
+      icon: <LockOutlined />,
+      label: t("security"),
+    },
+  ];
+
+  const routes = [
+    { path: "profile", element: <MyProfile /> },
+    { path: "notifications", element: <NotificationSettings /> },
+    { path: "appearance", element: <AppearanceSettings /> },
+    { path: "privacy", element: <PrivacySettings /> },
+    { path: "timezone", element: <TimeZoneSettings /> },
+    { path: "security", element: <SecuritySettings /> },
+  ];
 
   return (
     <Motion.div
@@ -81,23 +99,18 @@ const SettingsMain = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Layout className="min-h-[100vh] p-4">
-        <Sider
-          width={250}
-          className="bg-white border-r rounded-md border-gray-200"
-          theme="light"
-        >
+      <StyledLayout>
+        <StyledSider width={250} theme="light">
           <div className="p-4">
-            <h1 className="text-xl font-semibold text-gray-800">Settings</h1>
+            <h1 className="text-xl font-semibold">{t("settings")}</h1>
           </div>
-          <Menu
+          <StyledMenu
             mode="inline"
             items={menuItems}
-            className="rounded-md"
             selectedKeys={[selectedKey]}
             onClick={({ key }) => navigate(`/settings/${key}`)}
           />
-        </Sider>
+        </StyledSider>
         <Content className="p-6 bg-gray-50">
           <div className="max-w-4xl mx-auto">
             <Routes>
@@ -108,7 +121,7 @@ const SettingsMain = () => {
             </Routes>
           </div>
         </Content>
-      </Layout>
+      </StyledLayout>
     </Motion.div>
   );
 };

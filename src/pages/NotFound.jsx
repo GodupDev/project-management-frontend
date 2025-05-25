@@ -3,8 +3,11 @@ import { Link } from "react-router-dom";
 import { Button, Result } from "antd";
 import { HomeOutlined, RollbackOutlined } from "@ant-design/icons";
 import { motion as Motion } from "framer-motion";
+import { useLanguage } from "../context/LanguageContext";
 
 const NotFound = () => {
+  const { t } = useLanguage();
+
   return (
     <Motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -15,7 +18,7 @@ const NotFound = () => {
         <Result
           status="404"
           title="404"
-          subTitle="Sorry, the page you visited does not exist."
+          subTitle={t("pageNotFound")}
           extra={[
             <Button
               key="home"
@@ -25,14 +28,14 @@ const NotFound = () => {
               to="/"
               className="mr-4"
             >
-              Back to Home
+              {t("backToHome")}
             </Button>,
             <Button
               key="back"
               icon={<RollbackOutlined />}
               onClick={() => window.history.back()}
             >
-              Go Back
+              {t("goBack")}
             </Button>,
           ]}
         />

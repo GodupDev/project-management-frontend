@@ -9,6 +9,7 @@ import {
 } from "@ant-design/icons";
 import { useMockData } from "../../context/MockDataContext";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../../context/LanguageContext";
 
 const { Text } = Typography;
 
@@ -50,6 +51,7 @@ const getIcon = (type) => {
 const NotificationDropdown = ({ notifications = [], onViewAll }) => {
   const { updateNotifications } = useMockData();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const handleNotificationClick = (notification) => {
     updateNotifications(
@@ -66,14 +68,14 @@ const NotificationDropdown = ({ notifications = [], onViewAll }) => {
       <div className="flex justify-between items-center px-4 py-2 bg-gray-50 border-b border-gray-200">
         <div className="text-base font-semibold text-gray-800 flex items-center gap-1 select-none">
           <BellOutlined className="text-blue-600 text-lg" />
-          Notifications
+          {t("navNotifications")}
         </div>
-        <Tooltip title="Notification Settings">
+        <Tooltip title={t("commonSettings")}>
           <Button
             type="text"
             icon={<SettingOutlined className="text-gray-600 text-base" />}
             className="hover:bg-gray-200 rounded-full p-1 transition"
-            aria-label="Notification Settings"
+            aria-label={t("commonSettings")}
             size="small"
             onClick={() => navigate("./settings/notifications")}
           />
@@ -82,70 +84,72 @@ const NotificationDropdown = ({ notifications = [], onViewAll }) => {
 
       {/* List */}
       <div className="overflow-y-auto flex-1 custom-scrollbar">
-        <List
-          itemLayout="horizontal"
-          dataSource={notifications.slice(0, 6)}
-          renderItem={(item) => (
-            <List.Item
-              className={`transition-all px-4 py-2 cursor-pointer rounded-md mb-1 last:mb-0 m-1 ${
-                item.status === "unread"
-                  ? "bg-blue-50 shadow-sm"
-                  : "hover:bg-gray-100"
-              }`}
-              onClick={() => handleNotificationClick(item)}
-              aria-label={`Notification: ${item.title}`}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  handleNotificationClick(item);
-                }
-              }}
-            >
-              <div className="flex items-start gap-2 w-full">
-                <div>{getIcon(item.type)}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-center">
+        {notifications.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            {t("notifNoNotifications")}
+          </div>
+        ) : (
+          <List
+            itemLayout="horizontal"
+            dataSource={notifications.slice(0, 6)}
+            renderItem={(item) => (
+              <List.Item
+                className={`transition-all px-4 py-2 cursor-pointer rounded-md mb-1 last:mb-0 m-1 ${
+                  item.status === "unread"
+                    ? "bg-blue-50 shadow-sm"
+                    : "hover:bg-gray-100"
+                }`}
+                onClick={() => handleNotificationClick(item)}
+                aria-label={`${t("navNotifications")}: ${item.title}`}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    handleNotificationClick(item);
+                  }
+                }}
+              >
+                <div className="flex items-start gap-2 w-full">
+                  <div>{getIcon(item.type)}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center">
+                      <Text
+                        strong
+                        className="text-gray-900 text-sm truncate"
+                        title={item.title}
+                      >
+                        {t(
+                          `notif${
+                            item.type === "project"
+                              ? "ProjectUpdated"
+                              : item.type === "mention"
+                              ? "NewMention"
+                              : item.type === "task"
+                              ? "TaskAssigned"
+                              : item.type
+                          }`,
+                        )}
+                      </Text>
+                      <Text
+                        type="secondary"
+                        className="text-xs whitespace-nowrap ml-2"
+                      >
+                        {item.time}
+                      </Text>
+                    </div>
                     <Text
-                      strong
-                      className="text-gray-900 text-sm truncate"
-                      title={item.title}
+                      className="text-xs text-gray-700 mt-0.5 line-clamp-2"
+                      style={{ wordBreak: "break-word" }}
+                      title={item.message}
                     >
-                      {item.title}
-                    </Text>
-                    <Text
-                      type="secondary"
-                      className="text-xs whitespace-nowrap ml-2"
-                    >
-                      {item.time}
+                      {item.message}
                     </Text>
                   </div>
-                  <Text
-                    className="text-xs text-gray-700 mt-0.5 line-clamp-2"
-                    style={{ wordBreak: "break-word" }}
-                    title={item.message}
-                  >
-                    {item.message}
-                  </Text>
-                  <Tag
-                    color={
-                      item.type === "project"
-                        ? "blue"
-                        : item.type === "mention"
-                        ? "purple"
-                        : item.type === "task"
-                        ? "green"
-                        : "default"
-                    }
-                    className="mt-1 capitalize font-medium text-xs"
-                  >
-                    {item.type}
-                  </Tag>
                 </div>
-              </div>
-            </List.Item>
-          )}
-        />
+              </List.Item>
+            )}
+          />
+        )}
       </div>
 
       {/* Footer */}
@@ -154,10 +158,10 @@ const NotificationDropdown = ({ notifications = [], onViewAll }) => {
           type="link"
           className="text-blue-600 font-semibold hover:underline text-sm"
           onClick={onViewAll}
-          aria-label="View All Notifications"
+          aria-label={t("notifViewAll")}
           size="small"
         >
-          View All Notifications
+          {t("notifViewAll")}
         </Button>
       </div>
     </div>

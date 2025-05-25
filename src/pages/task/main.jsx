@@ -3,8 +3,11 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import TaskOverview from "./TaskOverview";
 import TaskSpecific from "./TaskSpecific";
 import { motion as Motion } from "framer-motion";
+import { useLanguage } from "../../context/LanguageContext";
 
 const TaskMain = () => {
+  const { t } = useLanguage();
+
   return (
     <Motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -14,7 +17,12 @@ const TaskMain = () => {
       <Routes>
         <Route path="/" element={<TaskOverview />} />
         <Route path="/:taskName" element={<TaskSpecific />} />
-        <Route path="*" element={<Navigate to="/tasks" replace />} />
+        <Route
+          path="*"
+          element={
+            <Navigate to="/tasks" replace state={{ from: t("invalidRoute") }} />
+          }
+        />
       </Routes>
     </Motion.div>
   );

@@ -25,11 +25,13 @@ import {
 import { motion as Motion } from "framer-motion";
 import dayjs from "dayjs";
 import { useMockData } from "../context/MockDataContext";
+import { useLanguage } from "../context/LanguageContext";
 
 const { RangePicker } = DatePicker;
 
 const WorkLogs = () => {
   const { worklogs } = useMockData();
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [dateRange, setDateRange] = useState([null, null]);
   const [showFilters, setShowFilters] = useState(false);
@@ -57,7 +59,7 @@ const WorkLogs = () => {
 
   const columns = [
     {
-      title: "Project",
+      title: t("project"),
       dataIndex: "projectName",
       key: "projectName",
       sorter: (a, b) => a.projectName.localeCompare(b.projectName),
@@ -65,13 +67,13 @@ const WorkLogs = () => {
         <Space>
           <span>{text}</span>
           <Tag color={record.projectStatus === "active" ? "green" : "blue"}>
-            {record.projectStatus}
+            {t(record.projectStatus)}
           </Tag>
         </Space>
       ),
     },
     {
-      title: "Task",
+      title: t("task"),
       dataIndex: "taskName",
       key: "taskName",
       sorter: (a, b) => a.taskName.localeCompare(b.taskName),
@@ -79,13 +81,13 @@ const WorkLogs = () => {
         <Space>
           <span>{text}</span>
           <Tag color={record.taskStatus === "completed" ? "green" : "orange"}>
-            {record.taskStatus}
+            {t(record.taskStatus)}
           </Tag>
         </Space>
       ),
     },
     {
-      title: "User",
+      title: t("user"),
       dataIndex: "userName",
       key: "userName",
       sorter: (a, b) => a.userName.localeCompare(b.userName),
@@ -103,7 +105,7 @@ const WorkLogs = () => {
       ),
     },
     {
-      title: "Description",
+      title: t("description"),
       dataIndex: "description",
       key: "description",
       ellipsis: {
@@ -116,7 +118,7 @@ const WorkLogs = () => {
       ),
     },
     {
-      title: "Created At",
+      title: t("createdAt"),
       dataIndex: "createdAt",
       key: "createdAt",
       sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
@@ -135,9 +137,9 @@ const WorkLogs = () => {
         <Space>
           <Button
             icon={<DownloadOutlined />}
-            onClick={() => message.info("Export functionality coming soon")}
+            onClick={() => message.info(t("exportComingSoon"))}
           >
-            Export
+            {t("export")}
           </Button>
           <Button
             icon={<ReloadOutlined />}
@@ -146,7 +148,7 @@ const WorkLogs = () => {
               setDateRange([null, null]);
             }}
           >
-            Reset
+            {t("reset")}
           </Button>
         </Space>
       </div>
@@ -155,7 +157,7 @@ const WorkLogs = () => {
         <Col span={8}>
           <Card>
             <Statistic
-              title="Total Hours"
+              title={t("totalHours")}
               value={totalHours}
               precision={1}
               prefix={<ClockCircleOutlined />}
@@ -166,7 +168,7 @@ const WorkLogs = () => {
         <Col span={8}>
           <Card>
             <Statistic
-              title="Active Users"
+              title={t("activeUsers")}
               value={uniqueUsers}
               prefix={<UserOutlined />}
             />
@@ -175,7 +177,7 @@ const WorkLogs = () => {
         <Col span={8}>
           <Card>
             <Statistic
-              title="Completed Tasks"
+              title={t("completedTasks")}
               value={completedTasks}
               prefix={<CheckCircleOutlined />}
             />
@@ -186,7 +188,7 @@ const WorkLogs = () => {
       <div className="mb-6">
         <Space className="w-full">
           <Input
-            placeholder="Search work logs..."
+            placeholder={t("searchWorkLogs")}
             prefix={<SearchOutlined />}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -196,7 +198,7 @@ const WorkLogs = () => {
             icon={<FilterOutlined />}
             onClick={() => setShowFilters(!showFilters)}
           >
-            Filters
+            {t("filters")}
           </Button>
         </Space>
       </div>
