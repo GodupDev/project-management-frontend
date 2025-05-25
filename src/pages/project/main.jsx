@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useParams, Outlet } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { Typography } from "antd";
 import ProjectManagement from "./ProjectManagement";
 import ProjectSpecific from "./ProjectSpecific";

@@ -1,7 +1,26 @@
 import React, { useState } from "react";
+import styled from "styled-components";
 import { Input } from "antd";
 import IconSearch from "../icons/IconSearch";
 import { motion as Motion } from "framer-motion";
+
+const Wrapper = styled.div`
+  .ant-input {
+    border-color: transparent !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+    outline: none !important;
+
+    &:hover,
+    &:focus,
+    &:active {
+      border-color: transparent !important;
+      box-shadow: none !important;
+      background-color: transparent !important;
+      outline: none !important;
+    }
+  }
+`;
 
 const SearchBar = () => {
   const [value, setValue] = useState("");
@@ -20,7 +39,7 @@ const SearchBar = () => {
       `}
     >
       <IconSearch />
-      <div className="searchbar w-full">
+      <Wrapper className="searchbar w-full">
         <Input
           className="!bg-transparent !border-none !shadow-none !p-0 !text-[0.8rem] !text-[var(--color-text)] placeholder:!text-[var(--color-text)] placeholder:opacity-100"
           placeholder="Search for anything..."
@@ -31,7 +50,7 @@ const SearchBar = () => {
           onBlur={() => setFocused(false)}
           onPressEnter={() => console.log("Search:", value)}
         />
-      </div>
+      </Wrapper>
     </Motion.div>
   );
 };

@@ -1,228 +1,221 @@
 import React from "react";
+import { Table, Progress, Card, Row, Col, Statistic } from "antd";
+import { motion as Motion } from "framer-motion";
 import {
-  Box,
-  Typography,
-  Grid,
-  Paper,
-  Card,
-  CardContent,
-  LinearProgress,
-  Avatar,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Divider,
-} from "@mui/material";
-import {
-  TrendingUp,
-  AccessTime,
-  CheckCircle,
-  Warning,
-} from "@mui/icons-material";
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+} from "recharts";
 
-// Mock data
-const mockPerformanceData = {
-  overallStats: {
-    totalTasks: 45,
-    completedTasks: 32,
-    inProgressTasks: 8,
-    pendingTasks: 5,
-    averageCompletionTime: "2.5 days",
-    productivityScore: 85,
+const projectsData = [
+  {
+    key: "1",
+    name: "Project Alpha",
+    status: "In Progress",
+    progress: 75,
+    startDate: "2025-01-01",
+    endDate: "2025-06-30",
+    manager: "John Doe",
+    completedTasks: 30,
+    overdueTasks: 2,
   },
-  topPerformers: [
-    {
-      name: "John Doe",
-      avatar: "https://i.pravatar.cc/150?img=1",
-      completedTasks: 12,
-      productivityScore: 92,
-    },
-    {
-      name: "Jane Smith",
-      avatar: "https://i.pravatar.cc/150?img=2",
-      completedTasks: 10,
-      productivityScore: 88,
-    },
-    {
-      name: "Mike Johnson",
-      avatar: "https://i.pravatar.cc/150?img=3",
-      completedTasks: 8,
-      productivityScore: 85,
-    },
-  ],
-  recentActivity: [
-    {
-      user: "Sarah Wilson",
-      action: "Completed task",
-      task: "Update Documentation",
-      time: "2 hours ago",
-    },
-    {
-      user: "Alex Brown",
-      action: "Started task",
-      task: "API Integration",
-      time: "4 hours ago",
-    },
-    {
-      user: "Emma Davis",
-      action: "Updated task",
-      task: "UI Design",
-      time: "6 hours ago",
-    },
-  ],
-};
+  {
+    key: "2",
+    name: "Project Beta",
+    status: "Completed",
+    progress: 100,
+    startDate: "2024-05-15",
+    endDate: "2024-12-31",
+    manager: "Jane Smith",
+    completedTasks: 50,
+    overdueTasks: 0,
+  },
+  {
+    key: "3",
+    name: "Project Gamma",
+    status: "Delayed",
+    progress: 40,
+    startDate: "2025-03-01",
+    endDate: "2025-09-30",
+    manager: "Alice",
+    completedTasks: 15,
+    overdueTasks: 5,
+  },
+];
 
-const StatCard = ({ title, value, icon, color }) => (
-  <Card elevation={0} sx={{ height: "100%" }}>
-    <CardContent>
-      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-        <Box
-          sx={{
-            backgroundColor: `${color}15`,
-            borderRadius: 2,
-            p: 1,
-            mr: 2,
-          }}
-        >
-          {icon}
-        </Box>
-        <Typography variant="h6" color="text.secondary">
-          {title}
-        </Typography>
-      </Box>
-      <Typography variant="h4" component="div" sx={{ mb: 1 }}>
-        {value}
-      </Typography>
-    </CardContent>
-  </Card>
-);
+// Tổng số task mỗi trạng thái (giả lập)
+const taskStatusData = [
+  { name: "Completed", value: 95 },
+  { name: "In Progress", value: 40 },
+  { name: "Overdue", value: 7 },
+  { name: "Open", value: 30 },
+];
 
-const Performance = () => {
-  const { overallStats, topPerformers, recentActivity } = mockPerformanceData;
+const COLORS = ["#0088FE", "#00C49F", "#FF8042", "#FFBB28"];
 
+const columns = [
+  { title: "Project Name", dataIndex: "name", key: "name" },
+  { title: "Status", dataIndex: "status", key: "status" },
+  {
+    title: "Progress",
+    dataIndex: "progress",
+    key: "progress",
+    render: (value) => <Progress percent={value} size="small" />,
+  },
+  { title: "Start Date", dataIndex: "startDate", key: "startDate" },
+  { title: "End Date", dataIndex: "endDate", key: "endDate" },
+  { title: "Manager", dataIndex: "manager", key: "manager" },
+  {
+    title: "Completed Tasks",
+    dataIndex: "completedTasks",
+    key: "completedTasks",
+  },
+  { title: "Overdue Tasks", dataIndex: "overdueTasks", key: "overdueTasks" },
+];
+
+// Giả lập dữ liệu tiến độ theo tháng (Line chart)
+const monthlyProgressData = [
+  { month: "Jan", progress: 30 },
+  { month: "Feb", progress: 45 },
+  { month: "Mar", progress: 50 },
+  { month: "Apr", progress: 65 },
+  { month: "May", progress: 70 },
+  { month: "Jun", progress: 85 },
+  { month: "Jul", progress: 90 },
+];
+
+export default function PerformancePage() {
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
-        Performance Overview
-      </Typography>
-
-      <Grid container spacing={3}>
-        {/* Overall Stats */}
-        <Grid item xs={12} md={3}>
-          <StatCard
-            title="Total Tasks"
-            value={overallStats.totalTasks}
-            icon={<TrendingUp sx={{ color: "primary.main" }} />}
-            color="primary"
-          />
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <StatCard
-            title="Completed Tasks"
-            value={overallStats.completedTasks}
-            icon={<CheckCircle sx={{ color: "success.main" }} />}
-            color="success"
-          />
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <StatCard
-            title="In Progress"
-            value={overallStats.inProgressTasks}
-            icon={<AccessTime sx={{ color: "warning.main" }} />}
-            color="warning"
-          />
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <StatCard
-            title="Pending Tasks"
-            value={overallStats.pendingTasks}
-            icon={<Warning sx={{ color: "error.main" }} />}
-            color="error"
-          />
-        </Grid>
-
-        {/* Productivity Score */}
-        <Grid item xs={12}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Team Productivity Score
-            </Typography>
-            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-              <Typography variant="h4" sx={{ mr: 2 }}>
-                {overallStats.productivityScore}%
-              </Typography>
-              <Typography color="text.secondary">
-                Average completion time: {overallStats.averageCompletionTime}
-              </Typography>
-            </Box>
-            <LinearProgress
-              variant="determinate"
-              value={overallStats.productivityScore}
-              sx={{ height: 8, borderRadius: 4 }}
+    <Motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      style={{ padding: 24 }}
+    >
+      {/* Tổng quan số liệu */}
+      <Row gutter={16} style={{ marginBottom: 24 }}>
+        <Col span={6}>
+          <Card>
+            <Statistic title="Total Projects" value={projectsData.length} />
+          </Card>
+        </Col>
+        <Col span={6}>
+          <Card>
+            <Statistic
+              title="Completed Tasks"
+              value={projectsData.reduce(
+                (acc, cur) => acc + cur.completedTasks,
+                0,
+              )}
             />
-          </Paper>
-        </Grid>
+          </Card>
+        </Col>
+        <Col span={6}>
+          <Card>
+            <Statistic
+              title="Overdue Tasks"
+              value={projectsData.reduce(
+                (acc, cur) => acc + cur.overdueTasks,
+                0,
+              )}
+            />
+          </Card>
+        </Col>
+        <Col span={6}>
+          <Card>
+            <Statistic
+              title="Average Progress"
+              value={`${Math.round(
+                projectsData.reduce((acc, cur) => acc + cur.progress, 0) /
+                  projectsData.length,
+              )}%`}
+            />
+          </Card>
+        </Col>
+      </Row>
 
-        {/* Top Performers */}
-        <Grid item xs={12} md={6}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 2, height: "100%" }}>
-            <Typography variant="h6" gutterBottom>
-              Top Performers
-            </Typography>
-            <List>
-              {topPerformers.map((performer, index) => (
-                <React.Fragment key={performer.name}>
-                  <ListItem>
-                    <ListItemAvatar>
-                      <Avatar src={performer.avatar} />
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={performer.name}
-                      secondary={`Completed ${performer.completedTasks} tasks`}
-                    />
-                    <Typography
-                      variant="body2"
-                      color="primary"
-                      sx={{ fontWeight: "bold" }}
-                    >
-                      {performer.productivityScore}%
-                    </Typography>
-                  </ListItem>
-                  {index < topPerformers.length - 1 && <Divider />}
-                </React.Fragment>
-              ))}
-            </List>
-          </Paper>
-        </Grid>
+      {/* Bảng chi tiết dự án */}
+      <Card title="Project Performance Overview" style={{ marginBottom: 24 }}>
+        <Table columns={columns} dataSource={projectsData} pagination={false} />
+      </Card>
 
-        {/* Recent Activity */}
-        <Grid item xs={12} md={6}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 2, height: "100%" }}>
-            <Typography variant="h6" gutterBottom>
-              Recent Activity
-            </Typography>
-            <List>
-              {recentActivity.map((activity, index) => (
-                <React.Fragment key={activity.task}>
-                  <ListItem>
-                    <ListItemText
-                      primary={activity.task}
-                      secondary={`${activity.user} ${activity.action}`}
+      {/* Biểu đồ cột tiến độ từng project */}
+      <Row gutter={24} style={{ marginBottom: 24 }}>
+        <Col xs={24} md={12}>
+          <Card title="Progress per Project (Bar Chart)">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={projectsData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="progress" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+        </Col>
+
+        {/* Biểu đồ tròn trạng thái task */}
+        <Col xs={24} md={12}>
+          <Card title="Task Status Distribution (Pie Chart)">
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={taskStatusData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label
+                >
+                  {taskStatusData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
                     />
-                    <Typography variant="caption" color="text.secondary">
-                      {activity.time}
-                    </Typography>
-                  </ListItem>
-                  {index < recentActivity.length - 1 && <Divider />}
-                </React.Fragment>
-              ))}
-            </List>
-          </Paper>
-        </Grid>
-      </Grid>
-    </Box>
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend verticalAlign="bottom" height={36} />
+              </PieChart>
+            </ResponsiveContainer>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Biểu đồ đường tiến độ theo tháng */}
+      <Card title="Monthly Average Progress (Line Chart)">
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart
+            data={monthlyProgressData}
+            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+          >
+            <XAxis dataKey="month" />
+            <YAxis domain={[0, 100]} />
+            <Tooltip />
+            <Legend />
+            <Line
+              type="monotone"
+              dataKey="progress"
+              stroke="#82ca9d"
+              strokeWidth={3}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </Card>
+    </Motion.div>
   );
-};
-
-export default Performance;
+}

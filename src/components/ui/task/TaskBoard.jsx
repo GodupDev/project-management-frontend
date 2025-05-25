@@ -2,7 +2,6 @@
 import React from "react";
 import { Card, Tag, Avatar, Tooltip } from "antd";
 import { UserOutlined } from "@ant-design/icons";
-import moment from "moment";
 
 const TaskBoard = ({ tasks = [], onTaskClick }) => {
   const columns = [
@@ -49,7 +48,7 @@ const TaskBoard = ({ tasks = [], onTaskClick }) => {
             <h3 className="text-lg font-medium">{column.title}</h3>
             <Tag color={column.color}>{column.tasks.length}</Tag>
           </div>
-          <div className="space-y-4">
+          <div className="!space-y-2">
             {column.tasks.map((task) => (
               <Card
                 key={`task-${task.id}`}
@@ -74,7 +73,7 @@ const TaskBoard = ({ tasks = [], onTaskClick }) => {
                     >
                       {task.priority}
                     </Tag>
-                    <Avatar.Group max={{ count: 3 }}>
+                    <Avatar.Group>
                       {task.assignees?.map((assignee) => (
                         <Tooltip
                           key={`assignee-${assignee?.id || "unknown"}`}

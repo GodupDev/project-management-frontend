@@ -1,39 +1,25 @@
 import React, { useState } from "react";
 import {
-  Box,
-  Typography,
-  Paper,
   Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  TextField,
-  InputAdornment,
+  Input,
   Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Grid,
-  IconButton,
-  Tooltip,
-  Stack,
+  DatePicker,
   Button,
-} from "@mui/material";
+  Tag,
+  Space,
+  Tooltip,
+} from "antd";
 import {
-  Search,
-  FilterList,
-  Download,
-  Refresh,
-  DateRange,
-  Person,
-  Assignment,
-} from "@mui/icons-material";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+  SearchOutlined,
+  FilterOutlined,
+  DownloadOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
+import { motion as Motion } from "framer-motion";
+import dayjs from "dayjs";
+
+const { Option } = Select;
+const { RangePicker } = DatePicker;
 
 // Mock data
 const mockWorkLogs = [
@@ -92,7 +78,53 @@ const mockWorkLogs = [
     description: "Created new design mockups",
     priority: "medium",
   },
+  {
+    id: 6,
+    project: "Website Redesign",
+    task: "Update Homepage",
+    user: "John Doe",
+    date: "2024-03-15",
+    hours: 4,
+    status: "completed",
+    description: "Updated homepage layout and content",
+    priority: "high",
+  },
+  {
+    id: 7,
+    project: "Mobile App",
+    task: "Fix Login Bug",
+    user: "Jane Smith",
+    date: "2024-03-14",
+    hours: 2,
+    status: "in_progress",
+    description: "Fixed authentication issue",
+    priority: "medium",
+  },
+  {
+    id: 8,
+    project: "API Development",
+    task: "Create Endpoints",
+    user: "Mike Johnson",
+    date: "2024-03-13",
+    hours: 6,
+    status: "completed",
+    description: "Implemented new API endpoints",
+    priority: "high",
+  },
 ];
+
+const statusColors = {
+  completed: "green",
+  in_progress: "orange",
+  default: "default",
+};
+
+const priorityColors = {
+  high: "red",
+  medium: "gold",
+  low: "green",
+  default: "default",
+};
 
 const WorkLogs = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -102,30 +134,9 @@ const WorkLogs = () => {
   const [dateRange, setDateRange] = useState([null, null]);
   const [showFilters, setShowFilters] = useState(false);
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "completed":
-        return "success";
-      case "in_progress":
-        return "warning";
-      default:
-        return "default";
-    }
-  };
+  const uniqueUsers = [...new Set(mockWorkLogs.map((log) => log.user))];
 
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case "high":
-        return "error";
-      case "medium":
-        return "warning";
-      case "low":
-        return "success";
-      default:
-        return "default";
-    }
-  };
-
+  // Filter logs based on filters
   const filteredLogs = mockWorkLogs.filter((log) => {
     const matchesSearch = Object.values(log).some((value) =>
       value.toString().toLowerCase().includes(searchTerm.toLowerCase()),
@@ -135,8 +146,10 @@ const WorkLogs = () => {
       priorityFilter === "all" || log.priority === priorityFilter;
     const matchesUser = userFilter === "all" || log.user === userFilter;
     const matchesDateRange =
-      (!dateRange[0] || new Date(log.date) >= dateRange[0]) &&
-      (!dateRange[1] || new Date(log.date) <= dateRange[1]);
+      (!dateRange[0] ||
+        dayjs(log.date).isSameOrAfter(dayjs(dateRange[0]), "day")) &&
+      (!dateRange[1] ||
+        dayjs(log.date).isSameOrBefore(dayjs(dateRange[1]), "day"));
 
     return (
       matchesSearch &&
@@ -147,197 +160,189 @@ const WorkLogs = () => {
     );
   });
 
-  const uniqueUsers = [...new Set(mockWorkLogs.map((log) => log.user))];
+  const columns = [
+    {
+      title: "Project",
+      dataIndex: "project",
+      key: "project",
+    },
+    {
+      title: "Task",
+      dataIndex: "task",
+      key: "task",
+    },
+    {
+      title: "User",
+      dataIndex: "user",
+      key: "user",
+    },
+    {
+      title: "Date",
+      dataIndex: "date",
+      key: "date",
+      render: (date) => dayjs(date).format("YYYY-MM-DD"),
+      sorter: (a, b) => dayjs(a.date).unix() - dayjs(b.date).unix(),
+      defaultSortOrder: "descend",
+    },
+    {
+      title: "Hours",
+      dataIndex: "hours",
+      key: "hours",
+      sorter: (a, b) => a.hours - b.hours,
+    },
+    {
+      title: "Priority",
+      dataIndex: "priority",
+      key: "priority",
+      render: (priority) => (
+        <Tag color={priorityColors[priority] || "default"} key={priority}>
+          {priority.toUpperCase()}
+        </Tag>
+      ),
+      filters: [
+        { text: "High", value: "high" },
+        { text: "Medium", value: "medium" },
+        { text: "Low", value: "low" },
+      ],
+      onFilter: (value, record) => record.priority === value,
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => (
+        <Tag color={statusColors[status] || "default"} key={status}>
+          {status.replace("_", " ").toUpperCase()}
+        </Tag>
+      ),
+      filters: [
+        { text: "Completed", value: "completed" },
+        { text: "In Progress", value: "in_progress" },
+      ],
+      onFilter: (value, record) => record.status === value,
+    },
+    {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+    },
+  ];
 
   return (
-    <Box sx={{ p: 4, backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 3,
-        }}
-      >
-        <Stack direction="row" spacing={1}>
+    <Motion.div
+      initial={{ scale: 0.95, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      className=" p-4"
+    >
+      <div className="flex justify-between items-center">
+        <Input
+          size="large"
+          placeholder="Search work logs..."
+          prefix={<SearchOutlined className="mr-2" />}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          allowClear
+          className="max-w-lg"
+        />
+        <Space>
           <Tooltip title="Refresh">
-            <IconButton color="primary">
-              <Refresh />
-            </IconButton>
+            <Button
+              icon={<ReloadOutlined />}
+              type="primary"
+              onClick={() => {
+                setSearchTerm("");
+                setStatusFilter("all");
+                setPriorityFilter("all");
+                setUserFilter("all");
+                setDateRange([null, null]);
+              }}
+            />
           </Tooltip>
           <Tooltip title="Export">
-            <IconButton color="primary">
-              <Download />
-            </IconButton>
+            <Button icon={<DownloadOutlined />} type="primary" />
           </Tooltip>
           <Button
-            variant="contained"
-            startIcon={<FilterList />}
+            type="primary"
+            icon={<FilterOutlined />}
             onClick={() => setShowFilters(!showFilters)}
-            sx={{ borderRadius: 2 }}
           >
             {showFilters ? "Hide Filters" : "Show Filters"}
           </Button>
-        </Stack>
-      </Box>
+        </Space>
+      </div>
 
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            variant="outlined"
-            placeholder="Search work logs..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ backgroundColor: "#fff", borderRadius: 2 }}
-          />
-        </Grid>
-      </Grid>
+      <div className="mb-4"></div>
 
       {showFilters && (
-        <Paper
-          elevation={1}
-          sx={{
-            p: 3,
-            mb: 3,
-            borderRadius: 3,
-            backgroundColor: "#fff",
-          }}
-        >
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  label="Status"
-                >
-                  <MenuItem value="all">All Status</MenuItem>
-                  <MenuItem value="completed">Completed</MenuItem>
-                  <MenuItem value="in_progress">In Progress</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Priority</InputLabel>
-                <Select
-                  value={priorityFilter}
-                  onChange={(e) => setPriorityFilter(e.target.value)}
-                  label="Priority"
-                >
-                  <MenuItem value="all">All Priorities</MenuItem>
-                  <MenuItem value="high">High</MenuItem>
-                  <MenuItem value="medium">Medium</MenuItem>
-                  <MenuItem value="low">Low</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>User</InputLabel>
-                <Select
-                  value={userFilter}
-                  onChange={(e) => setUserFilter(e.target.value)}
-                  label="User"
-                >
-                  <MenuItem value="all">All Users</MenuItem>
-                  {uniqueUsers.map((user) => (
-                    <MenuItem key={user} value={user}>
-                      {user}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DatePicker
-                  label="Start Date"
-                  value={dateRange[0]}
-                  onChange={(newValue) =>
-                    setDateRange([newValue, dateRange[1]])
-                  }
-                  renderInput={(params) => <TextField {...params} fullWidth />}
-                />
-              </LocalizationProvider>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DatePicker
-                  label="End Date"
-                  value={dateRange[1]}
-                  onChange={(newValue) =>
-                    setDateRange([dateRange[0], newValue])
-                  }
-                  renderInput={(params) => <TextField {...params} fullWidth />}
-                />
-              </LocalizationProvider>
-            </Grid>
-          </Grid>
-        </Paper>
+        <div className="bg-white rounded-lg p-6 mb-6 shadow-md">
+          <Space wrap size="large">
+            <Select
+              value={statusFilter}
+              onChange={setStatusFilter}
+              style={{ minWidth: 160 }}
+              placeholder="Select Status"
+            >
+              <Option value="all">All Status</Option>
+              <Option value="completed">Completed</Option>
+              <Option value="in_progress">In Progress</Option>
+            </Select>
+
+            <Select
+              value={priorityFilter}
+              onChange={setPriorityFilter}
+              style={{ minWidth: 160 }}
+              placeholder="Select Priority"
+            >
+              <Option value="all">All Priorities</Option>
+              <Option value="high">High</Option>
+              <Option value="medium">Medium</Option>
+              <Option value="low">Low</Option>
+            </Select>
+
+            <Select
+              value={userFilter}
+              onChange={setUserFilter}
+              style={{ minWidth: 160 }}
+              placeholder="Select User"
+              showSearch
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              <Option value="all">All Users</Option>
+              {uniqueUsers.map((user) => (
+                <Option key={user} value={user}>
+                  {user}
+                </Option>
+              ))}
+            </Select>
+
+            <RangePicker
+              value={dateRange[0] && dateRange[1] ? dateRange : []}
+              onChange={(dates) => {
+                if (!dates) {
+                  setDateRange([null, null]);
+                } else {
+                  setDateRange(dates);
+                }
+              }}
+              allowClear
+              style={{ minWidth: 200 }}
+            />
+          </Space>
+        </div>
       )}
 
-      <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
-        <Table>
-          <TableHead sx={{ backgroundColor: "#f1f1f1" }}>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 600 }}>Project</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Task</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>User</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Hours</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Priority</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Description</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredLogs.map((log) => (
-              <TableRow
-                key={log.id}
-                hover
-                sx={{
-                  transition: "0.2s",
-                  ":hover": { backgroundColor: "#f9f9f9" },
-                }}
-              >
-                <TableCell>{log.project}</TableCell>
-                <TableCell>{log.task}</TableCell>
-                <TableCell>{log.user}</TableCell>
-                <TableCell>{log.date}</TableCell>
-                <TableCell>{log.hours}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={log.priority}
-                    color={getPriorityColor(log.priority)}
-                    size="small"
-                    variant="outlined"
-                  />
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    label={log.status.replace("_", " ")}
-                    color={getStatusColor(log.status)}
-                    size="small"
-                    variant="outlined"
-                  />
-                </TableCell>
-                <TableCell>{log.description}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
+      <Table
+        dataSource={filteredLogs}
+        columns={columns}
+        rowKey="id"
+        pagination={{ pageSize: 5 }}
+        bordered
+        className="bg-white rounded-lg shadow"
+      />
+    </Motion.div>
   );
 };
 

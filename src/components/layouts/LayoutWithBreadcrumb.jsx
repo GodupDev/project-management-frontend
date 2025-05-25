@@ -13,7 +13,7 @@ function LayoutWithBreadcrumb() {
       <div>
         <Header />
         <div
-          className={`flex-1 transition-all duration-300 m-[7rem] ${
+          className={`flex-1 transition-all duration-300 ml-[7rem] mt-[7rem] mr-[1rem] ${
             isOpen ? "ml-[22rem]" : ""
           }`}
         >

@@ -11,8 +11,9 @@ import Projects from "./pages/project/main";
 import Tasks from "./pages/task/main";
 import WorkLogs from "./pages/WorkLogs";
 import Home from "./pages/Home";
-import Settings from "./pages/Settings";
+import Performance from "./pages/Performance";
 import NotFound from "./pages/NotFound";
+import Setting from "./pages/settings/main";
 
 function App() {
   return (
@@ -56,10 +57,18 @@ function App() {
                   }
                 />
                 <Route
-                  path="/settings"
+                  path="/performance"
                   element={
                     <ProtectedRoute>
-                      <Settings />
+                      <Performance />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings/*"
+                  element={
+                    <ProtectedRoute>
+                      <Setting />
                     </ProtectedRoute>
                   }
                 />
