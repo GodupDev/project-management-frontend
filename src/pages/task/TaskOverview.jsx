@@ -5,11 +5,12 @@ import { useNavigate } from "react-router-dom";
 import TaskBoard from "../../components/ui/task/TaskBoard";
 import CreateTask from "../../components/modals/CreateTask";
 import { useMockData } from "../../context/MockDataContext";
+import { motion as Motion } from "framer-motion";
 
 const { Search } = Input;
 const { Option } = Select;
 
-export default function TaskOverview() {
+const TaskOverview = () => {
   const navigate = useNavigate();
   const { tasks, updateTasks } = useMockData();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -49,50 +50,58 @@ export default function TaskOverview() {
   });
 
   return (
-    <div className="p-5">
-      <Card>
-        <div className="flex justify-between items-center mb-4">
-          <Space>
-            <Search
-              placeholder="Tìm kiếm task..."
-              allowClear
-              onSearch={setSearchText}
-              style={{ width: 200 }}
-            />
-            <Select
-              defaultValue="all"
-              style={{ width: 120 }}
-              onChange={setStatusFilter}
+    <Motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="p-5">
+        <Card>
+          <div className="flex justify-between items-center mb-4">
+            <Space>
+              <Search
+                placeholder="Tìm kiếm task..."
+                allowClear
+                onSearch={setSearchText}
+                style={{ width: 200 }}
+              />
+              <Select
+                defaultValue="all"
+                style={{ width: 120 }}
+                onChange={setStatusFilter}
+              >
+                <Option value="all">Tất cả</Option>
+                {taskStatuses.map((status) => (
+                  <Option key={status} value={status}>
+                    {status}
+                  </Option>
+                ))}
+              </Select>
+            </Space>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setIsCreateModalOpen(true)}
             >
-              <Option value="all">Tất cả</Option>
-              {taskStatuses.map((status) => (
-                <Option key={status} value={status}>
-                  {status}
-                </Option>
-              ))}
-            </Select>
-          </Space>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsCreateModalOpen(true)}
-          >
-            Tạo Task
-          </Button>
-        </div>
+              Tạo Task
+            </Button>
+          </div>
 
-        <TaskBoard tasks={filteredTasks} onTaskClick={handleTaskClick} />
-      </Card>
+          <TaskBoard tasks={filteredTasks} onTaskClick={handleTaskClick} />
+        </Card>
 
-      <Modal
-        title="Tạo Task Mới"
-        open={isCreateModalOpen}
-        onCancel={() => setIsCreateModalOpen(false)}
-        footer={null}
-        width={800}
-      >
-        <CreateTask onSuccess={handleCreateTask} />
-      </Modal>
-    </div>
+        <Modal
+          title="Tạo Task Mới"
+          open={isCreateModalOpen}
+          onCancel={() => setIsCreateModalOpen(false)}
+          footer={null}
+          width={800}
+        >
+          <CreateTask onSuccess={handleCreateTask} />
+        </Modal>
+      </div>
+    </Motion.div>
   );
-}
+};
+
+export default TaskOverview;

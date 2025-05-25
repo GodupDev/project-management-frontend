@@ -39,7 +39,7 @@ const columns = [
   { title: "Overdue Tasks", dataIndex: "overdueTasks", key: "overdueTasks" },
 ];
 
-export default function PerformancePage() {
+const Performance = () => {
   const { projects, tasks, users } = useMockData();
 
   // Map project data for the table
@@ -122,7 +122,6 @@ export default function PerformancePage() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      style={{ padding: 24 }}
     >
       {/* Summary Statistics */}
       <Row gutter={16} style={{ marginBottom: 24 }}>
@@ -218,4 +217,6 @@ export default function PerformancePage() {
       </Card>
     </Motion.div>
   );
-}
+};
+
+export default Performance;

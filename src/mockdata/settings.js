@@ -5,7 +5,7 @@ export const userProfile = {
   avatar: "https://i.pravatar.cc/150?img=1",
   role: "Admin",
   department: "Engineering",
-  location: "Ho Chi Minh City",
+  location: "Binh Duong Province",
   phone: "+84 123 456 789",
   bio: "Experienced project manager with a passion for delivering high-quality software solutions.",
   joinedDate: "2023-01-15",

@@ -1,8 +1,10 @@
+import React from "react";
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { Typography } from "antd";
 import ProjectManagement from "./ProjectManagement";
 import ProjectSpecific from "./ProjectSpecific";
 import TaskSpecific from "../task/TaskSpecific";
+import { motion as Motion } from "framer-motion";
 
 const { Title } = Typography;
 
@@ -11,21 +13,27 @@ const PROJECTS_BASE_PATH = "/projects";
 
 const Main = () => {
   return (
-    <Routes>
-      <Route index element={<ProjectManagement />} />
-      <Route path=":projectName" element={<ProjectSpecific />} />
-      <Route path=":projectName/:taskName" element={<TaskSpecific />} />
-      <Route
-        path="*"
-        element={
-          <Navigate
-            to={PROJECTS_BASE_PATH}
-            replace
-            state={{ from: "invalid-route" }}
-          />
-        }
-      />
-    </Routes>
+    <Motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Routes>
+        <Route index element={<ProjectManagement />} />
+        <Route path=":projectName" element={<ProjectSpecific />} />
+        <Route path=":projectName/:taskName" element={<TaskSpecific />} />
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to={PROJECTS_BASE_PATH}
+              replace
+              state={{ from: "invalid-route" }}
+            />
+          }
+        />
+      </Routes>
+    </Motion.div>
   );
 };
 

@@ -7,6 +7,7 @@ import {
   EnvironmentOutlined,
 } from "@ant-design/icons";
 import { useMockData } from "../../context/MockDataContext";
+import { motion as Motion } from "framer-motion";
 
 const MyProfile = () => {
   const { settings, updateSettings } = useMockData();
@@ -39,99 +40,105 @@ const MyProfile = () => {
   };
 
   return (
-    <Card title="My Profile" className="mb-4">
-      <div className="flex items-start gap-6">
-        <div className="flex-shrink-0">
-          <Avatar
-            size={100}
-            src={settings.userProfile.avatar}
-            icon={<UserOutlined />}
-          />
-        </div>
-        <div className="flex-grow">
-          {isEditing ? (
-            <Form
-              form={form}
-              layout="vertical"
-              onFinish={handleSave}
-              initialValues={settings.userProfile}
-            >
-              <Form.Item
-                name="fullName"
-                label="Full Name"
-                rules={[
-                  { required: true, message: "Please input your full name!" },
-                ]}
+    <Motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card title="My Profile" className="mb-4">
+        <div className="flex items-start gap-6">
+          <div className="flex-shrink-0">
+            <Avatar
+              size={100}
+              src={settings.userProfile.avatar}
+              icon={<UserOutlined />}
+            />
+          </div>
+          <div className="flex-grow">
+            {isEditing ? (
+              <Form
+                form={form}
+                layout="vertical"
+                onFinish={handleSave}
+                initialValues={settings.userProfile}
               >
-                <Input prefix={<UserOutlined />} />
-              </Form.Item>
-              <Form.Item
-                name="email"
-                label="Email"
-                rules={[
-                  { required: true, message: "Please input your email!" },
-                  { type: "email", message: "Please enter a valid email!" },
-                ]}
-              >
-                <Input prefix={<MailOutlined />} />
-              </Form.Item>
-              <Form.Item
-                name="phone"
-                label="Phone"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please input your phone number!",
-                  },
-                ]}
-              >
-                <Input prefix={<PhoneOutlined />} />
-              </Form.Item>
-              <Form.Item
-                name="location"
-                label="Location"
-                rules={[
-                  { required: true, message: "Please input your location!" },
-                ]}
-              >
-                <Input prefix={<EnvironmentOutlined />} />
-              </Form.Item>
-              <Form.Item>
-                <div className="flex gap-2">
-                  <Button type="primary" htmlType="submit">
-                    Save
-                  </Button>
-                  <Button onClick={handleCancel}>Cancel</Button>
+                <Form.Item
+                  name="fullName"
+                  label="Full Name"
+                  rules={[
+                    { required: true, message: "Please input your full name!" },
+                  ]}
+                >
+                  <Input prefix={<UserOutlined />} />
+                </Form.Item>
+                <Form.Item
+                  name="email"
+                  label="Email"
+                  rules={[
+                    { required: true, message: "Please input your email!" },
+                    { type: "email", message: "Please enter a valid email!" },
+                  ]}
+                >
+                  <Input prefix={<MailOutlined />} />
+                </Form.Item>
+                <Form.Item
+                  name="phone"
+                  label="Phone"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your phone number!",
+                    },
+                  ]}
+                >
+                  <Input prefix={<PhoneOutlined />} />
+                </Form.Item>
+                <Form.Item
+                  name="location"
+                  label="Location"
+                  rules={[
+                    { required: true, message: "Please input your location!" },
+                  ]}
+                >
+                  <Input prefix={<EnvironmentOutlined />} />
+                </Form.Item>
+                <Form.Item>
+                  <div className="flex gap-2">
+                    <Button type="primary" htmlType="submit">
+                      Save
+                    </Button>
+                    <Button onClick={handleCancel}>Cancel</Button>
+                  </div>
+                </Form.Item>
+              </Form>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold">
+                    {settings.userProfile.fullName}
+                  </h3>
+                  <p className="text-gray-600">{settings.userProfile.role}</p>
                 </div>
-              </Form.Item>
-            </Form>
-          ) : (
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold">
-                  {settings.userProfile.fullName}
-                </h3>
-                <p className="text-gray-600">{settings.userProfile.role}</p>
+                <div className="space-y-2">
+                  <p className="flex items-center gap-2">
+                    <MailOutlined /> {settings.userProfile.email}
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <PhoneOutlined /> {settings.userProfile.phone}
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <EnvironmentOutlined /> {settings.userProfile.location}
+                  </p>
+                </div>
+                <Button type="primary" onClick={handleEdit}>
+                  Edit Profile
+                </Button>
               </div>
-              <div className="space-y-2">
-                <p className="flex items-center gap-2">
-                  <MailOutlined /> {settings.userProfile.email}
-                </p>
-                <p className="flex items-center gap-2">
-                  <PhoneOutlined /> {settings.userProfile.phone}
-                </p>
-                <p className="flex items-center gap-2">
-                  <EnvironmentOutlined /> {settings.userProfile.location}
-                </p>
-              </div>
-              <Button type="primary" onClick={handleEdit}>
-                Edit Profile
-              </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+    </Motion.div>
   );
 };
 

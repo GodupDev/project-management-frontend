@@ -126,12 +126,12 @@ const WorkLogs = () => {
 
   return (
     <Motion.div
+      className="m-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="p-6"
     >
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 ">
         <Space>
           <Button
             icon={<DownloadOutlined />}

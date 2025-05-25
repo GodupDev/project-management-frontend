@@ -30,6 +30,7 @@ import {
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Comment from "../../components/ui/task/Comment";
 import { useMockData } from "../../context/MockDataContext";
+import { motion as Motion } from "framer-motion";
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -126,135 +127,141 @@ export default function TaskSpecific() {
   }
 
   return (
-    <div className="!p-5 mx-auto space-y-8">
-      <Card
-        title={
-          <Space>
-            <Button
-              type="text"
-              icon={<ArrowLeftOutlined />}
-              onClick={() => navigate(`/projects/${projectName}`)}
-            />
-            {editMode ? "Chỉnh sửa task" : "Chi tiết task"}
-          </Space>
-        }
-        extra={
-          editMode ? (
-            <>
+    <Motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="!p-5 mx-auto space-y-8">
+        <Card
+          title={
+            <Space>
               <Button
-                onClick={() => {
-                  setEditMode(false);
-                  setEditedTask({ ...task });
-                }}
-                style={{ marginRight: 8 }}
-              >
-                Hủy
+                type="text"
+                icon={<ArrowLeftOutlined />}
+                onClick={() => navigate(`/projects/${projectName}`)}
+              />
+              {editMode ? "Chỉnh sửa task" : "Chi tiết task"}
+            </Space>
+          }
+          extra={
+            editMode ? (
+              <>
+                <Button
+                  onClick={() => {
+                    setEditMode(false);
+                    setEditedTask({ ...task });
+                  }}
+                  style={{ marginRight: 8 }}
+                >
+                  Hủy
+                </Button>
+                <Button type="primary" onClick={handleSave}>
+                  Lưu
+                </Button>
+              </>
+            ) : (
+              <Button onClick={() => setEditMode(true)} type="primary" ghost>
+                Sửa
               </Button>
-              <Button type="primary" onClick={handleSave}>
-                Lưu
-              </Button>
-            </>
+            )
+          }
+        >
+          {/* Các phần khác ... */}
+
+          {/* Tên task */}
+          <Title level={4}>Tên task</Title>
+          {!editMode ? (
+            <Text strong style={{ fontSize: 16 }}>
+              {task.name}
+            </Text>
           ) : (
-            <Button onClick={() => setEditMode(true)} type="primary" ghost>
-              Sửa
-            </Button>
-          )
-        }
-      >
-        {/* Các phần khác ... */}
-
-        {/* Tên task */}
-        <Title level={4}>Tên task</Title>
-        {!editMode ? (
-          <Text strong style={{ fontSize: 16 }}>
-            {task.name}
-          </Text>
-        ) : (
-          <Input
-            value={editedTask.name}
-            onChange={(e) => handleChange("name", e.target.value)}
-            placeholder="Tên task"
-            autoFocus
-          />
-        )}
-        <Divider />
-
-        {/* Mô tả */}
-        <Title level={4}>Mô tả</Title>
-        {!editMode ? (
-          <Paragraph style={{ whiteSpace: "pre-wrap" }}>
-            {task.description || "Chưa có mô tả."}
-          </Paragraph>
-        ) : (
-          <TextArea
-            rows={5}
-            value={editedTask.description}
-            onChange={(e) => handleChange("description", e.target.value)}
-            placeholder="Mô tả chi tiết task"
-          />
-        )}
-        <Divider />
-
-        {/* ... Các phần khác như Người thực hiện, Dự án, Trạng thái, Ưu tiên, Deadline ... */}
-
-        {/* Phần file đính kèm */}
-        <Divider />
-        <Title level={5}>
-          <PaperClipOutlined /> File đính kèm
-        </Title>
-
-        {!editMode ? (
-          // Hiển thị danh sách file đính kèm khi xem task
-          task.attachments && task.attachments.length > 0 ? (
-            <List
-              dataSource={task.attachments}
-              renderItem={(file) => (
-                <List.Item key={file.uid || file.name}>
-                  <a
-                    href={file.url || "#"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    download={file.name}
-                  >
-                    <PaperClipOutlined /> {file.name}
-                  </a>
-                </List.Item>
-              )}
+            <Input
+              value={editedTask.name}
+              onChange={(e) => handleChange("name", e.target.value)}
+              placeholder="Tên task"
+              autoFocus
             />
+          )}
+          <Divider />
+
+          {/* Mô tả */}
+          <Title level={4}>Mô tả</Title>
+          {!editMode ? (
+            <Paragraph style={{ whiteSpace: "pre-wrap" }}>
+              {task.description || "Chưa có mô tả."}
+            </Paragraph>
           ) : (
-            <Text>Chưa có file đính kèm.</Text>
-          )
-        ) : (
-          <>
-            <Upload
-              multiple
-              fileList={editedTask.attachments || []}
-              onChange={handleUploadChange}
-              onRemove={handleRemoveAttachment}
-              beforeUpload={(file) => {
-                // Không tự động upload lên server
-                return false;
-              }}
-              listType="text"
-            >
-              <Button icon={<UploadOutlined />}>Chọn file</Button>
-            </Upload>
-            {(!editedTask.attachments ||
-              editedTask.attachments.length === 0) && (
-              <Text type="secondary">Chưa có file đính kèm.</Text>
-            )}
-          </>
-        )}
+            <TextArea
+              rows={5}
+              value={editedTask.description}
+              onChange={(e) => handleChange("description", e.target.value)}
+              placeholder="Mô tả chi tiết task"
+            />
+          )}
+          <Divider />
 
-        <Divider />
+          {/* ... Các phần khác như Người thực hiện, Dự án, Trạng thái, Ưu tiên, Deadline ... */}
 
-        {/* Bình luận */}
-        <Comment
-          key={`comments-${task.id}`}
-          comments={comments}
-          onAddComment={handleAddComment}
-        />
-      </Card>
-    </div>
+          {/* Phần file đính kèm */}
+          <Divider />
+          <Title level={5}>
+            <PaperClipOutlined /> File đính kèm
+          </Title>
+
+          {!editMode ? (
+            // Hiển thị danh sách file đính kèm khi xem task
+            task.attachments && task.attachments.length > 0 ? (
+              <List
+                dataSource={task.attachments}
+                renderItem={(file) => (
+                  <List.Item key={file.uid || file.name}>
+                    <a
+                      href={file.url || "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download={file.name}
+                    >
+                      <PaperClipOutlined /> {file.name}
+                    </a>
+                  </List.Item>
+                )}
+              />
+            ) : (
+              <Text>Chưa có file đính kèm.</Text>
+            )
+          ) : (
+            <>
+              <Upload
+                multiple
+                fileList={editedTask.attachments || []}
+                onChange={handleUploadChange}
+                onRemove={handleRemoveAttachment}
+                beforeUpload={(file) => {
+                  // Không tự động upload lên server
+                  return false;
+                }}
+                listType="text"
+              >
+                <Button icon={<UploadOutlined />}>Chọn file</Button>
+              </Upload>
+              {(!editedTask.attachments ||
+                editedTask.attachments.length === 0) && (
+                <Text type="secondary">Chưa có file đính kèm.</Text>
+              )}
+            </>
+          )}
+
+          <Divider />
+
+          {/* Bình luận */}
+          <Comment
+            key={`comments-${task.id}`}
+            comments={comments}
+            onAddComment={handleAddComment}
+          />
+        </Card>
+      </div>
+    </Motion.div>
   );
 }

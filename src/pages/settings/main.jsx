@@ -15,6 +15,7 @@ import {
   LockOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
+import { motion as Motion } from "framer-motion";
 import MyProfile from "./MyProfile";
 import NotificationSettings from "./NotificationSettings";
 import AppearanceSettings from "./AppearanceSettings";
@@ -75,34 +76,40 @@ const SettingsMain = () => {
   const selectedKey = pathParts[1] || "profile";
 
   return (
-    <Layout className="min-h-[100vh] p-4">
-      <Sider
-        width={250}
-        className="bg-white border-r rounded-md border-gray-200"
-        theme="light"
-      >
-        <div className="p-4">
-          <h1 className="text-xl font-semibold text-gray-800">Settings</h1>
-        </div>
-        <Menu
-          mode="inline"
-          items={menuItems}
-          className="rounded-md"
-          selectedKeys={[selectedKey]}
-          onClick={({ key }) => navigate(`/settings/${key}`)}
-        />
-      </Sider>
-      <Content className="p-6 bg-gray-50">
-        <div className="max-w-4xl mx-auto">
-          <Routes>
-            <Route index element={<Navigate to="profile" replace />} />
-            {routes.map(({ path, element }) => (
-              <Route key={path} path={path} element={element} />
-            ))}
-          </Routes>
-        </div>
-      </Content>
-    </Layout>
+    <Motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Layout className="min-h-[100vh] p-4">
+        <Sider
+          width={250}
+          className="bg-white border-r rounded-md border-gray-200"
+          theme="light"
+        >
+          <div className="p-4">
+            <h1 className="text-xl font-semibold text-gray-800">Settings</h1>
+          </div>
+          <Menu
+            mode="inline"
+            items={menuItems}
+            className="rounded-md"
+            selectedKeys={[selectedKey]}
+            onClick={({ key }) => navigate(`/settings/${key}`)}
+          />
+        </Sider>
+        <Content className="p-6 bg-gray-50">
+          <div className="max-w-4xl mx-auto">
+            <Routes>
+              <Route index element={<Navigate to="profile" replace />} />
+              {routes.map(({ path, element }) => (
+                <Route key={path} path={path} element={element} />
+              ))}
+            </Routes>
+          </div>
+        </Content>
+      </Layout>
+    </Motion.div>
   );
 };
 
