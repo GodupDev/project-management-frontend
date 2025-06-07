@@ -26,12 +26,6 @@ const ProjectManagement = () => {
     t("onHold"),
     t("cancelled"),
   ];
-  const projectTypes = [
-    t("development"),
-    t("design"),
-    t("marketing"),
-    t("research"),
-  ];
 
   const filteredProjects = projects.filter(
     (project) => statusFilter === "all" || project.status === statusFilter,
@@ -74,7 +68,7 @@ const ProjectManagement = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 rounded-md !bg-[var(--color-background-paper)] text-sm outline-none border-[var(--color-border)] hover:shadow-md transition-shadow duration-200 cursor-pointer"
+            className="px-3 py-2 rounded-md !bg-white text-sm outline-none border-[var(--color-border)] hover:shadow-md transition-shadow duration-200 cursor-pointer"
           >
             <option value="all">{t("allStatus")}</option>
             {projectStatuses.map((status) => (
@@ -87,7 +81,7 @@ const ProjectManagement = () => {
           <select
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}
-            className="px-3 py-2 rounded-md !bg-[var(--color-background-paper)] text-sm outline-none border-[var(--color-border)] hover:shadow-md transition-shadow duration-200 cursor-pointer"
+            className="px-3 py-2 rounded-md !bg-white text-sm outline-none border-[var(--color-border)] hover:shadow-md transition-shadow duration-200 cursor-pointer"
           >
             <option value="newest">{t("newestFirst")}</option>
             <option value="oldest">{t("oldestFirst")}</option>
@@ -150,18 +144,22 @@ const ProjectManagement = () => {
 
                 <div className="flex items-center gap-2">
                   <div className="flex -space-x-2">
-                    {project.members?.map((member) => (
-                      <Avatar
-                        key={member.user?.id || member.id}
-                        src={member.user?.avatar}
-                        size="small"
-                        className="border-2 border-white"
-                        icon={<UserOutlined />}
-                      >
-                        {member.user?.fullName?.charAt(0) ||
-                          member.name?.charAt(0)}
-                      </Avatar>
-                    ))}
+                    {project.members?.map((member, index) => {
+                      const memberId =
+                        member.user?.id || member.id || `member-${index}`;
+                      return (
+                        <Avatar
+                          key={`project-${project.id}-${memberId}`}
+                          src={member.user?.avatar}
+                          size="small"
+                          className="border-2 border-white"
+                          icon={<UserOutlined />}
+                        >
+                          {member.user?.fullName?.charAt(0) ||
+                            member.name?.charAt(0)}
+                        </Avatar>
+                      );
+                    })}
                   </div>
                   <Button
                     type="link"
@@ -195,11 +193,7 @@ const ProjectManagement = () => {
         width={800}
         className="create-project-modal"
       >
-        <CreateProject
-          onSuccess={handleCreateProject}
-          projectTypes={projectTypes}
-          projectStatuses={projectStatuses}
-        />
+        <CreateProject onSuccess={handleCreateProject} />
       </Modal>
     </div>
   );

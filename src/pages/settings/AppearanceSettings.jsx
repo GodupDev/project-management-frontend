@@ -30,7 +30,7 @@ const AppearanceSettings = () => {
       transition={{ duration: 0.5 }}
     >
       <Card title={t("appearance")} className="mb-4">
-        <div className="space-y-6">
+        <div className="p-5">
           {/* Theme */}
           <div>
             <Title level={5}>{t("theme")}</Title>
@@ -57,52 +57,6 @@ const AppearanceSettings = () => {
             >
               <Option value="en">English</Option>
               <Option value="vi">Tiếng Việt</Option>
-            </Select>
-          </div>
-
-          {/* Font Size */}
-          <div>
-            <Title level={5}>{t("fontSize")}</Title>
-            <Radio.Group
-              value={settings.appearanceSettings.fontSize}
-              onChange={(e) => handleChange("fontSize", e.target.value)}
-              className="mt-4"
-            >
-              <Space direction="vertical">
-                <Radio value="small">{t("small")}</Radio>
-                <Radio value="medium">{t("medium")}</Radio>
-                <Radio value="large">{t("large")}</Radio>
-              </Space>
-            </Radio.Group>
-          </div>
-
-          {/* Density */}
-          <div>
-            <Title level={5}>{t("density")}</Title>
-            <Radio.Group
-              value={settings.appearanceSettings.density}
-              onChange={(e) => handleChange("density", e.target.value)}
-              className="mt-4"
-            >
-              <Space direction="vertical">
-                <Radio value="comfortable">{t("comfortable")}</Radio>
-                <Radio value="compact">{t("compact")}</Radio>
-              </Space>
-            </Radio.Group>
-          </div>
-
-          {/* Color Scheme */}
-          <div>
-            <Title level={5}>{t("colorScheme")}</Title>
-            <Select
-              value={settings.appearanceSettings.colorScheme}
-              onChange={(value) => handleChange("colorScheme", value)}
-              className="w-full mt-4"
-            >
-              <Option value="blue">Blue</Option>
-              <Option value="green">Green</Option>
-              <Option value="purple">Purple</Option>
-              <Option value="orange">Orange</Option>
             </Select>
           </div>
         </div>

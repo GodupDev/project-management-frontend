@@ -69,19 +69,6 @@ const TimeZoneSettings = () => {
               <Radio value="24h">24-hour</Radio>
             </Radio.Group>
           </div>
-
-          {/* Week Starts On */}
-          <div>
-            <Title level={5}>Week Starts On</Title>
-            <Select
-              value={settings.timeZoneSettings.weekStartsOn}
-              onChange={(value) => handleChange("weekStartsOn", value)}
-              className="w-full mt-4"
-            >
-              <Option value="monday">Monday</Option>
-              <Option value="sunday">Sunday</Option>
-            </Select>
-          </div>
         </div>
       </Card>
     </Motion.div>

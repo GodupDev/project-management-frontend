@@ -134,7 +134,7 @@ export default function TaskSpecific() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="!p-5 mx-auto space-y-8">
+      <div className="p-5">
         <Card
           title={
             <Space>

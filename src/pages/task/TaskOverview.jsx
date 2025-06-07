@@ -62,8 +62,8 @@ const TaskOverview = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="p-5">
-        <Card>
+      <div>
+        <Card className="!bg-transparent shadow-none !border-none">
           <div className="flex justify-between items-center mb-4">
             <Space>
               <Search

@@ -35,9 +35,9 @@ function Breadcrumb() {
       title: (
         <Link
           to="/"
-          className="flex items-center text-gray-500 transition-colors duration-200"
+          className="flex items-center transition-colors duration-200"
         >
-          <IconHome className="w-5 h-5 mr-1 hover:text-blue-500" />
+          <IconHome className="w-5 h-5 mr-1 text-[var(--color-text-secondary)] hover:text-blue-500" />
         </Link>
       ),
     },
@@ -57,13 +57,13 @@ function Breadcrumb() {
 
       return {
         title: isLast ? (
-          <span className="text-gray-900 font-semibold text-base">
+          <span className="text-[var(--color-text-secondary)] font-semibold text-base">
             {translatedName}
           </span>
         ) : (
           <Link
             to={routeTo}
-            className="text-gray-500 hover:text-blue-500 text-base transition-colors duration-200"
+            className="!text-[var(--color-text-secondary)] hover:text-blue-500 text-base transition-colors duration-200"
           >
             {translatedName}
           </Link>
@@ -76,7 +76,7 @@ function Breadcrumb() {
     <AntBreadcrumb
       items={items}
       className="mb-6 text-base"
-      separator={<span className="text-gray-400">/</span>}
+      separator={<span className="text-[var(--color-text-secondary)]">/</span>}
     />
   );
 }

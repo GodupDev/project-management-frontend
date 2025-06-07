@@ -48,79 +48,45 @@ const CreateProject = ({ onSuccess }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Form.Item
             label={
-              <span className="!text-[var(--color-text-primary)] font-semibold">
-                {t("modalProjectTitle")}
-              </span>
+              <span className="font-semibold">{t("modalProjectTitle")}</span>
             }
             name="title"
             rules={[{ required: true, message: t("modalInputProjectTitle") }]}
           >
-            <Input
-              placeholder={t("modalEnterProjectTitle")}
-              className="!bg-transparent !py-2 !border !border-[var(--color-border)] !rounded-lg 
-              placeholder:!text-[var(--color-text-secondary)] placeholder:opacity-50 
-              !text-[var(--color-text-primary)] transition-all duration-300
-              hover:!border-[var(--color-primary)] focus:!border-[var(--color-primary)]
-              focus:!ring-2 focus:!ring-[var(--color-primary-light)] focus:!ring-opacity-50"
-            />
+            <Input placeholder={t("modalEnterProjectTitle")} />
           </Form.Item>
 
           <Form.Item
             label={
-              <span className="text-[var(--color-text-primary)] font-semibold">
-                {t("modalProjectType")}
-              </span>
+              <span className="font-semibold">{t("modalProjectType")}</span>
             }
             name="type"
             rules={[{ required: true, message: t("modalSelectProjectType") }]}
           >
-            <Select
-              placeholder={t("modalSelectProjectType")}
-              className="!bg-transparent !py-2 !border !border-[var(--color-border)] !rounded-lg 
-              placeholder:!text-[var(--color-text-secondary)] placeholder:opacity-50 
-              !text-[var(--color-text-primary)] transition-all duration-300
-              hover:!border-[var(--color-primary)] focus:!border-[var(--color-primary)]
-              focus:!ring-2 focus:!ring-[var(--color-primary-light)] focus:!ring-opacity-50"
-            >
+            <Select placeholder={t("modalSelectProjectType")}>
               <Option value="web">{t("modalWeb")}</Option>
               <Option value="app">{t("modalApp")}</Option>
             </Select>
           </Form.Item>
 
           <Form.Item
-            label={
-              <span className="text-[var(--color-text-primary)] font-semibold">
-                {t("modalStartDate")}
-              </span>
-            }
+            label={<span className="font-semibold">{t("modalStartDate")}</span>}
             name="startDate"
             rules={[{ required: true, message: t("modalSelectStartDate") }]}
           >
             <DatePicker
-              className="w-full !bg-transparent !py-2 !border !border-[var(--color-border)] !rounded-lg 
-              placeholder:!text-[var(--color-text-secondary)] placeholder:opacity-50 
-              !text-[var(--color-text-primary)] transition-all duration-300
-              hover:!border-[var(--color-primary)] focus:!border-[var(--color-primary)]
-              focus:!ring-2 focus:!ring-[var(--color-primary-light)] focus:!ring-opacity-50"
+              className="w-full"
               placeholder={t("modalDateDescription")}
             />
           </Form.Item>
 
           <Form.Item
-            label={
-              <span className="text-[var(--color-text-primary)] font-semibold">
-                {t("modalEndDate")}
-              </span>
-            }
+            label={<span className="font-semibold">{t("modalEndDate")}</span>}
             name="endDate"
             rules={[{ required: true, message: t("modalSelectEndDate") }]}
           >
             <DatePicker
-              className="w-full !bg-transparent !py-2 !border !border-[var(--color-border)] !rounded-lg 
-              placeholder:!text-[var(--color-text-secondary)] placeholder:opacity-50 
-              !text-[var(--color-text-primary)] transition-all duration-300
-              hover:!border-[var(--color-primary)] focus:!border-[var(--color-primary)]
-              focus:!ring-2 focus:!ring-[var(--color-primary-light)] focus:!ring-opacity-50"
+              className="w-full"
               placeholder={t("modalDateDescription")}
             />
           </Form.Item>
@@ -128,7 +94,7 @@ const CreateProject = ({ onSuccess }) => {
 
         <Form.Item
           label={
-            <span className="text-[var(--color-text-primary)] font-semibold">
+            <span className="font-semibold">
               {t("modalProjectDescription")}
             </span>
           }
@@ -137,19 +103,13 @@ const CreateProject = ({ onSuccess }) => {
           <Input.TextArea
             rows={4}
             placeholder={t("modalEnterProjectDescription")}
-            className="!bg-transparent !py-2 !border !border-[var(--color-border)] !rounded-lg 
-            placeholder:!text-[var(--color-text-secondary)] placeholder:opacity-50 
-            !text-[var(--color-text-primary)] transition-all duration-300 resize-vertical
-            hover:!border-[var(--color-primary)] focus:!border-[var(--color-primary)]
-            focus:!ring-2 focus:!ring-[var(--color-primary-light)] focus:!ring-opacity-50"
+            className="resize-vertical"
           />
         </Form.Item>
 
         <Form.Item
           label={
-            <span className="text-[var(--color-text-primary)] font-semibold">
-              {t("modalAddProjectMember")}
-            </span>
+            <span className="font-semibold">{t("modalAddProjectMember")}</span>
           }
         >
           <div className="flex flex-col md:flex-row gap-4 w-full">
@@ -159,21 +119,13 @@ const CreateProject = ({ onSuccess }) => {
               onChange={(e) =>
                 setNewMember({ ...newMember, name: e.target.value })
               }
-              className="!bg-transparent !py-2 !border !border-[var(--color-border)] !rounded-lg 
-              placeholder:!text-[var(--color-text-secondary)] placeholder:opacity-50 
-              !text-[var(--color-text-primary)] transition-all duration-300 w-full max-w-[75%]
-              hover:!border-[var(--color-primary)] focus:!border-[var(--color-primary)]
-              focus:!ring-2 focus:!ring-[var(--color-primary-light)] focus:!ring-opacity-50"
+              className="w-full max-w-[75%]"
             />
             <Select
               placeholder={t("modalSelectRole")}
               value={newMember.role}
               onChange={(value) => setNewMember({ ...newMember, role: value })}
-              className="!bg-transparent !py-2 !border !border-[var(--color-border)] !rounded-lg 
-              placeholder:!text-[var(--color-text-secondary)] placeholder:opacity-50 
-              !text-[var(--color-text-primary)] transition-all duration-300 w-full max-w-[25%]
-              hover:!border-[var(--color-primary)] focus:!border-[var(--color-primary)]
-              focus:!ring-2 focus:!ring-[var(--color-primary-light)] focus:!ring-opacity-50"
+              className="w-full max-w-[25%]"
             >
               {roleOptions.map((role) => (
                 <Option key={role} value={role}>
@@ -188,11 +140,9 @@ const CreateProject = ({ onSuccess }) => {
           {members.map((member) => (
             <div
               key={member.id}
-              className="flex items-center gap-2 p-2 bg-[var(--color-background-elevated)] rounded-lg"
+              className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg"
             >
-              <span className="flex-1 font-semibold text-[var(--color-text-primary)]">
-                {member.name}
-              </span>
+              <span className="flex-1 font-semibold">{member.name}</span>
               <Select
                 value={member.role}
                 onChange={(value) => {
@@ -202,10 +152,7 @@ const CreateProject = ({ onSuccess }) => {
                     ),
                   );
                 }}
-                className="flex-1 !bg-transparent !py-2 !border !border-[var(--color-border)] !rounded-lg 
-                !text-[var(--color-text-primary)] transition-all duration-300
-                hover:!border-[var(--color-primary)] focus:!border-[var(--color-primary)]
-                focus:!ring-2 focus:!ring-[var(--color-primary-light)] focus:!ring-opacity-50"
+                className="flex-1"
               >
                 {roleOptions.map((role) => (
                   <Option key={role} value={role}>
@@ -218,7 +165,6 @@ const CreateProject = ({ onSuccess }) => {
                 danger
                 icon={<DeleteOutlined />}
                 onClick={() => handleRemoveMember(member.id)}
-                className="hover:!bg-[var(--color-action-hover)] transition-all duration-300"
               />
             </div>
           ))}
@@ -227,13 +173,7 @@ const CreateProject = ({ onSuccess }) => {
         <Form.Item className="flex justify-center mt-8">
           <Space>
             <Motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                type="primary"
-                htmlType="submit"
-                className="!bg-[var(--color-primary)] !text-[var(--color-primary-contrast)] 
-                hover:!bg-[var(--color-primary-hover)] transition-all duration-300
-                focus:!ring-2 focus:!ring-[var(--color-primary-light)] focus:!ring-opacity-50"
-              >
+              <Button type="primary" htmlType="submit">
                 {t("modalCreate")}
               </Button>
             </Motion.div>
@@ -244,7 +184,6 @@ const CreateProject = ({ onSuccess }) => {
                 form.resetFields();
                 setMembers([]);
               }}
-              className="hover:!bg-[var(--color-action-hover)] transition-all duration-300"
             >
               {t("modalClear")}
             </Button>

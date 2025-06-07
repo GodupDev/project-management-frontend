@@ -18,7 +18,7 @@ function LayoutWithBreadcrumb() {
           }`}
         >
           <Breadcrumb />
-          <main>
+          <main className="mt-5">
             <Outlet />
           </main>
         </div>

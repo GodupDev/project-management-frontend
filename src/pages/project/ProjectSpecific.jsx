@@ -107,7 +107,7 @@ export default function ProjectSpecific() {
   }
 
   return (
-    <div className="!p-5 mx-auto space-y-8">
+    <div className="p-5 mx-auto space-y-8">
       <Card
         title={
           <Space>

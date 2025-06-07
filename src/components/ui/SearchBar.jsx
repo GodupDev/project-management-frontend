@@ -1,27 +1,8 @@
 import React, { useState } from "react";
-import styled from "styled-components";
-import { Input } from "antd";
+import { StyledInput } from "../styledAntd";
 import IconSearch from "../icons/IconSearch";
 import { motion as Motion } from "framer-motion";
 import { useLanguage } from "../../context/LanguageContext";
-
-const Wrapper = styled.div`
-  .ant-input {
-    border-color: transparent !important;
-    box-shadow: none !important;
-    background-color: transparent !important;
-    outline: none !important;
-
-    &:hover,
-    &:focus,
-    &:active {
-      border-color: transparent !important;
-      box-shadow: none !important;
-      background-color: transparent !important;
-      outline: none !important;
-    }
-  }
-`;
 
 const SearchBar = () => {
   const [value, setValue] = useState("");
@@ -41,18 +22,15 @@ const SearchBar = () => {
       `}
     >
       <IconSearch />
-      <Wrapper className="searchbar w-full">
-        <Input
-          className="!bg-transparent !border-none !shadow-none !p-0 !text-[0.8rem] !text-[var(--color-text)] placeholder:!text-[var(--color-text)] placeholder:opacity-100"
-          placeholder={t("searchPlaceholder")}
-          value={value}
-          allowClear
-          onChange={(e) => setValue(e.target.value)}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          onPressEnter={() => console.log("Search:", value)}
-        />
-      </Wrapper>
+      <StyledInput
+        placeholder={t("searchPlaceholder")}
+        value={value}
+        allowClear
+        onChange={(e) => setValue(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        onPressEnter={() => console.log("Search:", value)}
+      />
     </Motion.div>
   );
 };

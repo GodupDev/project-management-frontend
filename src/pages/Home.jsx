@@ -84,7 +84,7 @@ const Home = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="p-4 mx-auto space-y-12">
+      <div className="p-4 mx-auto space-y-12 w-full max-w-7xl">
         {/* Welcome Message */}
         <Motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -92,10 +92,16 @@ const Home = () => {
           transition={{ duration: 0.5 }}
           className="text-center"
         >
-          <Title level={2} className="!text-3xl">
+          <Title
+            level={2}
+            className="!text-3xl !text-[var(--color-text-primary)] font-semibold mb-2"
+          >
             {t("welcomeBack")}, {users[0].fullName} 👋
           </Title>
-          <Text type="secondary" className="text-gray-500">
+          <Text
+            type="secondary"
+            className="!text-[var(--color-text-secondary)]"
+          >
             {t("quickOverview")}
           </Text>
         </Motion.div>
@@ -164,7 +170,7 @@ const Home = () => {
           className="text-center pt-8"
         >
           <Divider />
-          <div className="inline-flex items-center justify-center gap-2 text-gray-600 text-base italic">
+          <div className="inline-flex items-center justify-center gap-2 !text-[var(--color-text-secondary)] text-base italic">
             <SmileOutlined />
             <span>{t("quote")}</span>
           </div>
