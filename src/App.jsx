@@ -4,10 +4,11 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { SidebarProvider } from "./context/SidebarContext";
 import { MockDataProvider } from "./context/MockDataContext";
 import { LanguageProvider } from "./context/LanguageContext";
+import { AuthProvider } from "./context/AuthContext";
 import LayoutWithBreadcrumb from "./components/layouts/LayoutWithBreadcrumb";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-import Login from "./pages/Login";
+import Login from "./pages/Auth";
 import Projects from "./pages/project/main";
 import Tasks from "./pages/task/main";
 import WorkLogs from "./pages/WorkLogs";
@@ -21,64 +22,73 @@ function App() {
     <BrowserRouter>
       <LanguageProvider>
         <ThemeProvider>
-          <MockDataProvider>
-            <SidebarProvider>
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route element={<LayoutWithBreadcrumb />}>
-                  <Route
-                    path="/"
-                    element={
-                      <ProtectedRoute>
-                        <Home />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/projects/*"
-                    element={
-                      <ProtectedRoute>
-                        <Projects />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/tasks/*"
-                    element={
-                      <ProtectedRoute>
-                        <Tasks />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/worklogs/*"
-                    element={
-                      <ProtectedRoute>
-                        <WorkLogs />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/performance"
-                    element={
-                      <ProtectedRoute>
-                        <Performance />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/settings/*"
-                    element={
-                      <ProtectedRoute>
-                        <Setting />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="*" element={<NotFound />} />
-                </Route>
-              </Routes>
-            </SidebarProvider>
-          </MockDataProvider>
+          <AuthProvider>
+            <MockDataProvider>
+              <SidebarProvider>
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  <Route element={<LayoutWithBreadcrumb />}>
+                    <Route
+                      path="/"
+                      element={
+                        <ProtectedRoute>
+                          <Home />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/projects/*"
+                      element={
+                        <ProtectedRoute>
+                          <Projects />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/tasks/*"
+                      element={
+                        <ProtectedRoute>
+                          <Tasks />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/worklogs/*"
+                      element={
+                        <ProtectedRoute>
+                          <WorkLogs />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/performance"
+                      element={
+                        <ProtectedRoute>
+                          <Performance />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/settings/*"
+                      element={
+                        <ProtectedRoute>
+                          <Setting />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="*"
+                      element={
+                        <ProtectedRoute>
+                          <NotFound />
+                        </ProtectedRoute>
+                      }
+                    />
+                  </Route>
+                </Routes>
+              </SidebarProvider>
+            </MockDataProvider>
+          </AuthProvider>
         </ThemeProvider>
       </LanguageProvider>
     </BrowserRouter>
