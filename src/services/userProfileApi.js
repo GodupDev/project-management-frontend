@@ -40,6 +40,26 @@ export const userProfileApi = api.injectEndpoints({
       }),
       invalidatesTags: ["UserProfile"],
     }),
+
+    // Cập nhật mật khẩu
+    updatePassword: builder.mutation({
+      query: (passwordData) => ({
+        url: "profiles/password",
+        method: "PUT",
+        body: passwordData,
+      }),
+      invalidatesTags: ["UserProfile"],
+    }),
+
+    // Cập nhật thông tin cá nhân
+    updatePersonalInfo: builder.mutation({
+      query: (personalInfo) => ({
+        url: "profiles/personal-info",
+        method: "PUT",
+        body: personalInfo,
+      }),
+      invalidatesTags: ["UserProfile"],
+    }),
   }),
 });
 
@@ -48,4 +68,6 @@ export const {
   useGetUserProfileQuery,
   useUpdateProfileMutation,
   useUpdateAvatarMutation,
+  useUpdatePasswordMutation,
+  useUpdatePersonalInfoMutation,
 } = userProfileApi;
