@@ -1,156 +1,86 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { message } from "antd";
 import { useLanguage } from "./LanguageContext";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  login,
+  logout,
+  register,
+  getCurrentUser,
+} from "../store/slices/authSlice";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { user, loading, error, isAuthenticated } = useSelector(
+    (state) => state.auth,
+  );
+
+  // Check for token and fetch user data on mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      dispatch(getCurrentUser());
+    }
+    console.log(token);
+  }, [dispatch]);
 
   useEffect(() => {
-    // Check if user is logged in on mount
-    checkAuth();
-  }, []);
+    if (error) {
+      message.error(error);
+    }
+  }, [error]);
 
-  const checkAuth = async () => {
+  const handleLogin = async (email, password) => {
     try {
-      const token = localStorage.getItem("token");
-      if (token) {
-        // Here you would typically validate the token with your backend
-        // For now, we'll just set a mock user
-        setUser({
-          id: 1,
-          name: "Test User",
-          email: "test@example.com",
-        });
+      const result = await dispatch(login({ email, password })).unwrap();
+      if (result) {
+        console.log("Login successful, user data:", result.data);
+        message.success("Đăng nhập thành công");
+        navigate("/");
       }
     } catch (error) {
-      console.error("Auth check failed:", error);
-    } finally {
-      setLoading(false);
+      // Error is handled by the reducer
     }
   };
 
-  const login = async (email, password) => {
+  const handleSignup = async (email, password, username) => {
     try {
-      setLoading(true);
-      // Here you would typically make an API call to your backend
-      // For now, we'll simulate a successful login
-      const mockUser = {
-        id: 1,
-        name: "Test User",
-        email: email,
-      };
-
-      // Mock token
-      const token = "mock-jwt-token";
-
-      // Store token
-      localStorage.setItem("token", token);
-
-      // Set user
-      setUser(mockUser);
-
-      message.success(t("loginSuccess"));
-      navigate("/dashboard");
-
-      return { success: true };
+      const result = await dispatch(
+        register({ email, password, username }),
+      ).unwrap();
+      if (result) {
+        console.log("Signup successful, user data:", result.data);
+        message.success("Đăng ký thành công");
+        navigate("/login");
+      }
     } catch (error) {
-      console.error("Login failed:", error);
-      message.error(
-        t("loginFailed") + ": " + (error.message || t("unknownError")),
-      );
-      return { success: false, error };
-    } finally {
-      setLoading(false);
+      // Error is handled by the reducer
     }
   };
 
-  const signup = async (name, email, password) => {
+  const handleLogout = async () => {
     try {
-      setLoading(true);
-      // Here you would typically make an API call to your backend
-      // For now, we'll simulate a successful signup
-      const mockUser = {
-        id: 1,
-        name: name,
-        email: email,
-      };
-
-      // Mock token
-      const token = "mock-jwt-token";
-
-      // Store token
-      localStorage.setItem("token", token);
-
-      // Set user
-      setUser(mockUser);
-
-      message.success(t("signupSuccess"));
-      navigate("/dashboard");
-
-      return { success: true };
-    } catch (error) {
-      console.error("Signup failed:", error);
-      message.error(
-        t("signupFailed") + ": " + (error.message || t("unknownError")),
-      );
-      return { success: false, error };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const logout = () => {
-    try {
-      // Remove token
-      localStorage.removeItem("token");
-
-      // Clear user
-      setUser(null);
-
-      // Navigate to login
+      await dispatch(logout()).unwrap();
+      console.log("User logged out");
       navigate("/login");
-
-      message.success(t("logoutSuccess"));
+      message.success("Đăng xuất thành công");
     } catch (error) {
-      console.error("Logout failed:", error);
-      message.error(t("logoutFailed"));
-    }
-  };
-
-  const updateProfile = async (userData) => {
-    try {
-      setLoading(true);
-      // Here you would typically make an API call to your backend
-      // For now, we'll just update the local state
-      setUser((prevUser) => ({
-        ...prevUser,
-        ...userData,
-      }));
-
-      message.success(t("profileUpdateSuccess"));
-      return { success: true };
-    } catch (error) {
-      console.error("Profile update failed:", error);
-      message.error(t("profileUpdateFailed"));
-      return { success: false, error };
-    } finally {
-      setLoading(false);
+      // Error is handled by the reducer
     }
   };
 
   const value = {
     user,
     loading,
-    login,
-    signup,
-    logout,
-    updateProfile,
+    isAuthenticated,
+    login: handleLogin,
+    signup: handleSignup,
+    logout: handleLogout,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

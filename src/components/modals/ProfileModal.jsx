@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, Avatar, Typography, Row, Col, Tag } from "antd";
+import { Modal, Avatar, Typography, Row, Col, Button } from "antd";
 import {
   MailOutlined,
   PhoneOutlined,
@@ -8,27 +8,35 @@ import {
   ClockCircleOutlined,
 } from "@ant-design/icons";
 import { useLanguage } from "../../context/LanguageContext";
+import { useAuth } from "../../context/AuthContext";
 
 const { Text, Title } = Typography;
 
 const ProfileModal = ({ isOpen, onClose, user }) => {
   const { t } = useLanguage();
+  const { logout } = useAuth();
+
   if (!user) return null;
+
+  const handleLogout = async () => {
+    await logout();
+    onClose();
+  };
 
   return (
     <Modal
-      title={t("profileEdit")}
+      title={t("profileTitle")}
       open={isOpen}
       onCancel={onClose}
       footer={null}
       width={500}
       styles={{
         body: {
-          padding: "20px",
+          padding: "10px",
         },
         header: {
           borderBottom: "1px solid #e5e7eb",
-          padding: "12px 20px",
+          padding: "12px 15px",
         },
       }}
     >
@@ -41,9 +49,6 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
         <Title level={4} className="mb-1 text-lg">
           {user.fullName}
         </Title>
-        <Tag color="default" className="text-xs">
-          {user.role}
-        </Tag>
       </div>
 
       <Row gutter={[12, 12]}>
@@ -118,6 +123,11 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
           </Col>
         )}
       </Row>
+      <div className="flex justify-center mt-5">
+        <Button type="primary" danger onClick={handleLogout}>
+          {t("logOut")}
+        </Button>
+      </div>
     </Modal>
   );
 };

@@ -40,6 +40,7 @@ const translations = {
     settingsSecurity: "Security",
 
     // Profile
+    profileTitle: "Profile Information",
     profileFullName: "Full Name",
     profileEmail: "Email Address",
     profilePhone: "Phone",
@@ -198,12 +199,11 @@ const translations = {
     signIn: "Sign in",
     login: "Login",
     signUp: "Sign Up",
+    logOut: "Log Out",
     loginSubtitle: "Welcome back! Please enter your details.",
     name: "Name",
     namePlaceholder: "Enter your name",
-    email: "Email",
     emailPlaceholder: "Enter your email",
-    password: "Password",
     passwordPlaceholder: "Enter your password",
     confirmPassword: "Confirm Password",
     confirmPasswordPlaceholder: "Confirm your password",
@@ -374,6 +374,7 @@ const translations = {
     settingsSecurity: "Bảo mật",
 
     // Profile
+    profileTitle: "Hồ sơ cá nhân",
     profileFullName: "Họ và tên",
     profileEmail: "Địa chỉ email",
     profilePhone: "Số điện thoại",
@@ -532,12 +533,11 @@ const translations = {
     signIn: "Đăng nhập",
     login: "Đăng nhập",
     signUp: "Đăng ký",
+    logOut: "Đăng xuất",
     loginSubtitle: "Chào mừng trở lại! Vui lòng nhập thông tin của bạn.",
     name: "Tên",
     namePlaceholder: "Nhập tên của bạn",
-    email: "Email",
     emailPlaceholder: "Nhập email của bạn",
-    password: "Mật khẩu",
     passwordPlaceholder: "Nhập mật khẩu của bạn",
     confirmPassword: "Xác nhận mật khẩu",
     confirmPasswordPlaceholder: "Xác nhận mật khẩu của bạn",
