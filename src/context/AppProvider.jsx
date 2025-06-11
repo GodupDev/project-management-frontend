@@ -1,10 +1,10 @@
 import React, { createContext } from "react";
 import { ThemeProvider } from "./ThemeContext";
 import { SidebarProvider } from "./SidebarContext";
-import { MockDataProvider } from "./MockDataContext";
 import { LanguageProvider } from "./LanguageContext";
 import { AuthProvider } from "./AuthContext";
 import { UserProfileProvider } from "./UserProfileContext";
+import { ProjectProvider } from "./ProjectContext";
 import AppContextProvider from "./AppContextProvider";
 
 // Tạo một context chung cho toàn bộ ứng dụng
@@ -17,13 +17,13 @@ const AppProvider = ({ children }) => {
     <LanguageProvider>
       <ThemeProvider>
         <AuthProvider>
-          <UserProfileProvider>
-            <MockDataProvider>
+          <ProjectProvider>
+            <UserProfileProvider>
               <SidebarProvider>
                 <AppContextProvider>{children}</AppContextProvider>
               </SidebarProvider>
-            </MockDataProvider>
-          </UserProfileProvider>
+            </UserProfileProvider>
+          </ProjectProvider>
         </AuthProvider>
       </ThemeProvider>
     </LanguageProvider>

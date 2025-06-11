@@ -7,11 +7,11 @@ import {
   Button,
   Form,
   Space,
-  message,
 } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { motion as Motion } from "framer-motion";
 import { useLanguage } from "../../context/LanguageContext";
+import { useProject } from "../../context/ProjectContext";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -23,52 +23,44 @@ const CreateProject = ({ onSuccess }) => {
   const [members, setMembers] = useState([]);
   const [newMember, setNewMember] = useState({ name: "", role: "" });
   const { t } = useLanguage();
+  const { createProject, loading } = useProject();
 
   const handleRemoveMember = (id) => {
     setMembers(members.filter((m) => m.id !== id));
   };
 
-  const handleSubmit = (values) => {
-    const projectData = {
-      ...values,
-      startDate: values.startDate?.format("YYYY-MM-DD"),
-      endDate: values.endDate?.format("YYYY-MM-DD"),
-      members,
-    };
-    console.log("Submitted Project:", projectData);
-    message.success(t("projectCreatedSuccess"));
-    form.resetFields();
-    setMembers([]);
-    onSuccess?.();
+  const handleSubmit = async (values) => {
+    try {
+      const projectData = {
+        ...values,
+        startDate: values.startDate?.format("YYYY-MM-DD"),
+        endDate: values.endDate?.format("YYYY-MM-DD"),
+        members,
+      };
+
+      await createProject(projectData);
+      form.resetFields();
+      setMembers([]);
+      onSuccess?.();
+    } catch (error) {
+      // Error is already handled in ProjectContext
+      console.error("Project creation failed:", error);
+    }
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 !pb-1">
       <Form layout="vertical" form={form} onFinish={handleSubmit}>
+        <Form.Item
+          label={
+            <span className="font-semibold">{t("modalProjectTitle")}</span>
+          }
+          name="title"
+          rules={[{ required: true, message: t("modalInputProjectTitle") }]}
+        >
+          <Input placeholder={t("modalEnterProjectTitle")} />
+        </Form.Item>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Form.Item
-            label={
-              <span className="font-semibold">{t("modalProjectTitle")}</span>
-            }
-            name="title"
-            rules={[{ required: true, message: t("modalInputProjectTitle") }]}
-          >
-            <Input placeholder={t("modalEnterProjectTitle")} />
-          </Form.Item>
-
-          <Form.Item
-            label={
-              <span className="font-semibold">{t("modalProjectType")}</span>
-            }
-            name="type"
-            rules={[{ required: true, message: t("modalSelectProjectType") }]}
-          >
-            <Select placeholder={t("modalSelectProjectType")}>
-              <Option value="web">{t("modalWeb")}</Option>
-              <Option value="app">{t("modalApp")}</Option>
-            </Select>
-          </Form.Item>
-
           <Form.Item
             label={<span className="font-semibold">{t("modalStartDate")}</span>}
             name="startDate"
@@ -114,25 +106,15 @@ const CreateProject = ({ onSuccess }) => {
         >
           <div className="flex flex-col md:flex-row gap-4 w-full">
             <Input
-              placeholder={t("modalMemberName")}
-              value={newMember.name}
+              placeholder={t("modalMemberEmail")}
               onChange={(e) =>
                 setNewMember({ ...newMember, name: e.target.value })
               }
-              className="w-full max-w-[75%]"
+              className="w-full max-w-[80%]"
             />
-            <Select
-              placeholder={t("modalSelectRole")}
-              value={newMember.role}
-              onChange={(value) => setNewMember({ ...newMember, role: value })}
-              className="w-full max-w-[25%]"
-            >
-              {roleOptions.map((role) => (
-                <Option key={role} value={role}>
-                  {role}
-                </Option>
-              ))}
-            </Select>
+            <Button type="primary" className="w-full max-w-[20%]">
+              Add
+            </Button>
           </div>
         </Form.Item>
 
@@ -152,7 +134,6 @@ const CreateProject = ({ onSuccess }) => {
                     ),
                   );
                 }}
-                className="flex-1"
               >
                 {roleOptions.map((role) => (
                   <Option key={role} value={role}>
@@ -170,10 +151,10 @@ const CreateProject = ({ onSuccess }) => {
           ))}
         </div>
 
-        <Form.Item className="flex justify-center mt-8">
+        <Form.Item className="flex justify-center !mt-10">
           <Space>
             <Motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button type="primary" htmlType="submit">
+              <Button type="primary" htmlType="submit" loading={loading}>
                 {t("modalCreate")}
               </Button>
             </Motion.div>
@@ -184,6 +165,7 @@ const CreateProject = ({ onSuccess }) => {
                 form.resetFields();
                 setMembers([]);
               }}
+              disabled={loading}
             >
               {t("modalClear")}
             </Button>

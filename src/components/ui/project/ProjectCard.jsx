@@ -18,47 +18,41 @@ const ProjectCard = ({ project }) => {
       <Card
         title={
           <div className="flex justify-between items-center">
-            <span className="font-semibold text-[var(--color-text-primary)]">
-              {project.name}
+            <span className="font-semibold text-gray-800">
+              {project.projectName}
             </span>
-            <Tag className="!bg-[#ef4444] !text-[var(--color-text-primary)] !border-[red] cursor-pointer">
+            <Tag className="bg-red-100 text-red-600 border-red-200 rounded-md px-2 py-1 text-xs">
               Off Track
             </Tag>
           </div>
         }
-        className="rounded-xl border-[var(--color-border)] hover:shadow-md transition-shadow duration-200 cursor-pointer"
-        style={{
-          backgroundColor: "var(--color-background-paper)",
-        }}
-        bordered={false}
+        className="rounded-2xl border border-gray-200 hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+        variant="borderless"
       >
-        <p
-          className="!text-[var(--color-text-secondary)]"
-          ellipsis={{ rows: 3 }}
-        >
+        <p className="text-gray-600 text-sm line-clamp-3">
           {project.description}
         </p>
 
-        <div className="flex items-center mt-4 text-sm text-[var(--color-text-secondary)] gap-2">
-          <CalendarOutlined className="text-[var(--color-text-secondary)]" />
+        <div className="flex items-center mt-4 text-sm text-gray-500 gap-2">
+          <CalendarOutlined className="text-gray-500" />
           <span>{dayjs(project.date).format("DD MMMM, YYYY")}</span>
         </div>
 
         <div className="flex justify-between items-center mt-4">
           <div className="flex -space-x-2">
-            {project.team.map((avatar, i) => (
-              <Tooltip key={i} title={`Member ${i + 1}`}>
+            {project.members?.map((member, i) => (
+              <Tooltip key={i} title={member.user.fullName}>
                 <Avatar
-                  src={avatar}
+                  src={member.user.avatar}
                   size="small"
-                  className="border border-[var(--color-border)]"
+                  className="ring-1 ring-gray-200"
                 />
               </Tooltip>
             ))}
           </div>
-          <div className="flex items-center text-[var(--color-text-secondary)] text-sm gap-1">
-            <ExclamationCircleOutlined className="text-[var(--color-text-secondary)]" />
-            <span>{project.issues} issues</span>
+          <div className="flex items-center text-gray-500 text-sm gap-1">
+            <ExclamationCircleOutlined className="text-gray-500" />
+            <span>{project.totalTasks} tasks</span>
           </div>
         </div>
       </Card>

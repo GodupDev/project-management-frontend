@@ -14,18 +14,15 @@ import {
   Col,
   Avatar,
   Tooltip,
-  Progress,
 } from "antd";
 import {
   ArrowLeftOutlined,
   UserOutlined,
   ClockCircleOutlined,
-  TeamOutlined,
   TagOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useMockData } from "../../context/MockDataContext";
 import { useLanguage } from "../../context/LanguageContext";
 import TaskBoard from "../../components/ui/task/TaskBoard";
 
@@ -38,8 +35,41 @@ export default function ProjectSpecific() {
   const navigate = useNavigate();
   const location = useLocation();
   const projectData = location.state?.projectData;
-  const { projects, tasks, users, updateProjects } = useMockData();
   const { t } = useLanguage();
+
+  // Hardcoded data
+  const users = [
+    { id: 1, fullName: "Alice Johnson", avatar: "" },
+    { id: 2, fullName: "Bob Smith", avatar: "" },
+    { id: 3, fullName: "Charlie Brown", avatar: "" },
+  ];
+
+  const projects = [
+    {
+      id: 1,
+      name: "abc",
+      description: "Redesign the marketing website.",
+      status: t("inProgress"),
+      startDate: "2024-06-01T00:00:00Z",
+      expectedEndDate: "2024-07-01T00:00:00Z",
+      managers: [users[0], users[1]],
+    },
+  ];
+
+  const tasks = [
+    {
+      id: 1,
+      name: "Wireframes",
+      project: { id: 1 },
+      status: "Todo",
+    },
+    {
+      id: 2,
+      name: "UI Design",
+      project: { id: 1 },
+      status: "In Progress",
+    },
+  ];
 
   const [project, setProject] = useState(null);
   const [projectTasks, setProjectTasks] = useState([]);
@@ -64,13 +94,12 @@ export default function ProjectSpecific() {
         setEditedProject({ ...foundProject });
       }
     }
-  }, [projectData, projectName, projects]);
+  }, [projectData, projectName]);
 
   useEffect(() => {
-    // Filter tasks for this project
-    const projectTasks = tasks.filter((t) => t.project.id === project?.id);
-    setProjectTasks(projectTasks);
-  }, [project, tasks]);
+    const filteredTasks = tasks.filter((t) => t.project.id === project?.id);
+    setProjectTasks(filteredTasks);
+  }, [project]);
 
   const handleChange = (field, value) => {
     setEditedProject((prev) => ({
@@ -83,10 +112,10 @@ export default function ProjectSpecific() {
     const updatedProjects = projects.map((p) =>
       p.id === editedProject.id ? editedProject : p,
     );
-    updateProjects(updatedProjects);
     setProject(editedProject);
     setEditMode(false);
     message.success(t("projectUpdatedSuccess"));
+    // Since this is hardcoded, the update is local only
   };
 
   const handleTaskClick = (task) => {
@@ -142,7 +171,6 @@ export default function ProjectSpecific() {
           )
         }
       >
-        {/* Project Name */}
         <div>
           <Title level={4}>{t("projectName")}</Title>
           {!editMode ? (
@@ -161,7 +189,6 @@ export default function ProjectSpecific() {
 
         <Divider />
 
-        {/* Description */}
         <div>
           <Title level={4}>{t("description")}</Title>
           {!editMode ? (
@@ -181,7 +208,6 @@ export default function ProjectSpecific() {
         <Divider />
 
         <Row gutter={[24, 24]}>
-          {/* Project Manager */}
           <Col xs={24} sm={12}>
             <Title level={5}>
               <UserOutlined /> {t("projectManager")}
@@ -229,7 +255,6 @@ export default function ProjectSpecific() {
             )}
           </Col>
 
-          {/* Status */}
           <Col xs={24} sm={12}>
             <Title level={5}>
               <TagOutlined /> {t("status")}
@@ -265,7 +290,6 @@ export default function ProjectSpecific() {
             )}
           </Col>
 
-          {/* Start Date */}
           <Col xs={24} sm={12}>
             <Title level={5}>
               <ClockCircleOutlined /> {t("startDate")}
@@ -292,7 +316,6 @@ export default function ProjectSpecific() {
             )}
           </Col>
 
-          {/* Expected End Date */}
           <Col xs={24} sm={12}>
             <Title level={5}>
               <ClockCircleOutlined /> {t("expectedEndDate")}
@@ -325,7 +348,6 @@ export default function ProjectSpecific() {
 
         <Divider />
 
-        {/* Task List */}
         <div>
           <Title level={4}>{t("tasks")}</Title>
           <TaskBoard

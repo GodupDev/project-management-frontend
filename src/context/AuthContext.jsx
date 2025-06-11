@@ -25,53 +25,38 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem("token");
     if (token) {
       dispatch(getCurrentUser());
+      console.log(token);
     }
-    console.log(token);
   }, [dispatch]);
 
   useEffect(() => {
     if (error) {
-      message.error(error);
+      message.error(t(error));
     }
-  }, [error]);
+  }, [error, t]);
 
   const handleLogin = async (email, password) => {
-    try {
-      const result = await dispatch(login({ email, password })).unwrap();
-      if (result) {
-        console.log("Login successful, user data:", result.data);
-        message.success("Đăng nhập thành công");
-        navigate("/");
-      }
-    } catch (error) {
-      // Error is handled by the reducer
+    const result = await dispatch(login({ email, password })).unwrap();
+    if (result) {
+      message.success(t("successLogin"));
+      navigate("/");
     }
   };
 
   const handleSignup = async (email, password, username) => {
-    try {
-      const result = await dispatch(
-        register({ email, password, username }),
-      ).unwrap();
-      if (result) {
-        console.log("Signup successful, user data:", result.data);
-        message.success("Đăng ký thành công");
-        navigate("/login");
-      }
-    } catch (error) {
-      // Error is handled by the reducer
+    const result = await dispatch(
+      register({ email, password, username }),
+    ).unwrap();
+    if (result) {
+      message.success(t("successCreate"));
+      navigate("/login");
     }
   };
 
   const handleLogout = async () => {
-    try {
-      await dispatch(logout()).unwrap();
-      console.log("User logged out");
-      navigate("/login");
-      message.success("Đăng xuất thành công");
-    } catch (error) {
-      // Error is handled by the reducer
-    }
+    await dispatch(logout()).unwrap();
+    navigate("/login");
+    message.success(t("successLogout"));
   };
 
   const value = {
@@ -89,7 +74,10 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error(
+      context?.t("errorUseAuth") ||
+        "useAuth must be used within an AuthProvider",
+    );
   }
   return context;
 };
