@@ -2,17 +2,10 @@ import React, { createContext, useContext, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { message } from "antd";
 import { useAuth } from "./AuthContext";
+import { useLanguage } from "./LanguageContext";
 import {
-  useGetProfileQuery,
-  useUpdateProfileMutation,
-  useUpdateAvatarMutation,
-  useUpdatePasswordMutation,
-  useUpdatePersonalInfoMutation,
-} from "../services/userProfileApi";
-import {
-  setProfile,
-  setLoading,
-  setError,
+  fetchUserProfile,
+  updateUserProfile,
   clearProfile,
   selectProfile,
   selectProfileLoading,
@@ -24,38 +17,19 @@ const UserProfileContext = createContext();
 export const UserProfileProvider = ({ children }) => {
   const dispatch = useDispatch();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
-  // RTK Query hooks
-  const {
-    data: profileData,
-    isLoading: isProfileLoading,
-    error: profileError,
-  } = useGetProfileQuery(undefined, {
-    skip: !user, // Skip query if no user is logged in
-  });
+  // Get profile data from Redux store
+  const profile = useSelector(selectProfile);
+  const loading = useSelector(selectProfileLoading);
+  const error = useSelector(selectProfileError);
 
-  const [updateProfile] = useUpdateProfileMutation();
-  const [updateAvatar] = useUpdateAvatarMutation();
-  const [updatePassword] = useUpdatePasswordMutation();
-  const [updatePersonalInfo] = useUpdatePersonalInfoMutation();
-
-  // Sync RTK Query state with Redux state
+  // Fetch profile when user is logged in
   useEffect(() => {
-    if (profileData) {
-      dispatch(setProfile(profileData));
+    if (user?._id) {
+      dispatch(fetchUserProfile(user._id));
     }
-  }, [profileData, dispatch]);
-
-  useEffect(() => {
-    dispatch(setLoading(isProfileLoading));
-  }, [isProfileLoading, dispatch]);
-
-  useEffect(() => {
-    if (profileError) {
-      dispatch(setError(profileError.message));
-      message.error(profileError.message || "Failed to fetch profile");
-    }
-  }, [profileError, dispatch]);
+  }, [user?._id, dispatch]);
 
   // Clear profile when user logs out
   useEffect(() => {
@@ -67,58 +41,20 @@ export const UserProfileProvider = ({ children }) => {
   // Profile update handlers
   const handleUpdateProfile = async (profileData) => {
     try {
-      const result = await updateProfile(profileData).unwrap();
-      message.success("Profile updated successfully");
+      const result = await dispatch(updateUserProfile(profileData)).unwrap();
+      message.success(t("successProfileUpdate"));
       return result;
     } catch (error) {
-      message.error(error.message || "Failed to update profile");
-      throw error;
-    }
-  };
-
-  const handleUpdateAvatar = async (avatarFile) => {
-    try {
-      const formData = new FormData();
-      formData.append("avatar", avatarFile);
-      const result = await updateAvatar(formData).unwrap();
-      message.success("Avatar updated successfully");
-      return result;
-    } catch (error) {
-      message.error(error.message || "Failed to update avatar");
-      throw error;
-    }
-  };
-
-  const handleUpdatePassword = async (passwordData) => {
-    try {
-      const result = await updatePassword(passwordData).unwrap();
-      message.success("Password updated successfully");
-      return result;
-    } catch (error) {
-      message.error(error.message || "Failed to update password");
-      throw error;
-    }
-  };
-
-  const handleUpdatePersonalInfo = async (personalInfo) => {
-    try {
-      const result = await updatePersonalInfo(personalInfo).unwrap();
-      message.success("Personal info updated successfully");
-      return result;
-    } catch (error) {
-      message.error(error.message || "Failed to update personal info");
+      message.error(error.message || t("successProfileUpdateFailed"));
       throw error;
     }
   };
 
   const value = {
-    profile: useSelector(selectProfile),
-    loading: useSelector(selectProfileLoading),
-    error: useSelector(selectProfileError),
+    profile,
+    loading,
+    error,
     updateProfile: handleUpdateProfile,
-    updateAvatar: handleUpdateAvatar,
-    updatePassword: handleUpdatePassword,
-    updatePersonalInfo: handleUpdatePersonalInfo,
   };
 
   return (

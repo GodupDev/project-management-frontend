@@ -7,7 +7,6 @@ import {
   ProjectOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
-import { useMockData } from "../../context/MockDataContext";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 
@@ -48,17 +47,41 @@ const getIcon = (type) => {
   }
 };
 
-const NotificationDropdown = ({ notifications = [], onViewAll }) => {
-  const { updateNotifications } = useMockData();
+const NotificationDropdown = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
 
+  // Hardcoded notifications data
+  const notifications = [
+    {
+      id: 1,
+      type: "task",
+      title: "Task Completed",
+      message: "The task 'Design Homepage' has been completed by Jane Smith",
+      time: "2m ago",
+      status: "unread",
+    },
+    {
+      id: 2,
+      type: "mention",
+      title: "New Mention",
+      message:
+        "John Doe mentioned you in a comment on 'Implement Authentication'",
+      time: "10m ago",
+      status: "unread",
+    },
+    {
+      id: 3,
+      type: "project",
+      title: "Project Updated",
+      message: "The project 'Website Redesign' status changed to In Progress",
+      time: "1h ago",
+      status: "read",
+    },
+  ];
+
   const handleNotificationClick = (notification) => {
-    updateNotifications(
-      notifications.map((n) =>
-        n.id === notification.id ? { ...n, status: "read" } : n,
-      ),
-    );
+    // In a real app, this would update the notification status in the backend
     console.log("Navigate to", notification.type, ":", notification.message);
   };
 
@@ -157,7 +180,7 @@ const NotificationDropdown = ({ notifications = [], onViewAll }) => {
         <Button
           type="link"
           className="text-blue-600 font-semibold hover:underline text-sm"
-          onClick={onViewAll}
+          onClick={() => navigate("/notifications")}
           aria-label={t("notifViewAll")}
           size="small"
         >

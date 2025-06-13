@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Card,
   Typography,
@@ -8,96 +8,159 @@ import {
   DatePicker,
   Input,
   Space,
-  message,
   Divider,
   Row,
   Col,
   Avatar,
-  Tooltip,
-  Progress,
+  Spin,
 } from "antd";
 import {
   ArrowLeftOutlined,
   UserOutlined,
   ClockCircleOutlined,
-  TeamOutlined,
   TagOutlined,
+  TeamOutlined,
+  PlusOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useMockData } from "../../context/MockDataContext";
 import { useLanguage } from "../../context/LanguageContext";
+import { useProject } from "../../context/ProjectContext";
 import TaskBoard from "../../components/ui/task/TaskBoard";
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
 const { TextArea } = Input;
 
+// Define MEMBER_ROLES outside the component to prevent re-creation on re-renders
+const MEMBER_ROLES = [
+  { value: "leader", label: "Leader", color: "red" },
+  { value: "member", label: "Member", color: "blue" },
+  { value: "viewer", label: "Viewer", color: "default" },
+];
+
 export default function ProjectSpecific() {
-  const { projectName } = useParams();
+  const { projectId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const projectData = location.state?.projectData;
-  const { projects, tasks, users, updateProjects } = useMockData();
-  const { t } = useLanguage();
 
-  const [project, setProject] = useState(null);
-  const [projectTasks, setProjectTasks] = useState([]);
+  const { t } = useLanguage();
+  const { getProjectById, updateProject } = useProject();
+
+  const [projectData, setProjectData] = useState(
+    location.state?.projectData || null,
+  );
   const [editMode, setEditMode] = useState(false);
-  const [editedProject, setEditedProject] = useState(null);
+  const [editedProject, setEditedProject] = useState(
+    location.state?.projectData || null,
+  );
+  const [loading, setLoading] = useState(!location.state?.projectData);
+  const [saving, setSaving] = useState(false);
 
   const projectStatuses = [
-    t("inProgress"),
-    t("completed"),
-    t("onHold"),
-    t("cancelled"),
+    { value: "active", label: t("active"), color: "green" },
+    { value: "completed", label: t("completed"), color: "blue" },
+    { value: "onHold", label: t("onHold"), color: "orange" },
+    { value: "cancelled", label: t("cancelled"), color: "red" },
   ];
 
-  useEffect(() => {
-    if (projectData) {
-      setProject(projectData);
-      setEditedProject({ ...projectData });
-    } else {
-      const foundProject = projects.find((p) => p.name === projectName);
-      if (foundProject) {
-        setProject(foundProject);
-        setEditedProject({ ...foundProject });
-      }
+  const fetchProject = useCallback(async () => {
+    const projectIdToFetch = location.state?.projectData?._id || projectId;
+
+    if (!projectIdToFetch) {
+      navigate("/projects");
+      return;
     }
-  }, [projectData, projectName, projects]);
+
+    try {
+      setLoading(true);
+      const fetchedProject = await getProjectById(projectIdToFetch);
+      if (!fetchedProject) {
+        navigate("/projects");
+        return;
+      }
+      setProjectData(fetchedProject);
+      setEditedProject(fetchedProject);
+    } catch (error) {
+      console.error("Error fetching project:", error);
+      navigate("/projects");
+    } finally {
+      setLoading(false);
+    }
+  }, [projectId, location.state?.projectData, navigate, getProjectById]);
 
   useEffect(() => {
-    // Filter tasks for this project
-    const projectTasks = tasks.filter((t) => t.project.id === project?.id);
-    setProjectTasks(projectTasks);
-  }, [project, tasks]);
+    fetchProject();
+  }, [fetchProject]);
 
-  const handleChange = (field, value) => {
+  const handleInputChange = (field, value) => {
     setEditedProject((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  const handleSave = () => {
-    const updatedProjects = projects.map((p) =>
-      p.id === editedProject.id ? editedProject : p,
-    );
-    updateProjects(updatedProjects);
-    setProject(editedProject);
+  const handleDateChange = (field, date) => {
+    setEditedProject((prev) => ({
+      ...prev,
+      dateRange: {
+        ...prev.dateRange,
+        [field]: date ? date.toISOString() : null,
+      },
+    }));
+  };
+
+  const handleSave = async () => {
+    if (!projectData?._id || !editedProject) return;
+
+    try {
+      setSaving(true);
+      const updatedData = {
+        projectName: editedProject.projectName,
+        description: editedProject.description,
+        dateRange: {
+          startDate: editedProject.dateRange?.startDate,
+          endDate: editedProject.dateRange?.endDate,
+        },
+        status: editedProject.status,
+      };
+
+      const updatedProject = await updateProject(projectData._id, updatedData);
+      if (!updatedProject) {
+        throw new Error(t("projectUpdateFailed"));
+      }
+
+      setProjectData(updatedProject);
+      setEditedProject(updatedProject);
+      setEditMode(false);
+    } catch (error) {
+      console.error("Error updating project:", error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditedProject(projectData);
     setEditMode(false);
-    message.success(t("projectUpdatedSuccess"));
   };
 
-  const handleTaskClick = (task) => {
-    navigate(`/projects/${projectName}/${task.name}`, {
-      state: { taskData: task },
-    });
-  };
+  const handleTaskClick = useCallback((task) => {
+    console.log("Task clicked:", task);
+  }, []);
 
-  if (!project) {
+  if (loading) {
     return (
-      <Card style={{ maxWidth: 700, margin: "auto", marginTop: 50 }}>
+      <div className="flex justify-center items-center min-h-screen">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (!projectData || !editedProject) {
+    return (
+      <Card style={{ maxWidth: 1200, margin: "auto", marginTop: 50 }}>
         <Text type="danger">{t("projectNotFound")}</Text>
         <Button type="link" onClick={() => navigate("/projects")}>
           {t("backToList")}
@@ -107,7 +170,7 @@ export default function ProjectSpecific() {
   }
 
   return (
-    <div className="p-5 mx-auto space-y-8">
+    <div className="p-5 mx-auto !space-y-3">
       <Card
         title={
           <Space>
@@ -122,16 +185,10 @@ export default function ProjectSpecific() {
         extra={
           editMode ? (
             <>
-              <Button
-                onClick={() => {
-                  setEditMode(false);
-                  setEditedProject({ ...project });
-                }}
-                style={{ marginRight: 8 }}
-              >
+              <Button onClick={handleCancel} style={{ marginRight: 8 }}>
                 {t("cancel")}
               </Button>
-              <Button type="primary" onClick={handleSave}>
+              <Button type="primary" onClick={handleSave} loading={saving}>
                 {t("save")}
               </Button>
             </>
@@ -142,17 +199,22 @@ export default function ProjectSpecific() {
           )
         }
       >
-        {/* Project Name */}
-        <div>
-          <Title level={4}>{t("projectName")}</Title>
+        <div className="flex !items-center gap-2">
+          <Text strong className="!text-lg">
+            {t("projectName")}:
+          </Text>
+
           {!editMode ? (
-            <Text strong style={{ fontSize: 16 }}>
-              {project.name}
+            <Text strong className="!text-lg italic">
+              {projectData.projectName || (
+                <span className="text-gray-400 italic">({t("noName")})</span>
+              )}
             </Text>
           ) : (
             <Input
-              value={editedProject.name}
-              onChange={(e) => handleChange("name", e.target.value)}
+              className="w-full max-w-sm rounded-md border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              value={editedProject.projectName}
+              onChange={(e) => handleInputChange("projectName", e.target.value)}
               placeholder={t("projectName")}
               autoFocus
             />
@@ -161,18 +223,17 @@ export default function ProjectSpecific() {
 
         <Divider />
 
-        {/* Description */}
         <div>
           <Title level={4}>{t("description")}</Title>
           {!editMode ? (
             <Paragraph style={{ whiteSpace: "pre-wrap" }}>
-              {project.description || t("noDescription")}
+              {projectData.description || t("noDescription")}
             </Paragraph>
           ) : (
             <TextArea
               rows={5}
               value={editedProject.description}
-              onChange={(e) => handleChange("description", e.target.value)}
+              onChange={(e) => handleInputChange("description", e.target.value)}
               placeholder={t("projectDescriptionPlaceholder")}
             />
           )}
@@ -181,55 +242,75 @@ export default function ProjectSpecific() {
         <Divider />
 
         <Row gutter={[24, 24]}>
-          {/* Project Manager */}
           <Col xs={24} sm={12}>
             <Title level={5}>
-              <UserOutlined /> {t("projectManager")}
+              <TeamOutlined /> {t("members")}
             </Title>
-            {!editMode ? (
-              <Avatar.Group max={{ count: 3 }}>
-                {project.managers?.map((manager) => (
-                  <Tooltip
-                    key={`manager-${manager?.id || "unknown"}`}
-                    title={manager?.fullName || t("unknown")}
-                  >
-                    <Avatar
-                      src={manager?.avatar}
-                      icon={!manager?.avatar && <UserOutlined />}
-                    >
-                      {!manager?.avatar && (manager?.fullName?.[0] || "?")}
-                    </Avatar>
-                  </Tooltip>
-                ))}
-              </Avatar.Group>
-            ) : (
-              <Select
-                mode="multiple"
-                style={{ width: "100%" }}
-                placeholder={t("selectManagers")}
-                value={
-                  editedProject.managers?.map((m) => m?.id).filter(Boolean) ||
-                  []
-                }
-                onChange={(ids) =>
-                  handleChange(
-                    "managers",
-                    ids
-                      .map((id) => users.find((u) => u.id === id))
-                      .filter(Boolean),
-                  )
-                }
-              >
-                {users.map((user) => (
-                  <Option key={`user-${user.id}`} value={user.id}>
-                    {user.fullName}
-                  </Option>
-                ))}
-              </Select>
+            {editMode && (
+              <div className="mb-4 flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder={t("enterMemberEmail")}
+                    className="flex-1"
+                  />
+                  <Button type="primary" disabled>
+                    {t("addMember")}
+                  </Button>
+                </div>
+              </div>
             )}
+            <Space direction="vertical" size="middle" className="w-full">
+              {projectData.members?.map((member) => (
+                <div
+                  key={member.userId}
+                  className="flex items-center justify-between p-2 shadow-sm bg-gray-50 hover:bg-gray-100"
+                >
+                  <Space>
+                    <Avatar
+                      src={member.avatarUrl}
+                      icon={!member.avatarUrl && <UserOutlined />}
+                      size="small"
+                    />
+                    <span>{member.username}</span>
+                  </Space>
+                  <Space>
+                    {editMode ? (
+                      <Select
+                        value={member.role}
+                        style={{ width: 120 }}
+                        disabled
+                      >
+                        {MEMBER_ROLES.map((role) => (
+                          <Option key={role.value} value={role.value}>
+                            {role.label}
+                          </Option>
+                        ))}
+                      </Select>
+                    ) : (
+                      <Tag
+                        color={
+                          MEMBER_ROLES.find((r) => r.value === member.role)
+                            ?.color || "default"
+                        }
+                      >
+                        {MEMBER_ROLES.find((r) => r.value === member.role)
+                          ?.label || t("member")}
+                      </Tag>
+                    )}
+                    {editMode && (
+                      <Button
+                        type="text"
+                        danger
+                        icon={<DeleteOutlined />}
+                        disabled
+                      />
+                    )}
+                  </Space>
+                </div>
+              ))}
+            </Space>
           </Col>
 
-          {/* Status */}
           <Col xs={24} sm={12}>
             <Title level={5}>
               <TagOutlined /> {t("status")}
@@ -237,103 +318,100 @@ export default function ProjectSpecific() {
             {!editMode ? (
               <Tag
                 color={
-                  project.status === t("completed")
-                    ? "green"
-                    : project.status === t("inProgress")
-                    ? "blue"
-                    : project.status === t("onHold")
-                    ? "orange"
-                    : project.status === t("cancelled")
-                    ? "red"
-                    : "default"
+                  projectStatuses.find((s) => s.value === projectData.status)
+                    ?.color || "default"
                 }
               >
-                {project.status}
+                {projectStatuses.find((s) => s.value === projectData.status)
+                  ?.label || projectData.status}
               </Tag>
             ) : (
               <Select
                 value={editedProject.status}
-                onChange={(val) => handleChange("status", val)}
+                onChange={(val) => handleInputChange("status", val)}
                 style={{ width: "100%" }}
               >
                 {projectStatuses.map((status) => (
-                  <Option key={status} value={status}>
-                    {status}
+                  <Option key={status.value} value={status.value}>
+                    {status.label}
                   </Option>
                 ))}
               </Select>
             )}
           </Col>
 
-          {/* Start Date */}
           <Col xs={24} sm={12}>
             <Title level={5}>
               <ClockCircleOutlined /> {t("startDate")}
             </Title>
             {!editMode ? (
               <Text>
-                {project.startDate
-                  ? moment(project.startDate).format("DD/MM/YYYY")
+                {projectData.dateRange?.startDate
+                  ? moment(projectData.dateRange.startDate).format("DD/MM/YYYY")
                   : t("notSpecified")}
               </Text>
             ) : (
               <DatePicker
                 value={
-                  editedProject.startDate
-                    ? moment(editedProject.startDate)
+                  editedProject.dateRange?.startDate
+                    ? moment(editedProject.dateRange.startDate)
                     : null
                 }
-                onChange={(date) =>
-                  handleChange("startDate", date ? date.toISOString() : null)
-                }
+                onChange={(date) => handleDateChange("startDate", date)}
                 style={{ width: "100%" }}
                 format="DD/MM/YYYY"
               />
             )}
           </Col>
 
-          {/* Expected End Date */}
           <Col xs={24} sm={12}>
             <Title level={5}>
-              <ClockCircleOutlined /> {t("expectedEndDate")}
+              <ClockCircleOutlined /> {t("endDate")}
             </Title>
             {!editMode ? (
               <Text>
-                {project.expectedEndDate
-                  ? moment(project.expectedEndDate).format("DD/MM/YYYY")
+                {projectData.dateRange?.endDate
+                  ? moment(projectData.dateRange.endDate).format("DD/MM/YYYY")
                   : t("notSpecified")}
               </Text>
             ) : (
               <DatePicker
                 value={
-                  editedProject.expectedEndDate
-                    ? moment(editedProject.expectedEndDate)
+                  editedProject.dateRange?.endDate
+                    ? moment(editedProject.dateRange.endDate)
                     : null
                 }
-                onChange={(date) =>
-                  handleChange(
-                    "expectedEndDate",
-                    date ? date.toISOString() : null,
-                  )
-                }
+                onChange={(date) => handleDateChange("endDate", date)}
                 style={{ width: "100%" }}
                 format="DD/MM/YYYY"
               />
             )}
           </Col>
         </Row>
+      </Card>
 
-        <Divider />
-
-        {/* Task List */}
-        <div>
-          <Title level={4}>{t("tasks")}</Title>
-          <TaskBoard
-            tasks={projectTasks}
-            onTaskClick={handleTaskClick}
-            projectId={project.id}
-          />
-        </div>
+      <Card
+        title={
+          <div className="flex justify-between items-center">
+            <Title level={4} className="!mb-0">
+              {t("tasks")}
+            </Title>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                console.log("Create new task");
+              }}
+            >
+              {t("newTask")}
+            </Button>
+          </div>
+        }
+      >
+        <TaskBoard
+          tasks={projectData.tasks || []}
+          onTaskClick={handleTaskClick}
+        />
       </Card>
     </div>
   );

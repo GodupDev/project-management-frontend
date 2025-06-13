@@ -21,7 +21,6 @@ import MyProfile from "./MyProfile";
 import NotificationSettings from "./NotificationSettings";
 import AppearanceSettings from "./AppearanceSettings";
 import PrivacySettings from "./PrivacySettings";
-import TimeZoneSettings from "./TimeZoneSettings";
 import SecuritySettings from "./SecuritySettings";
 
 const { Content, Sider } = Layout;
@@ -73,11 +72,6 @@ const SettingsMain = () => {
       label: t("privacy"),
     },
     {
-      key: "timezone",
-      icon: <GlobalOutlined />,
-      label: t("timeZone"),
-    },
-    {
       key: "security",
       icon: <LockOutlined />,
       label: t("security"),
@@ -89,7 +83,6 @@ const SettingsMain = () => {
     { path: "notifications", element: <NotificationSettings /> },
     { path: "appearance", element: <AppearanceSettings /> },
     { path: "privacy", element: <PrivacySettings /> },
-    { path: "timezone", element: <TimeZoneSettings /> },
     { path: "security", element: <SecuritySettings /> },
   ];
 

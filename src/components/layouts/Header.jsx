@@ -1,7 +1,6 @@
 import { motion as Motion } from "framer-motion";
 import { Image } from "antd";
 import { useSidebar } from "../../context/SidebarContext";
-import { useMockData } from "../../context/MockDataContext";
 import SearchBar from "../ui/SearchBar";
 import IMAGE from "../../assets/images/images";
 import IconThemeToggle from "../icons/IconThemeToggle";
@@ -10,11 +9,11 @@ import IconNotification from "../icons/IconNotification";
 import { useState, useRef, useEffect } from "react";
 import ProfileModal from "../modals/ProfileModal";
 import NotificationDropdown from "../dropdown/NotificationDropdown";
+import { useUserProfile } from "../../context/UserProfileContext";
 
 const Header = () => {
   const { toggleSidebar } = useSidebar();
-  const { settings, notifications } = useMockData();
-  const { userProfile } = settings;
+  const { profile } = useUserProfile();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
@@ -42,7 +41,7 @@ const Header = () => {
   };
 
   // Tính số thông báo chưa đọc
-  const unreadCount = notifications.filter((n) => n.status === "unread").length;
+  const unreadCount = 2;
 
   return (
     <Motion.div
@@ -101,10 +100,7 @@ const Header = () => {
 
           {isNotificationOpen && (
             <div ref={notifRef} className="absolute right-0 top-full mt-2 z-50">
-              <NotificationDropdown
-                notifications={notifications}
-                onViewAll={handleViewAllNotifications}
-              />
+              <NotificationDropdown onViewAll={handleViewAllNotifications} />
             </div>
           )}
 
@@ -114,16 +110,16 @@ const Header = () => {
           >
             <div className="text-right flex-1">
               <p className="text-[1rem] font-medium text-[var(--color-text-primary)] truncate">
-                {userProfile.fullName}
+                {profile?.userId.username}
               </p>
               <p className="text-[0.7rem] text-[var(--color-text-secondary)] truncate">
-                {userProfile.role}
+                {profile?.fullName}
               </p>
             </div>
             <Image
               width={40}
               height={40}
-              src={userProfile.avatar}
+              src={profile?.avatarUrl}
               preview={false}
               className="rounded-full object-cover border-2 border-[var(--color-border-light)] 
                          shadow-[var(--shadow-sm)]"
@@ -139,7 +135,6 @@ const Header = () => {
       <ProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
-        user={userProfile}
       />
     </Motion.div>
   );

@@ -24,17 +24,58 @@ import {
 } from "@ant-design/icons";
 import { motion as Motion } from "framer-motion";
 import dayjs from "dayjs";
-import { useMockData } from "../context/MockDataContext";
 import { useLanguage } from "../context/LanguageContext";
 
 const { RangePicker } = DatePicker;
 
 const WorkLogs = () => {
-  const { worklogs } = useMockData();
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [dateRange, setDateRange] = useState([null, null]);
   const [showFilters, setShowFilters] = useState(false);
+
+  // Hardcoded data
+  const worklogs = [
+    {
+      id: 1,
+      projectName: "Project Management System",
+      projectStatus: "active",
+      taskName: "Implement user authentication",
+      taskStatus: "completed",
+      userId: "user1",
+      userName: "John Doe",
+      userAvatar: "https://i.pravatar.cc/150?img=1",
+      description: "Added JWT authentication and user registration",
+      hours: 3.5,
+      date: "2024-03-15T09:00:00",
+    },
+    {
+      id: 2,
+      projectName: "E-commerce Platform",
+      projectStatus: "active",
+      taskName: "Design dashboard layout",
+      taskStatus: "inProgress",
+      userId: "user2",
+      userName: "Jane Smith",
+      userAvatar: "https://i.pravatar.cc/150?img=2",
+      description: "Created responsive dashboard components",
+      hours: 4.0,
+      date: "2024-03-15T13:00:00",
+    },
+    {
+      id: 3,
+      projectName: "Mobile App Development",
+      projectStatus: "active",
+      taskName: "Write API documentation",
+      taskStatus: "completed",
+      userId: "user3",
+      userName: "Mike Johnson",
+      userAvatar: "https://i.pravatar.cc/150?img=3",
+      description: "Documented REST API endpoints",
+      hours: 2.5,
+      date: "2024-03-14T10:00:00",
+    },
+  ];
 
   // Calculate statistics
   const totalHours = worklogs.reduce((sum, log) => sum + log.hours, 0);
@@ -119,9 +160,9 @@ const WorkLogs = () => {
     },
     {
       title: t("createdAt"),
-      dataIndex: "createdAt",
-      key: "createdAt",
-      sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+      dataIndex: "date",
+      key: "date",
+      sorter: (a, b) => new Date(a.date) - new Date(b.date),
       render: (date) => dayjs(date).format("MMM DD, YYYY HH:mm"),
     },
   ];

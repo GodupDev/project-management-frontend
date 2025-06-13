@@ -23,8 +23,8 @@ const Main = () => {
     >
       <Routes>
         <Route index element={<ProjectManagement />} />
-        <Route path=":projectName" element={<ProjectSpecific />} />
-        <Route path=":projectName/:taskName" element={<TaskSpecific />} />
+        <Route path=":projectId" element={<ProjectSpecific />} />
+        <Route path=":projectId/:taskId" element={<TaskSpecific />} />
         <Route
           path="*"
           element={

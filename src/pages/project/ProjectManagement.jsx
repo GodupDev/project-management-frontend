@@ -1,88 +1,48 @@
-import React, { useState } from "react";
-import { Button, Typography, Modal, Card, Tag, Avatar, message } from "antd";
-import { PlusOutlined, UserOutlined } from "@ant-design/icons";
+import React, { useState, useEffect } from "react";
+import { Button, Modal, Empty } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import ProjectCard from "../../components/ui/project/ProjectCard";
-import Pagination from "../../components/ui/Pagination";
 import CreateProject from "../../components/modals/CreateProject";
-import { useMockData } from "../../context/MockDataContext";
+import { useProject } from "../../context/ProjectContext";
 import { useLanguage } from "../../context/LanguageContext";
-
-const { Title } = Typography;
 
 const ProjectManagement = () => {
   const navigate = useNavigate();
-  const { projects, updateProjects } = useMockData();
+  const { createProject, projects, getAllProjects, loading } = useProject();
   const { t } = useLanguage();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [sortOption, setSortOption] = useState("newest");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const pageSize = 6;
 
-  const projectStatuses = [
-    t("inProgress"),
-    t("completed"),
-    t("onHold"),
-    t("cancelled"),
-  ];
+  // Load projects when component mounts
+  useEffect(() => {
+    getAllProjects();
+  }, []);
 
-  const filteredProjects = projects.filter(
-    (project) => statusFilter === "all" || project.status === statusFilter,
-  );
+  console.log(projects);
 
-  const sortedProjects = [...filteredProjects].sort((a, b) => {
-    const dateA = new Date(a.startDate);
-    const dateB = new Date(b.startDate);
-    switch (sortOption) {
-      case "newest":
-        return dateB - dateA;
-      case "oldest":
-        return dateA - dateB;
-      case "mostIssues":
-        return b.totalTasks - a.totalTasks;
-      case "fewestIssues":
-        return a.totalTasks - b.totalTasks;
-      default:
-        return 0;
+  const handleCreateProject = async (newProject) => {
+    try {
+      await createProject(newProject);
+      setIsCreateModalOpen(false);
+      navigate(`/projects/${newProject.name}`);
+    } catch (error) {
+      console.error("Failed to create project:", error);
     }
-  });
-
-  const displayedProjects = sortedProjects.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize,
-  );
-
-  const handleCreateProject = (newProject) => {
-    const updatedProjects = [...projects, { ...newProject, id: Date.now() }];
-    updateProjects(updatedProjects);
-    setIsCreateModalOpen(false);
-    message.success(t("projectCreatedSuccess"));
-    navigate(`/projects/${newProject.name}`);
   };
 
   return (
     <div className="p-5 mx-auto space-y-8">
       <div className="flex flex-wrap gap-4 mb-6 justify-between">
         <div className="flex gap-5">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 rounded-md !bg-white text-sm outline-none border-[var(--color-border)] hover:shadow-md transition-shadow duration-200 cursor-pointer"
-          >
+          <select className="px-3 py-2 rounded-md !bg-white text-sm outline-none border-[var(--color-border)] hover:shadow-md transition-shadow duration-200 cursor-pointer">
             <option value="all">{t("allStatus")}</option>
-            {projectStatuses.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
+            <option value="inProgress">{t("inProgress")}</option>
+            <option value="completed">{t("completed")}</option>
+            <option value="onHold">{t("onHold")}</option>
+            <option value="cancelled">{t("cancelled")}</option>
           </select>
 
-          <select
-            value={sortOption}
-            onChange={(e) => setSortOption(e.target.value)}
-            className="px-3 py-2 rounded-md !bg-white text-sm outline-none border-[var(--color-border)] hover:shadow-md transition-shadow duration-200 cursor-pointer"
-          >
+          <select className="px-3 py-2 rounded-md !bg-white text-sm outline-none border-[var(--color-border)] hover:shadow-md transition-shadow duration-200 cursor-pointer">
             <option value="newest">{t("newestFirst")}</option>
             <option value="oldest">{t("oldestFirst")}</option>
             <option value="mostIssues">{t("mostTasks")}</option>
@@ -101,90 +61,31 @@ const ProjectManagement = () => {
           {t("createProject")}
         </Button>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {displayedProjects.map((project) => (
-          <Card
-            key={project.id}
-            className="hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-            onClick={() => navigate(`/projects/${project.name}`)}
-          >
-            <div className="flex flex-col h-full">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">{project.name}</h3>
-                  <p className="text-gray-600 text-sm line-clamp-2">
-                    {project.description}
-                  </p>
-                </div>
-                <Tag
-                  color={
-                    project.status === t("completed")
-                      ? "green"
-                      : project.status === t("inProgress")
-                      ? "blue"
-                      : project.status === t("onHold")
-                      ? "orange"
-                      : "gray"
-                  }
-                >
-                  {project.status}
-                </Tag>
-              </div>
-
-              <div className="mt-auto">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm text-gray-500">
-                    {new Date(project.startDate).toLocaleDateString()}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {project.completedTasks}/{project.totalTasks} {t("tasks")}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <div className="flex -space-x-2">
-                    {project.members?.map((member, index) => {
-                      const memberId =
-                        member.user?.id || member.id || `member-${index}`;
-                      return (
-                        <Avatar
-                          key={`project-${project.id}-${memberId}`}
-                          src={member.user?.avatar}
-                          size="small"
-                          className="border-2 border-white"
-                          icon={<UserOutlined />}
-                        >
-                          {member.user?.fullName?.charAt(0) ||
-                            member.name?.charAt(0)}
-                        </Avatar>
-                      );
-                    })}
-                  </div>
-                  <Button
-                    type="link"
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/projects/${project.name}`);
-                    }}
-                  >
-                    {t("viewDetails")}
-                  </Button>
-                </div>
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+        {loading ? (
+          <div className="col-span-full flex flex-col items-center justify-center py-16 w-full">
+            <Empty description={t("loading")} />
+          </div>
+        ) : projects.length === 0 ? (
+          <div className="col-span-full flex flex-col items-center justify-center py-16 w-full">
+            <Empty description={t("noProjects")} />
+          </div>
+        ) : (
+          projects.map((project) => (
+            <div
+              key={project._id}
+              onClick={() =>
+                navigate(`/projects/${project.projectName}`, {
+                  state: { projectData: project },
+                })
+              }
+              className="cursor-pointer"
+            >
+              <ProjectCard project={project} />
             </div>
-          </Card>
-        ))}
+          ))
+        )}
       </div>
-
-      <Pagination
-        current={currentPage}
-        total={filteredProjects.length}
-        pageSize={pageSize}
-        onChange={setCurrentPage}
-      />
-
       <Modal
         title={t("createNewProject")}
         open={isCreateModalOpen}

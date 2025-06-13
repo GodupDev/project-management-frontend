@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
 import { Typography, Input, Select, Button, Form, Space, message } from "antd";
-import { motion } from "framer-motion";
 import { useLanguage } from "../../context/LanguageContext";
 
 const { Title } = Typography;
