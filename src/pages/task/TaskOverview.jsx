@@ -1,32 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   Button,
   Input,
   Select,
-  Space,
   Modal,
-  message,
   Table,
   Tag,
-  Tooltip,
+  message
 } from "antd";
 import {
   PlusOutlined,
   SearchOutlined,
-  FilterOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import TaskBoard from "../../components/ui/task/TaskBoard";
 import CreateTask from "../../components/modals/CreateTask";
 import { motion } from "framer-motion";
-import dayjs from "dayjs";
 import { useLanguage } from "../../context/LanguageContext";
 import { DatePicker } from "antd";
-
-const { Search } = Input;
-const { Option } = Select;
-const { RangePicker } = DatePicker;
+import { useDispatch, useSelector } from "react-redux";
+import { fetchTasks, createTask } from "../../store/slices/taskSlice";
+import { fetchUsers } from "../../store/slices/userSlice";
 
 // Define task statuses
 const taskStatuses = {
@@ -45,63 +39,74 @@ const taskPriorities = {
 };
 
 const TaskOverview = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { tasks, loading } = useSelector((state) => state.tasks);
+  const users = useSelector((state) => state.users?.list || []);
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [viewMode, setViewMode] = useState("all");
+  const currentUserId = useSelector((state) => state.auth.user?._id);
 
-  // Mock data for tasks
-  const tasks = [
-    {
-      id: 1,
-      title: "Implement user authentication",
-      status: "IN_PROGRESS",
-      priority: "HIGH",
-      assignee: "John Doe",
-      dueDate: "2024-03-15",
-      project: "Website Redesign",
-    },
-    {
-      id: 2,
-      title: "Design database schema",
-      status: "DONE",
-      priority: "MEDIUM",
-      assignee: "Jane Smith",
-      dueDate: "2024-03-10",
-      project: "Mobile App",
-    },
-    {
-      id: 3,
-      title: "Create API endpoints",
-      status: "TODO",
-      priority: "HIGH",
-      assignee: "Mike Johnson",
-      dueDate: "2024-03-20",
-      project: "Backend Service",
-    },
-  ];
+  useEffect(() => {
+    dispatch(fetchTasks());
+    dispatch(fetchUsers());
+  }, [dispatch]);
 
-  const handleCreateTask = (taskData) => {
-    // In a real app, this would create the task in the backend
-    console.log("Creating task:", taskData);
-    setIsModalVisible(false);
+  const handleCreateTask = async (taskData) => {
+    try {
+      await dispatch(createTask(taskData)).unwrap();
+      setIsModalVisible(false);
+      message.success(t("taskCreatedSuccess"));
+      dispatch(fetchTasks());
+    } catch (error) {
+      message.error(t("taskCreateFailed") || "Failed to create task.");
+    }
   };
 
-  const handleUpdateTask = (taskId, updates) => {
-    // In a real app, this would update the task in the backend
-    console.log("Updating task:", taskId, updates);
+  console.log("Users:", users);
+  // Lấy tên người nhận từ mảng users
+  const getAssigneeNames = (ids) => {
+    if (!Array.isArray(ids)) return "";
+    return ids
+      .map((id) => {
+        const user = users.find((u) => u._id === id);
+        return user ? user.username || user.name : id;
+      })
+      .join(", ");
   };
 
-  const handleDeleteTask = (taskId) => {
-    // In a real app, this would delete the task from the backend
-    console.log("Deleting task:", taskId);
-  };
+  const mappedTasks = tasks.map((task) => ({
+    id: task._id || task.id,
+    title: task.taskTitle,
+    status: (task.taskStatus || "").toUpperCase(),
+    priority: (task.taskType || "low").toUpperCase(),
+    assignee: getAssigneeNames(task.taskAssign),
+    assigneeIds: Array.isArray(task.taskAssign) ? task.taskAssign : [],
+    dueDate: task.taskEndDate ? task.taskEndDate.slice(0, 10) : "",
+    project: task.projectId?.projectName || "",
+  }));
+
+  const filteredTasks = mappedTasks.filter((task) => {
+    const matchesSearch = (task.title || "")
+      .toLowerCase()
+      .includes(searchText.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" || task.status === statusFilter;
+    const matchesPriority =
+      priorityFilter === "all" || task.priority === priorityFilter;
+    const matchesView =
+      viewMode === "all" ||
+      (viewMode === "mine" && task.assigneeIds.includes(currentUserId));
+    return matchesSearch && matchesStatus && matchesPriority && matchesView;
+  });
 
   const columns = [
     {
-      title: t("task"),
+      title: t("Task"),
       dataIndex: "title",
       key: "title",
       render: (text, record) => (
@@ -109,52 +114,39 @@ const TaskOverview = () => {
       ),
     },
     {
-      title: t("status"),
+      title: t("Status"),
       dataIndex: "status",
       key: "status",
-      render: (status) => (
-        <Tag color={taskStatuses[status].color}>
-          {taskStatuses[status].label}
-        </Tag>
-      ),
+      render: (status) =>
+        taskStatuses[status]
+          ? <Tag color={taskStatuses[status].color}>{taskStatuses[status].label}</Tag>
+          : <Tag>{status || t("UNKNOWN")}</Tag>,
     },
     {
-      title: t("priority"),
+      title: t("Priority"),
       dataIndex: "priority",
       key: "priority",
-      render: (priority) => (
-        <Tag color={taskPriorities[priority].color}>
-          {taskPriorities[priority].label}
-        </Tag>
-      ),
+      render: (priority) =>
+        taskPriorities[priority]
+          ? <Tag color={taskPriorities[priority].color}>{taskPriorities[priority].label}</Tag>
+          : <Tag>{priority || t("UNKNOWN")}</Tag>,
     },
     {
-      title: t("assignee"),
+      title: t("Assignee"),
       dataIndex: "assignee",
       key: "assignee",
     },
     {
-      title: t("dueDate"),
+      title: t("Due Date"),
       dataIndex: "dueDate",
       key: "dueDate",
     },
     {
-      title: t("project"),
+      title: t("Project"),
       dataIndex: "project",
       key: "project",
     },
   ];
-
-  const filteredTasks = tasks.filter((task) => {
-    const matchesSearch = task.title
-      .toLowerCase()
-      .includes(searchText.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || task.status === statusFilter;
-    const matchesPriority =
-      priorityFilter === "all" || task.priority === priorityFilter;
-    return matchesSearch && matchesStatus && matchesPriority;
-  });
 
   return (
     <motion.div
@@ -179,6 +171,7 @@ const TaskOverview = () => {
             <Select
               defaultValue="all"
               style={{ width: 120 }}
+              value={statusFilter}
               onChange={setStatusFilter}
               options={[
                 { value: "all", label: t("allStatus") },
@@ -191,6 +184,7 @@ const TaskOverview = () => {
             <Select
               defaultValue="all"
               style={{ width: 120 }}
+              value={priorityFilter}
               onChange={setPriorityFilter}
               options={[
                 { value: "all", label: t("allPriorities") },
@@ -201,13 +195,29 @@ const TaskOverview = () => {
               ]}
             />
           </div>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsModalVisible(true)}
-          >
-            {t("createTask")}
-          </Button>
+          <div className="flex gap-2 items-center">
+            <Button.Group>
+              <Button
+                type={viewMode === "all" ? "primary" : "default"}
+                onClick={() => setViewMode("all")}
+              >
+                {t("All Tasks")}
+              </Button>
+              <Button
+                type={viewMode === "mine" ? "primary" : "default"}
+                onClick={() => setViewMode("mine")}
+              >
+                {t("My Tasks")}
+              </Button>
+            </Button.Group>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setIsModalVisible(true)}
+            >
+              {t("createTask")}
+            </Button>
+          </div>
         </div>
       </Card>
 
@@ -217,6 +227,7 @@ const TaskOverview = () => {
           dataSource={filteredTasks}
           rowKey="id"
           pagination={{ pageSize: 10 }}
+          loading={loading}
         />
       </Card>
 
