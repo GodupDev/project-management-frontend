@@ -16,7 +16,7 @@ const TaskMain = () => {
     >
       <Routes>
         <Route path="/" element={<TaskOverview />} />
-        <Route path="/:taskName" element={<TaskSpecific />} />
+        <Route path="/:id" element={<TaskSpecific />} />
         <Route
           path="*"
           element={

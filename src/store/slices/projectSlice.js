@@ -23,6 +23,8 @@ export const createProject = createAsyncThunk(
   },
 );
 
+
+
 export const getAllProjects = createAsyncThunk(
   "project/getAll",
   async (_, { rejectWithValue }) => {
@@ -41,6 +43,25 @@ export const getAllProjects = createAsyncThunk(
       );
     }
   },
+);
+
+// cái này là lấy toàn bộ projects, k phân biệt userID luôn
+export const fetchAllProjects = createAsyncThunk(
+  "projects/fetchProjects",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axios.get("http://localhost:8000/api/projects/all-unfiltered");
+      if (!res.data || !res.data.success) {
+        return rejectWithValue(res.data?.message || "Fetch failed");
+      }
+      return res.data.data;
+    } catch (err) {
+      if (err.response && err.response.data) {
+        return rejectWithValue(err.response.data.message || "Fetch failed");
+      }
+      return rejectWithValue(err.message || "Fetch failed");
+    }
+  }
 );
 
 export const getProjectById = createAsyncThunk(
@@ -167,6 +188,7 @@ export const updateProjectMember = createAsyncThunk(
 
 const initialState = {
   projects: [],
+  members: [],
   currentProject: null,
   loading: false,
   error: null,
@@ -283,9 +305,7 @@ const projectSlice = createSlice({
       })
       .addCase(getProjectMembers.fulfilled, (state, action) => {
         state.loading = false;
-        if (state.currentProject) {
-          state.currentProject.members = action.payload;
-        }
+        state.members = action.payload;
       })
       .addCase(getProjectMembers.rejected, (state, action) => {
         state.loading = false;
@@ -310,7 +330,20 @@ const projectSlice = createSlice({
       .addCase(updateProjectMember.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+      // Fetch All Projects (Unfiltered)
+    .addCase(fetchAllProjects.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    })
+    .addCase(fetchAllProjects.fulfilled, (state, action) => {
+      state.loading = false;
+      state.projects = action.payload; // Gán danh sách không lọc vào state.projects
+    })
+    .addCase(fetchAllProjects.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    });
   },
 });
 

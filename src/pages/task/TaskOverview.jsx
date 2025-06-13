@@ -14,7 +14,7 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import CreateTask from "../../components/modals/CreateTask";
+import CreateTaskBoard from "../../components/modals/CreateTask";
 import { motion } from "framer-motion";
 import { useLanguage } from "../../context/LanguageContext";
 import { DatePicker } from "antd";
@@ -174,7 +174,7 @@ const TaskOverview = () => {
               value={statusFilter}
               onChange={setStatusFilter}
               options={[
-                { value: "all", label: t("allStatus") },
+                { value: "all", label: t("All Status") },
                 ...Object.entries(taskStatuses).map(([key, value]) => ({
                   value: key,
                   label: value.label,
@@ -187,7 +187,7 @@ const TaskOverview = () => {
               value={priorityFilter}
               onChange={setPriorityFilter}
               options={[
-                { value: "all", label: t("allPriorities") },
+                { value: "all", label: t("All Priorities") },
                 ...Object.entries(taskPriorities).map(([key, value]) => ({
                   value: key,
                   label: value.label,
@@ -238,7 +238,7 @@ const TaskOverview = () => {
         footer={null}
         width={800}
       >
-        <CreateTask onSuccess={handleCreateTask} />
+        <CreateTaskBoard onSuccess={handleCreateTask} />
       </Modal>
     </motion.div>
   );
