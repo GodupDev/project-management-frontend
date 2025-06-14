@@ -103,9 +103,9 @@ export const getComments = createAsyncThunk(
 // create comment of a task
 export const createComment= createAsyncThunk(
   "comments/createComment",
-  async (taskId, { rejectWithValue }) => {
+  async ({taskId, authorId,  content}, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`http://localhost:8000/api/comments/${taskId}`, taskId);
+      const res = await axios.post(`http://localhost:8000/api/comments/${taskId}`, {authorId, content});
       if (!res.data || !res.data.success) {
         return rejectWithValue(res.data?.message || "Create failed");
       }
@@ -121,7 +121,7 @@ export const createComment= createAsyncThunk(
 
 // Delete a comment
 export const deleteComment = createAsyncThunk(
-  "tasks/deleteComment",
+  "comments/deleteComment",
   async ({ taskId, commentId }, { rejectWithValue }) => {
     try {
       const res = await axios.delete(
@@ -142,7 +142,7 @@ export const deleteComment = createAsyncThunk(
 
 // Update a comment
 export const updateComment = createAsyncThunk(
-  "tasks/updateComment",
+  "comments/updateComment",
   async ({ taskId, commentId, content }, { rejectWithValue }) => {
     try {
       const res = await axios.patch(
@@ -164,17 +164,25 @@ export const updateComment = createAsyncThunk(
 
 // Reply to a comment
 export const replyComment = createAsyncThunk(
-  "tasks/replyComment",
+  "comments/replyComment",
   async ({ commentId, content }, { rejectWithValue }) => {
     try {
-      const res = await axios.post(
+      const token = localStorage.getItem("token");
+        const res = await axios.post(
         `http://localhost:8000/api/comments/${commentId}/reply`,
-        { content }
+        { content }, // body
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
+      
       if (!res.data || !res.data.success) {
         return rejectWithValue(res.data?.message || "Reply comment failed");
       }
-      return { taskId, commentId, reply: res.data.data };
+      //console.log("Reply comment response:", res.data);
+      return { commentId, reply: res.data.data };
     } catch (err) {
       if (err.response && err.response.data) {
         return rejectWithValue(err.response.data.message || "Reply comment failed");
@@ -184,10 +192,31 @@ export const replyComment = createAsyncThunk(
   }
 );
 
+// get replies of a comment
+export const getReplyComment = createAsyncThunk(
+  "comments/getReplyComment",
+  async (commentId, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(`http://localhost:8000/api/comments/${commentId}/reply`);
+      if (!res.data || !res.data.success) {
+        return rejectWithValue(res.data?.message || "Get replies failed");
+      }
+      // Trả về commentId và replies
+      return { commentId, replies: res.data.data };
+    } catch (err) {
+      if (err.response && err.response.data) {
+        return rejectWithValue(err.response.data.message || "Get replies failed");
+      }
+      return rejectWithValue(err.message || "Get replies failed");
+    }
+  }
+);
+
 const taskSlice = createSlice({
   name: "tasks",
   initialState: {
     tasks: [],
+    comments: [],
     loading: false,
     error: null,
     updateError: null,
@@ -265,6 +294,7 @@ const taskSlice = createSlice({
       })
       // getComments
       .addCase(getComments.fulfilled, (state, action) => {
+        state.comments = action.payload.comments;
         const { taskId, comments } = action.payload;
         const idx = state.tasks.findIndex((t) => t._id === taskId || t.id === taskId);
         if (idx !== -1) {
@@ -278,8 +308,10 @@ const taskSlice = createSlice({
       })
       .addCase(createComment.fulfilled, (state, action) => {
         state.loading = false;
-        state.tasks.push(action.payload);
-      })
+        if (Array.isArray(state.comments)) {
+          state.comments.push(action.payload);
+      }
+          })
       .addCase(createComment.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
@@ -306,7 +338,42 @@ const taskSlice = createSlice({
             state.tasks[idx].comments[cIdx] = comment;
           }
         }
-      });
+      })
+      .addCase(replyComment.fulfilled, (state, action) => {
+      const { taskId, commentId, reply } = action.payload;
+
+      const taskIdx = state.tasks.findIndex((t) => t._id === taskId || t.id === taskId);
+      if (taskIdx !== -1 && Array.isArray(state.tasks[taskIdx].comments)) {
+        // Gắn reply vào parent comment nếu bạn muốn hiển thị dạng cây
+        const parentIdx = state.tasks[taskIdx].comments.findIndex(
+          (c) => c._id === commentId || c.id === commentId
+        );
+        if (parentIdx !== -1) {
+          // Giả sử mỗi comment có replies: []
+          if (!Array.isArray(state.tasks[taskIdx].comments[parentIdx].replies)) {
+            state.tasks[taskIdx].comments[parentIdx].replies = [];
+          }
+          state.tasks[taskIdx].comments[parentIdx].replies.push(reply);
+        }
+      }
+    })
+    .addCase(getReplyComment.fulfilled, (state, action) => {
+        const { commentId, replies } = action.payload;
+        // Tìm comment cha trong state.comments (nếu đang dùng state.comments để render)
+        const parent = state.comments.find(c => c._id === commentId || c.id === commentId);
+        if (parent) {
+          parent.replies = replies;
+        }
+        // Nếu bạn render từ state.tasks[].comments, cập nhật ở đó nữa:
+        state.tasks.forEach(task => {
+          if (Array.isArray(task.comments)) {
+            const parent = task.comments.find(c => c._id === commentId || c.id === commentId);
+            if (parent) {
+              parent.replies = replies;
+            }
+          }
+        });
+      }) ;
   },
 });
 

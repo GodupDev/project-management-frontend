@@ -47,7 +47,7 @@ const CreateTaskBoard = ({ onSuccess }) => {
     const taskData = {
       projectId: selectedProject,
       taskTitle: values.title,
-      taskType: values.type || "Low", // hoặc lấy từ form nếu có
+      taskType: values.priority, // hoặc lấy từ form nếu có
       taskDescription: values.description || "",
       taskStartDate: values.startDate?.format("YYYY-MM-DD"),
       taskEndDate: values.endDate?.format("YYYY-MM-DD"),
@@ -65,7 +65,7 @@ const CreateTaskBoard = ({ onSuccess }) => {
       message.error(t("taskCreatedFail") || err.message);
     }
   };
- console.log("Projects:", selectedProject);
+ console.log("Projects:", projects);
   console.log("Project Members:", projectMembers);
   return (
     <div className="p-4">
@@ -137,11 +137,13 @@ const CreateTaskBoard = ({ onSuccess }) => {
               allowClear
               disabled={!selectedProject}
             >
-              {(projectMembers || []).map((member) => (
-                <Option key={member.userId._id} value={member.userId._id}>
-                  {member.userId.username}
-                </Option>
-              ))}
+              {(projectMembers || [])
+            .filter((member) => member.userId && member.userId._id) // 👈 lọc null
+            .map((member) => (
+              <Option key={member.userId._id} value={member.userId._id}>
+                {member.userId.username}
+              </Option>
+            ))}
             </Select>
           </Form.Item>
 

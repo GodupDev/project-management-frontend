@@ -12,12 +12,23 @@ import {
   DatePicker,
   message,
 } from "antd";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Comment from "../../components/ui/task/Comment";
 import { useLanguage } from "../../context/LanguageContext";
 import { motion as Motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchTasks, updateTask, clearUpdateStatus, deleteTask } from "../../store/slices/taskSlice";
+import {
+  fetchTasks,
+  updateTask,
+  clearUpdateStatus,
+  deleteTask,
+  getComments,
+  createComment,
+  updateComment,
+  deleteComment,
+  replyComment,
+} from "../../store/slices/taskSlice";
+import { getProjectMembers } from "../../store/slices/projectSlice";
 import dayjs from "dayjs";
 
 const { TextArea } = Input;
@@ -30,9 +41,11 @@ const TaskSpecific = () => {
   const [form] = Form.useForm();
   const { tasks, loading, updateSuccess, updateError } = useSelector((state) => state.tasks);
   const users = useSelector((state) => state.users?.list || []);
+  const projectMembers = useSelector((state) => state.project.members || []);
   const [editMode, setEditMode] = useState(false);
   const [localTask, setLocalTask] = useState(null);
-  
+  const currentUserId = useSelector((state) => state.auth.user?._id);
+  const comments = useSelector((state) => state.tasks.comments || []);
 
   useEffect(() => {
     if (!tasks.length) {
@@ -45,6 +58,21 @@ const TaskSpecific = () => {
     const found = tasks.find((t) => t._id === id || t.id === id);
     if (found) setLocalTask({ ...found });
   }, [tasks, id]);
+
+  // Lấy project members khi có localTask
+  useEffect(() => {
+    if (localTask && localTask.projectId) {
+      const projectId = localTask.projectId._id || localTask.projectId;
+      dispatch(getProjectMembers(projectId));
+    }
+  }, [dispatch, localTask && localTask.projectId]);
+
+  // Lấy comment khi có localTask
+  useEffect(() => {
+    if (localTask && localTask._id) {
+      dispatch(getComments(localTask._id));
+    }
+  }, [dispatch, localTask && localTask._id]);
 
   // Xử lý thông báo khi update
   useEffect(() => {
@@ -83,12 +111,10 @@ const TaskSpecific = () => {
   };
 
   const handleSaveUpdate = () => {
-    
     const originalTask = tasks.find((t) => t._id === id || t.id === id);
     // Tìm các trường bị thay đổi
     const changedFields = {};
     Object.keys(localTask).forEach((key) => {
-      // So sánh sâu cho mảng (assignee), còn lại so sánh thông thường
       if (Array.isArray(localTask[key]) && Array.isArray(originalTask[key])) {
         if (localTask[key].join(",") !== originalTask[key].join(",")) {
           changedFields[key] = { old: originalTask[key], new: localTask[key] };
@@ -102,34 +128,66 @@ const TaskSpecific = () => {
     dispatch(updateTask(localTask));
   };
 
-  console.log("Local Task:", localTask);
   const handleDelete = () => {
-    
     Modal.confirm({
-    title: t("Confirm delete"),
-    content: t("Are you sure to delete this task"),
-    okText: t("Delete"),
-    okType: "danger",
-    cancelText: t("Cancel"),
-    onOk: async () => {
-      try {
-        await dispatch(deleteTask(localTask._id)).unwrap();
-        message.success(t("taskDeleted"));
-        navigate("/tasks");
-      } catch (err) {
-        message.error(t("taskDeleteFail") || err.message);
-      }
-    },
-  });
+      title: t("Confirm delete"),
+      content: t("Are you sure to delete this task"),
+      okText: t("Delete"),
+      okType: "danger",
+      cancelText: t("Cancel"),
+      onOk: async () => {
+        try {
+          await dispatch(deleteTask(localTask._id)).unwrap();
+          message.success(t("taskDeleted"));
+          navigate("/tasks");
+        } catch (err) {
+          message.error(t("taskDeleteFail") || err.message);
+        }
+      },
+    });
   };
 
-  const handleAddComment = (values) => {
-    // In a real app, this would add the comment to the backend
-    message.success(t("commentAdded"));
-    form.resetFields();
+  const handleAddComment = async (values) => {
+    try {
+      await dispatch(createComment({ taskId: localTask._id, content: values.content, authorId: values.authorId })).unwrap();
+      message.success(t("commentAdded"));
+      form.resetFields();
+      dispatch(getComments(localTask._id));
+    } catch (err) {
+      message.error(t("commentAddFail") || err.message);
+    }
   };
 
-  // Định nghĩa màu cho status
+  const handleUpdateComment = async (commentId, content) => {
+    try {
+      await dispatch(updateComment({ taskId: localTask._id, commentId, content })).unwrap();
+      message.success(t("commentUpdated"));
+      dispatch(getComments(localTask._id));
+    } catch (err) {
+      message.error(t("commentUpdateFail") || err.message);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await dispatch(deleteComment({ taskId: localTask._id, commentId })).unwrap();
+      message.success(t("commentDeleted"));
+      dispatch(getComments(localTask._id));
+    } catch (err) {
+      message.error(t("commentDeleteFail") || err.message);
+    }
+  };
+
+  const handleReplyComment = async (commentId, content, authorId) => {
+    try {
+      await dispatch(replyComment({ commentId, content, authorId })).unwrap();
+      message.success(t("replyAdded"));
+      dispatch(getComments(localTask._id));
+    } catch (err) {
+      message.error(t("replyAddFail") || err.message);
+    }
+  };
+
   const getStatusColor = (status) => {
     const colors = {
       todo: "default",
@@ -140,7 +198,6 @@ const TaskSpecific = () => {
     return colors[status] || "default";
   };
 
-  // Định nghĩa màu cho priority
   const getPriorityColor = (priority) => {
     const colors = {
       low: "green",
@@ -150,7 +207,6 @@ const TaskSpecific = () => {
     return colors[priority] || "default";
   };
 
-  // Lấy tên priority (taskType) dạng text
   const getPriorityText = (priority) => {
     if (priority === "low") return t("Low");
     if (priority === "medium") return t("Medium");
@@ -158,7 +214,6 @@ const TaskSpecific = () => {
     return priority;
   };
 
-  // Lấy tên status dạng text
   const getStatusText = (status) => {
     if (status === "todo") return t("todo");
     if (status === "in_progress") return t("inProgress");
@@ -166,6 +221,11 @@ const TaskSpecific = () => {
     if (status === "done") return t("done");
     return status;
   };
+  
+  console.log("Project Members:", projectMembers);
+
+  // Lấy danh sách userId của project member
+const projectMemberUsers = (projectMembers || []).filter(m => m.userId).map(m => m.userId);
 
   return (
     <Motion.div
@@ -281,7 +341,7 @@ const TaskSpecific = () => {
                 className="!rounded-md"
                 disabled={!editMode}
               >
-                {users.map(u => (
+                {projectMemberUsers.map((u) => (
                   <Select.Option key={u._id} value={u._id}>
                     {u.username}
                   </Select.Option>
@@ -306,11 +366,25 @@ const TaskSpecific = () => {
               <span className="font-medium">{localTask.projectId?.projectName || ""}</span>
             </Descriptions.Item>
             <Descriptions.Item
-              label={<span className="text-gray-700 font-semibold">Description</span>}
-              span={2}
-            >
-              <span className="whitespace-pre-line">{localTask.taskDescription}</span>
-            </Descriptions.Item>
+  label={<span className="text-gray-700 font-semibold">Description</span>}
+  span={2}
+>
+  {editMode ? (
+    <Input.TextArea
+      value={localTask.taskDescription}
+      onChange={e =>
+        setLocalTask(prev => ({
+          ...prev,
+          taskDescription: e.target.value,
+        }))
+      }
+      rows={4}
+      className="resize-vertical"
+    />
+  ) : (
+    <span className="whitespace-pre-line">{localTask.taskDescription}</span>
+  )}
+</Descriptions.Item>
           </Descriptions>
         </Card>
 
@@ -319,26 +393,17 @@ const TaskSpecific = () => {
           className="rounded-xl shadow border border-gray-200"
         >
           <div className="space-y-4">
-            {(localTask.comments || []).map((comment) => (
-              <Comment key={comment.id} comment={comment} />
-            ))}
-            <Form form={form} onFinish={handleAddComment}>
-              <Form.Item
-                name="content"
-                rules={[{ required: true, message: t("commentRequired") }]}
-              >
-                <TextArea
-                  rows={4}
-                  placeholder={t("Add comment")}
-                  className="!rounded-md"
-                />
-              </Form.Item>
-              <Form.Item>
-                <Button type="primary" htmlType="submit" className="bg-blue-500 hover:bg-blue-600">
-                  {t("Add comment")}
-                </Button>
-              </Form.Item>
-            </Form>
+            <Comment
+              comments={comments}
+              users={users}
+              onAddComment={({ content, authorId }) =>
+                handleAddComment({ content, authorId })
+              }
+              onReply={(commentId, content, authorId) =>
+                handleReplyComment(commentId, content, authorId)
+              }
+              currentUserId={currentUserId}
+            />
           </div>
         </Card>
       </div>
