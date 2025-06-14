@@ -85,7 +85,7 @@ export const getComments = createAsyncThunk(
   "tasks/getComments",
   async (taskId, { rejectWithValue }) => {
     try {
-      const res = await axios.get(`http://localhost:8000/api/tasks/${taskId}/comments`);
+      const res = await axios.get(`http://localhost:8000/api/comments/${taskId}`);
       if (!res.data || !res.data.success) {
         return rejectWithValue(res.data?.message || "Get comments failed");
       }
@@ -99,13 +99,33 @@ export const getComments = createAsyncThunk(
   }
 );
 
+
+// create comment of a task
+export const createComment= createAsyncThunk(
+  "comments/createComment",
+  async (taskId, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(`http://localhost:8000/api/comments/${taskId}`, taskId);
+      if (!res.data || !res.data.success) {
+        return rejectWithValue(res.data?.message || "Create failed");
+      }
+      return res.data.data;
+    } catch (err) {
+      if (err.response && err.response.data) {
+        return rejectWithValue(err.response.data.message || "Create failed");
+      }
+      return rejectWithValue(err.message || "Create failed");
+    }
+  }
+);
+
 // Delete a comment
 export const deleteComment = createAsyncThunk(
   "tasks/deleteComment",
   async ({ taskId, commentId }, { rejectWithValue }) => {
     try {
       const res = await axios.delete(
-        `http://localhost:8000/api/tasks/${taskId}/comments/${commentId}`
+        `http://localhost:8000/api/comments/${commentId}`
       );
       if (!res.data || !res.data.success) {
         return rejectWithValue(res.data?.message || "Delete comment failed");
@@ -126,7 +146,7 @@ export const updateComment = createAsyncThunk(
   async ({ taskId, commentId, content }, { rejectWithValue }) => {
     try {
       const res = await axios.patch(
-        `http://localhost:8000/api/tasks/${taskId}/comments/${commentId}`,
+        `http://localhost:8000/api/comments/${commentId}`,
         { content }
       );
       if (!res.data || !res.data.success) {
@@ -138,6 +158,28 @@ export const updateComment = createAsyncThunk(
         return rejectWithValue(err.response.data.message || "Update comment failed");
       }
       return rejectWithValue(err.message || "Update comment failed");
+    }
+  }
+);
+
+// Reply to a comment
+export const replyComment = createAsyncThunk(
+  "tasks/replyComment",
+  async ({ commentId, content }, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        `http://localhost:8000/api/comments/${commentId}/reply`,
+        { content }
+      );
+      if (!res.data || !res.data.success) {
+        return rejectWithValue(res.data?.message || "Reply comment failed");
+      }
+      return { taskId, commentId, reply: res.data.data };
+    } catch (err) {
+      if (err.response && err.response.data) {
+        return rejectWithValue(err.response.data.message || "Reply comment failed");
+      }
+      return rejectWithValue(err.message || "Reply comment failed");
     }
   }
 );
@@ -228,6 +270,19 @@ const taskSlice = createSlice({
         if (idx !== -1) {
           state.tasks[idx].comments = comments;
         }
+      })
+      // createComment
+      .addCase(createComment.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createComment.fulfilled, (state, action) => {
+        state.loading = false;
+        state.tasks.push(action.payload);
+      })
+      .addCase(createComment.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       })
       // deleteComment
       .addCase(deleteComment.fulfilled, (state, action) => {

@@ -24,11 +24,10 @@ import { fetchUsers } from "../../store/slices/userSlice";
 
 // Define task statuses
 const taskStatuses = {
-  TODO: { label: "To Do", color: "default" },
-  IN_PROGRESS: { label: "In Progress", color: "processing" },
-  REVIEW: { label: "Review", color: "warning" },
-  DONE: { label: "Done", color: "success" },
-  BLOCKED: { label: "Blocked", color: "error" },
+  todo: { label: "To Do", color: "default" },
+  in_progress: { label: "In Progress", color: "processing" },
+  review: { label: "Review", color: "warning" },
+  completed: { label: "Completed", color: "success" },
 };
 
 // Define task priorities
@@ -79,10 +78,11 @@ const TaskOverview = () => {
       .join(", ");
   };
 
+  console.log("Tasks:", tasks);
   const mappedTasks = tasks.map((task) => ({
     id: task._id || task.id,
     title: task.taskTitle,
-    status: (task.taskStatus || "").toUpperCase(),
+    status: (task.taskStatus || "").toLowerCase(),
     priority: (task.taskType || "low").toUpperCase(),
     assignee: getAssigneeNames(task.taskAssign),
     assigneeIds: Array.isArray(task.taskAssign) ? task.taskAssign : [],

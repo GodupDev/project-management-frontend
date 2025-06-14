@@ -17,7 +17,7 @@ import Comment from "../../components/ui/task/Comment";
 import { useLanguage } from "../../context/LanguageContext";
 import { motion as Motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchTasks, updateTask, clearUpdateStatus } from "../../store/slices/taskSlice";
+import { fetchTasks, updateTask, clearUpdateStatus, deleteTask } from "../../store/slices/taskSlice";
 import dayjs from "dayjs";
 
 const { TextArea } = Input;
@@ -32,6 +32,7 @@ const TaskSpecific = () => {
   const users = useSelector((state) => state.users?.list || []);
   const [editMode, setEditMode] = useState(false);
   const [localTask, setLocalTask] = useState(null);
+  
 
   useEffect(() => {
     if (!tasks.length) {
@@ -101,19 +102,25 @@ const TaskSpecific = () => {
     dispatch(updateTask(localTask));
   };
 
+  console.log("Local Task:", localTask);
   const handleDelete = () => {
+    
     Modal.confirm({
-      title: t("deleteTask"),
-      content: t("deleteTaskConfirm"),
-      okText: t("delete"),
-      okType: "danger",
-      cancelText: t("cancel"),
-      onOk: () => {
-        // In a real app, this would delete the task from the backend
+    title: t("Confirm delete"),
+    content: t("Are you sure to delete this task"),
+    okText: t("Delete"),
+    okType: "danger",
+    cancelText: t("Cancel"),
+    onOk: async () => {
+      try {
+        await dispatch(deleteTask(localTask._id)).unwrap();
         message.success(t("taskDeleted"));
         navigate("/tasks");
-      },
-    });
+      } catch (err) {
+        message.error(t("taskDeleteFail") || err.message);
+      }
+    },
+  });
   };
 
   const handleAddComment = (values) => {

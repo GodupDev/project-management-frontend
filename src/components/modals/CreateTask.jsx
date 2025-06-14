@@ -18,7 +18,12 @@ import { fetchAllProjects, getProjectMembers } from "../../store/slices/projectS
 const { Option } = Select;
 
 const priorityOptions = ["High", "Medium", "Low"];
-const statusOptions = ["To Do", "In Progress", "Review", "Completed"];
+const statusOptions = [
+  { value: "todo", label: "To Do" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "review", label: "Review" },
+  { value: "completed", label: "Completed" },
+];
 
 const CreateTaskBoard = ({ onSuccess }) => {
   const [form] = Form.useForm();
@@ -40,14 +45,18 @@ const CreateTaskBoard = ({ onSuccess }) => {
 
   const handleSubmit = async (values) => {
     const taskData = {
-      ...values,
       projectId: selectedProject,
-      taskAssignee: values.assignee, // Đổi tên field nếu backend yêu cầu
+      taskTitle: values.title,
+      taskType: values.type || "Low", // hoặc lấy từ form nếu có
+      taskDescription: values.description || "",
       taskStartDate: values.startDate?.format("YYYY-MM-DD"),
       taskEndDate: values.endDate?.format("YYYY-MM-DD"),
+      taskAssign: values.assignee, // array of userId string
+      taskStatus: values.status,
     };
+    console.log("Creating task with data:", taskData);
     try {
-      console.log("Creating task with data:", taskData);
+      
       await dispatch(createTask(taskData)).unwrap();
       message.success(t("taskCreatedSuccess"));
       form.resetFields();
@@ -104,14 +113,14 @@ const CreateTaskBoard = ({ onSuccess }) => {
           </Form.Item>
 
           <Form.Item
-            label={<span className="font-semibold">{t("modalTaskStatus")}</span>}
+            label={<span className="font-semibold">{t("Task Status")}</span>}
             name="status"
             rules={[{ required: true, message: t("modalSelectTaskStatus") }]}
           >
             <Select placeholder={t("modalSelectStatus")}>
               {statusOptions.map((status) => (
-                <Option key={status} value={status}>
-                  {t(`taskStatus${status.replace(/\s+/g, "")}`)}
+                <Option key={status.value} value={status.value}>
+                  {t(status.label)}
                 </Option>
               ))}
             </Select>
@@ -129,8 +138,8 @@ const CreateTaskBoard = ({ onSuccess }) => {
               disabled={!selectedProject}
             >
               {(projectMembers || []).map((member) => (
-                <Option key={member._id} value={member._id}>
-                  {member.username}
+                <Option key={member.userId._id} value={member.userId._id}>
+                  {member.userId.username}
                 </Option>
               ))}
             </Select>
