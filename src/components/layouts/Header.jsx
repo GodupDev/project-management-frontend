@@ -1,7 +1,6 @@
 import { motion as Motion } from "framer-motion";
 import { Image } from "antd";
 import { useSidebar } from "../../context/SidebarContext";
-import { useMockData } from "../../context/MockDataContext";
 import SearchBar from "../ui/SearchBar";
 import IMAGE from "../../assets/images/images";
 import IconThemeToggle from "../icons/IconThemeToggle";
@@ -10,7 +9,13 @@ import IconNotification from "../icons/IconNotification";
 import { useState, useRef, useEffect } from "react";
 import ProfileModal from "../modals/ProfileModal";
 import NotificationDropdown from "../dropdown/NotificationDropdown";
-
+import { useUserProfile } from "../../context/UserProfileContext";
+import { useAuth } from "../../context/AuthContext";
+import { Layout, Space, Avatar, Dropdown, Button } from "antd";
+import { UserOutlined } from "@ant-design/icons";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { selectProfile } from "../../store/slices/userProfileSlice";
 const Header = () => {
   const { toggleSidebar } = useSidebar();
   const { settings, notifications } = useMockData();
@@ -43,6 +48,30 @@ const Header = () => {
 
   // Tính số thông báo chưa đọc
   const unreadCount = notifications.filter((n) => n.status === "unread").length;
+
+  const profileRedux = useSelector(selectProfile);
+  const navigate = useNavigate();
+
+  const userMenuItems = [
+    {
+      key: "profile",
+      label: "Thông tin cá nhân",
+      onClick: () => navigate("/profile"),
+    },
+    {
+      key: "settings",
+      label: "Cài đặt",
+      onClick: () => navigate("/settings"),
+    },
+    {
+      key: "logout",
+      label: "Đăng xuất",
+      onClick: () => {
+        localStorage.removeItem("token");
+        navigate("/login");
+      },
+    },
+  ];
 
   return (
     <Motion.div
