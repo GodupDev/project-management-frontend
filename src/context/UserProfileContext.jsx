@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { message } from "antd";
 import { useAuth } from "./AuthContext";
@@ -15,6 +15,8 @@ import {
 const UserProfileContext = createContext();
 
 export const UserProfileProvider = ({ children }) => {
+
+  const [profileId, setProfileId] = useState(null);
   const dispatch = useDispatch();
   const { user } = useAuth();
   const { t } = useLanguage();
@@ -58,9 +60,22 @@ export const UserProfileProvider = ({ children }) => {
       message.error(error.message || t("getProfileFailed"));
       throw error;
     }
-  };
+  }; 
 
+  /**
+   * An object representing the context value for user profiles.
+   * 
+   * @property {string} profileId - The current profile ID.
+   * @property {Function} setProfileId - Function to update the profile ID.
+   * @property {Object} profile - The current user profile data.
+   * @property {boolean} loading - Indicates if the profile data is being fetched.
+   * @property {Error|null} error - Error information if fetching/updating profile fails.
+   * @property {Function} updateProfile - Function to update the user profile.
+   * @property {Function} getProfileById - Function to fetch a profile by ID.
+   */
   const value = {
+    profileId,
+    setProfileId,
     profile,
     loading,
     error,

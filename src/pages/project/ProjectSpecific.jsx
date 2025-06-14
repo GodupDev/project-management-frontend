@@ -30,6 +30,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import { useProject } from "../../context/ProjectContext";
 import { useAuth } from "../../context/AuthContext";
+import { useUserProfile } from "../../context/UserProfileContext";
+
 import TaskBoard from "../../components/ui/task/TaskBoard";
 
 const { Title, Text, Paragraph } = Typography;
@@ -58,6 +60,7 @@ export default function ProjectSpecific() {
   const [deleting, setDeleting] = useState(false);
   const [editedMembers, setEditedMembers] = useState();
   const [form] = Form.useForm();
+  const { setProfileId } = useUserProfile();
 
   const projectStatuses = [
     { value: "active", label: t("active"), color: "green" },
@@ -361,8 +364,11 @@ export default function ProjectSpecific() {
                 {editedMembers?.map((member) => (
                   <li
                     key={member.userId}
-                    className="flex items-center justify-between py-1 px-2 rounded hover:bg-gray-100"
+                    className="flex items-center justify-between py-1 px-2 rounded hover:bg-gray-100 !cursor-pointer"
                     style={{ marginBottom: 2 }}
+                    onClick={() => {
+                      if (!editMode) setProfileId(member.userId);
+                    }}
                   >
                     <div className="flex items-center gap-2">
                       <Avatar

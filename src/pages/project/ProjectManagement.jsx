@@ -39,9 +39,9 @@ const ProjectManagement = () => {
       page,
       limit,
     });
-  }, [statusFilter, sortFilter, searchTerm, dateRange, page, limit]);
+  }, [statusFilter, sortFilter, searchTerm, dateRange, page, limit, total]);
 
-  console.log(total);
+  console.log(projects);
 
   const handleNavigate = (project) => {
     navigate(`/projects/${project._id}`, {

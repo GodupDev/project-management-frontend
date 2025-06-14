@@ -14,55 +14,66 @@ import { useUserProfile } from "../../context/UserProfileContext";
 
 const Header = () => {
   const { toggleSidebar } = useSidebar();
-  const { getProfileById } = useUserProfile();
+  const { getProfileById, setProfileId } = useUserProfile();
   const { user } = useAuth();
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
 
-  const notifRef = useRef(null);
+  const notifButtonRef = useRef(null);
+  const notifDropdownRef = useRef(null);
 
   useEffect(() => {
-    if (!user || !user._id) return; // Thêm điều kiện này để tránh lỗi
+    if (!user || !user._id) return;
+
     const fetchProfile = async () => {
       try {
         const profileData = await getProfileById(user._id);
         setProfile(profileData);
       } catch (error) {
         console.error("Error fetching profile:", error);
+      } finally {
+        setLoadingProfile(false);
       }
     };
+
     fetchProfile();
   }, [user]);
 
   // Close notification dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (notifRef.current && !notifRef.current.contains(event.target)) {
+      if (
+        notifDropdownRef.current &&
+        !notifDropdownRef.current.contains(event.target) &&
+        notifButtonRef.current &&
+        !notifButtonRef.current.contains(event.target)
+      ) {
         setIsNotificationOpen(false);
       }
     };
+
     if (isNotificationOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     } else {
       document.removeEventListener("mousedown", handleClickOutside);
     }
+
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isNotificationOpen]);
 
   const handleViewAllNotifications = () => {
     setIsNotificationOpen(false);
-    // Your logic to navigate or show full notifications page
+    // Navigate to full notifications page
   };
 
-  // Tính số thông báo chưa đọc
   const unreadCount = 2;
 
   return (
     <Motion.div
       initial={{ scale: 0.95, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-background-paper)] px-6 py-3 shadow-[var(--shadow-md)] 
+      className="fixed top-0 left-0 right-0 z-50 bg-[var(--color-background-paper)] px-6 py-3 shadow-[var(--shadow-md)]
                  transition-colors duration-300 border-b border-[var(--color-border-main)]"
     >
       <div className="flex w-full items-center justify-between">
@@ -82,19 +93,21 @@ const Header = () => {
             <IconMenu />
           </button>
           <div className="flex items-center gap-2">
-            <Image width={50} src={IMAGE.LOGO} preview={false} />
+            <Image width={50} src={IMAGE.LOGO} preview={false} alt="Logo" />
             <h1 className="text-[1.5em] font-semibold text-[var(--color-text-primary)]">
               PMS Team4.1
             </h1>
           </div>
         </div>
 
-        {/* Right Content: Search, Notification, Profile */}
+        {/* Right: Search, Theme, Notifications, Profile */}
         <div className="flex items-center justify-end gap-6 w-[50rem] relative">
-          <div className="md:block hidden w-[100%]">
+          <div className="md:block hidden w-full">
             <SearchBar />
           </div>
+
           <IconThemeToggle />
+
           <button
             onClick={() => setIsNotificationOpen((prev) => !prev)}
             className="relative p-2 rounded-lg bg-[var(--color-background-elevated)] 
@@ -107,49 +120,56 @@ const Header = () => {
             aria-label="Toggle notifications"
             aria-expanded={isNotificationOpen}
             aria-haspopup="true"
-            ref={notifRef}
+            ref={notifButtonRef}
           >
-            {/* Truyền số notification chưa đọc */}
             <IconNotification count={unreadCount} />
           </button>
 
           {isNotificationOpen && (
-            <div ref={notifRef} className="absolute right-0 top-full mt-2 z-50">
+            <div
+              ref={notifDropdownRef}
+              className="absolute right-0 top-full mt-2 z-50"
+            >
               <NotificationDropdown onViewAll={handleViewAllNotifications} />
             </div>
           )}
 
           <div
             className="flex items-center gap-3 cursor-pointer hover:bg-[var(--color-action-hover)] p-2 rounded-lg transition-all duration-300"
-            onClick={() => setIsProfileModalOpen(true)}
+            onClick={() => {
+              setProfileId(user._id);
+            }}
           >
-            <div className="text-right flex-1">
-              <p className="text-[1rem] font-medium text-[var(--color-text-primary)] truncate">
-                {profile?.userId.username}
-              </p>
-              <p className="text-[0.7rem] text-[var(--color-text-secondary)] truncate">
-                {profile?.fullName}
-              </p>
-            </div>
-            <Image
-              width={40}
-              height={40}
-              src={profile?.avatarUrl}
-              preview={false}
-              className="rounded-full object-cover border-2 border-[var(--color-border-light)] 
-                         shadow-[var(--shadow-sm)]"
-            />
+            {!loadingProfile && profile ? (
+              <>
+                <div className="text-right flex-1">
+                  <p className="text-[1rem] font-medium text-[var(--color-text-primary)] truncate">
+                    {profile?.userId?.username || "Unknown"}
+                  </p>
+                  <p className="text-[0.7rem] text-[var(--color-text-secondary)] truncate">
+                    {profile?.fullName}
+                  </p>
+                </div>
+                <Image
+                  width={40}
+                  height={40}
+                  src={profile?.avatarUrl}
+                  preview={false}
+                  alt="User avatar"
+                  className="rounded-full object-cover border-2 border-[var(--color-border-light)] 
+                             shadow-[var(--shadow-sm)]"
+                />
+              </>
+            ) : (
+              <div className="text-sm text-gray-400">Loading...</div>
+            )}
           </div>
         </div>
       </div>
-
       <div className="sm:hidden flex justify-center mt-2">
         <SearchBar />
       </div>
-      <ProfileModal
-        isOpen={isProfileModalOpen}
-        onClose={() => setIsProfileModalOpen(false)}
-      />
+      <ProfileModal />
     </Motion.div>
   );
 };
