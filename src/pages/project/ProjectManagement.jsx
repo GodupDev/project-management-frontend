@@ -17,7 +17,7 @@ const { RangePicker } = DatePicker;
 const ProjectManagement = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { projects, getAllProjects, loading, total } = useProject();
+  const { projects = [], getAllProjects, loading, total } = useProject();
   const { searchTerm } = useSearch();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -40,6 +40,8 @@ const ProjectManagement = () => {
       limit,
     });
   }, [statusFilter, sortFilter, searchTerm, dateRange, page, limit]);
+
+  console.log(total);
 
   const handleNavigate = (project) => {
     navigate(`/projects/${project._id}`, {

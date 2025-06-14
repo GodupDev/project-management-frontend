@@ -10,16 +10,42 @@ import {
   GithubOutlined,
   InfoCircleOutlined,
   SolutionOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import { useUserProfile } from "../../context/UserProfileContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { motion as Motion } from "framer-motion";
+import { uploadImage } from "../../services/cloudinary";
 
 const MyProfile = () => {
   const { profile, loading, updateProfile } = useUserProfile();
   const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
   const [form] = Form.useForm();
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(profile?.avatarUrl || "");
+
+  const beforeUpload = (file) => {
+    const isImage = file.type.startsWith("image/");
+    if (!isImage) {
+      return Upload.LIST_IGNORE;
+    }
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isLt2M) {
+      return Upload.LIST_IGNORE;
+    }
+
+    // Create preview URL
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      setAvatarPreview(reader.result);
+    };
+
+    // Store the file for later upload
+    setAvatarFile(file);
+    return false; // Prevent auto upload
+  };
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -34,43 +60,52 @@ const MyProfile = () => {
   };
 
   const handleCancel = () => {
+    // Reset avatar preview if user cancels
+    if (avatarFile) {
+      setAvatarFile(null);
+      setAvatarPreview(profile?.avatarUrl || "");
+    }
     setIsEditing(false);
     form.resetFields();
   };
 
   const handleSave = async (values) => {
-    await updateProfile(values);
-    setIsEditing(false);
+    try {
+      let newAvatarUrl = profile?.avatarUrl;
+      let newAvatarPublicId = profile?.avatarPublicId;
+
+      // Upload new avatar if there's a file
+      if (avatarFile) {
+        const result = await uploadImage(
+          avatarFile,
+          `users/${profile?._id}`,
+          newAvatarPublicId,
+        );
+        if (result && result.url) {
+          newAvatarUrl = result.url;
+          newAvatarPublicId = result.public_id;
+        } else {
+          throw new Error("Failed to upload avatar");
+        }
+      }
+
+      // Update profile with new data and avatar
+      await updateProfile({
+        ...values,
+        avatarUrl: newAvatarUrl,
+        avatarPublicId: newAvatarPublicId,
+      });
+
+      setIsEditing(false);
+      setAvatarFile(null);
+    } catch (error) {
+      console.error("Update error:", error);
+    }
   };
 
   if (loading) {
     return <div>{t("commonLoading")}</div>;
   }
-
-  const handleAvatarChange = async (info) => {
-    const file = info.file.originFileObj;
-    const isImage = file.type.startsWith("image/");
-    if (!isImage) {
-      message.error(t("pleaseUploadImage"));
-      return;
-    }
-
-    const toBase64 = (file) =>
-      new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = (error) => reject(error);
-      });
-
-    try {
-      const base64Image = await toBase64(file);
-      await updateProfile({ ...profile, avatarUrl: base64Image });
-      message.success(t("avatarUpdatedSuccessfully"));
-    } catch (error) {
-      message.error(t("uploadFailed"));
-    }
-  };
 
   return (
     <Motion.div
@@ -83,19 +118,22 @@ const MyProfile = () => {
           <div className="flex-shrink-0">
             {isEditing ? (
               <Upload
-                customRequest={({ file }) =>
-                  handleAvatarChange({ file: { originFileObj: file } })
-                }
+                name="avatar"
+                className="avatar-uploader"
+                showUploadList={false}
+                beforeUpload={beforeUpload}
+                accept="image/*"
               >
-                <div className="relative group cursor-pointer">
+                <div className="relative group cursor-pointer flex flex-col items-center">
                   <Avatar
                     size={120}
-                    src={profile?.avatarUrl}
+                    src={avatarPreview}
                     icon={<UserOutlined />}
-                    className="border-4 border-white shadow-xl"
+                    className="mb-2"
                   />
-                  <div className="absolute inset-0 rounded-full bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white text-xs">
-                    {t("changeAvatar")}
+                  <div className="flex items-center mt-2 gap-2 text-md font-bold text-blue-500 hover:text-blue-600 transition-colors">
+                    <UploadOutlined />
+                    Upload Avatar
                   </div>
                 </div>
               </Upload>

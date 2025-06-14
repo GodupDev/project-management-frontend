@@ -176,7 +176,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
               <div className="flex items-center justify-center gap-5 w-full">
                 {profile.socialLinks.linkedin && (
                   <a
-                    href={profile.socialLinks.linkedin}
+                    href={`https://${profile.socialLinks.linkedin}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="!text-gray-700 transition-all duration-300 transform hover:scale-110 hover:shadow-md" // Màu đen gốc, hiệu ứng hover
@@ -187,9 +187,8 @@ const ProfileModal = ({ isOpen, onClose }) => {
                 )}
                 {profile.socialLinks.github && (
                   <a
-                    href={profile.socialLinks.github}
+                    href={`https://${profile.socialLinks.github}`}
                     target="_blank"
-                    rel="noopener noreferrer"
                     className="!text-gray-700 hover:text-gray-700 transition-all duration-300 transform hover:scale-110 hover:shadow-md" // Màu đen gốc, hiệu ứng hover
                     title="GitHub Profile"
                   >
@@ -198,9 +197,8 @@ const ProfileModal = ({ isOpen, onClose }) => {
                 )}
                 {profile.socialLinks.facebook && (
                   <a
-                    href={profile.socialLinks.facebook}
+                    href={`https://${profile.socialLinks.facebook}`}
                     target="_blank"
-                    rel="noopener noreferrer"
                     className="!text-gray-700 hover:text-blue-600 transition-all duration-300 transform hover:scale-110 hover:shadow-md" // Màu đen gốc, hiệu ứng hover
                     title="Facebook Profile"
                   >
