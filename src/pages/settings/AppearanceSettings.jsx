@@ -1,6 +1,6 @@
 import React from "react";
-import { Card, Select, Radio, Space, Typography } from "antd";
-import { useMockData } from "../../context/MockDataContext";
+import { Card, Select, Radio, Space, Typography, Divider } from "antd";
+import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { motion as Motion } from "framer-motion";
 
@@ -8,19 +8,13 @@ const { Title } = Typography;
 const { Option } = Select;
 
 const AppearanceSettings = () => {
-  const { settings, updateSettings } = useMockData();
+  const { theme, toggleTheme } = useTheme();
   const { t, language, changeLanguage } = useLanguage();
 
-  const handleChange = (key, value) => {
-    if (key === "language") {
-      changeLanguage(value);
+  const handleThemeChange = (value) => {
+    if (value === "light" || value === "dark") {
+      toggleTheme();
     }
-    updateSettings({
-      appearanceSettings: {
-        ...settings.appearanceSettings,
-        [key]: value,
-      },
-    });
   };
 
   return (
@@ -30,79 +24,34 @@ const AppearanceSettings = () => {
       transition={{ duration: 0.5 }}
     >
       <Card title={t("appearance")} className="mb-4">
-        <div className="space-y-6">
+        <div className="p-5 space-y-8">
           {/* Theme */}
           <div>
-            <Title level={5}>{t("theme")}</Title>
+            <Title level={5}>{t("settingsTheme")}</Title>
             <Radio.Group
-              value={settings.appearanceSettings.theme}
-              onChange={(e) => handleChange("theme", e.target.value)}
-              className="mt-4"
+              value={theme}
+              onChange={(e) => handleThemeChange(e.target.value)}
+              className="!mt-2"
             >
               <Space direction="vertical">
-                <Radio value="light">{t("light")}</Radio>
-                <Radio value="dark">{t("dark")}</Radio>
-                <Radio value="system">{t("system")}</Radio>
+                <Radio value="light">{t("settingsLight")}</Radio>
+                <Radio value="dark">{t("settingsDark")}</Radio>
               </Space>
             </Radio.Group>
           </div>
+
+          <Divider />
 
           {/* Language */}
           <div>
-            <Title level={5}>{t("language")}</Title>
+            <Title level={5}>{t("settingsLanguage")}</Title>
             <Select
               value={language}
-              onChange={(value) => handleChange("language", value)}
-              className="w-full mt-4"
+              onChange={(value) => changeLanguage(value)}
+              className="w-full !mt-2"
             >
               <Option value="en">English</Option>
               <Option value="vi">Tiếng Việt</Option>
-            </Select>
-          </div>
-
-          {/* Font Size */}
-          <div>
-            <Title level={5}>{t("fontSize")}</Title>
-            <Radio.Group
-              value={settings.appearanceSettings.fontSize}
-              onChange={(e) => handleChange("fontSize", e.target.value)}
-              className="mt-4"
-            >
-              <Space direction="vertical">
-                <Radio value="small">{t("small")}</Radio>
-                <Radio value="medium">{t("medium")}</Radio>
-                <Radio value="large">{t("large")}</Radio>
-              </Space>
-            </Radio.Group>
-          </div>
-
-          {/* Density */}
-          <div>
-            <Title level={5}>{t("density")}</Title>
-            <Radio.Group
-              value={settings.appearanceSettings.density}
-              onChange={(e) => handleChange("density", e.target.value)}
-              className="mt-4"
-            >
-              <Space direction="vertical">
-                <Radio value="comfortable">{t("comfortable")}</Radio>
-                <Radio value="compact">{t("compact")}</Radio>
-              </Space>
-            </Radio.Group>
-          </div>
-
-          {/* Color Scheme */}
-          <div>
-            <Title level={5}>{t("colorScheme")}</Title>
-            <Select
-              value={settings.appearanceSettings.colorScheme}
-              onChange={(value) => handleChange("colorScheme", value)}
-              className="w-full mt-4"
-            >
-              <Option value="blue">Blue</Option>
-              <Option value="green">Green</Option>
-              <Option value="purple">Purple</Option>
-              <Option value="orange">Orange</Option>
             </Select>
           </div>
         </div>

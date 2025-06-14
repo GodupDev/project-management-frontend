@@ -1,82 +1,123 @@
 import React from "react";
-import { Typography, Card, Divider } from "antd";
 import {
-  PlusOutlined,
-  CalendarOutlined,
-  BarChartOutlined,
-  BellOutlined,
-  HistoryOutlined,
-  ThunderboltOutlined,
-  TeamOutlined,
-  CheckCircleOutlined,
+  Row,
+  Col,
+  Card,
+  Statistic,
+  Progress,
+  List,
+  Avatar,
+  Tag,
+  Typography,
+} from "antd";
+import {
   ProjectOutlined,
-  SmileOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  TeamOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 import { motion as Motion } from "framer-motion";
-import { useMockData } from "../context/MockDataContext";
 import { useLanguage } from "../context/LanguageContext";
-
 const { Title, Text } = Typography;
 
-const SummaryCard = ({ icon, title, description }) => (
-  <Card className="hover:shadow-lg transition-shadow duration-200">
-    <div className="flex items-center gap-4">
-      <div className="text-2xl text-blue-500">{icon}</div>
-      <div>
-        <Text className="text-gray-500">{title}</Text>
-        <div className="text-xl font-semibold">{description}</div>
-      </div>
-    </div>
-  </Card>
-);
-
-const CardSection = ({ title, items, icon }) => (
-  <Card
-    title={
-      <div className="flex items-center gap-2">
-        {icon}
-        <span>{title}</span>
-      </div>
-    }
-    className="hover:shadow-lg transition-shadow duration-200"
-  >
-    <ul className="space-y-2">
-      {items.map((item, index) => (
-        <li key={index} className="flex items-center gap-2">
-          <ThunderboltOutlined className="text-blue-500" />
-          <span>{item}</span>
-        </li>
-      ))}
-    </ul>
-  </Card>
-);
-
 const Home = () => {
-  const { projects, tasks, users, notifications } = useMockData();
   const { t } = useLanguage();
 
-  // Calculate summary statistics
-  const ongoingProjects = projects.filter(
-    (p) => p.status === "in-progress",
-  ).length;
-  const completedTasksToday = tasks.filter((t) => {
-    const today = new Date().toISOString().split("T")[0];
-    return t.status === "completed" && t.dueDate === today;
-  }).length;
-  const activeMembers = users.length;
-  const recentNotifications = notifications.slice(0, 2);
+  // Hardcoded data
+  const stats = {
+    totalProjects: 8,
+    completedProjects: 4,
+    inProgressProjects: 3,
+    totalTasks: 32,
+    completedTasks: 20,
+    teamMembers: 6,
+  };
 
-  // Get today's tasks
-  const todayTasks = tasks.filter((task) => {
-    const today = new Date().toISOString().split("T")[0];
-    return task.dueDate === today;
-  });
-
-  // Get recent activities
-  const recentActivities = [
-    ...recentNotifications.map((notif) => notif.message),
-    ...todayTasks.map((task) => `Due today: ${task.title}`),
+  const recentProjects = [
+    {
+      id: 1,
+      name: "Website Redesign",
+      progress: 65,
+      status: "in_progress",
+      team: [
+        { id: 1, name: "John Doe", avatar: "https://i.pravatar.cc/150?img=1" },
+        {
+          id: 2,
+          name: "Jane Smith",
+          avatar: "https://i.pravatar.cc/150?img=2",
+        },
+      ],
+    },
+    {
+      id: 2,
+      name: "Mobile App Launch",
+      progress: 100,
+      status: "completed",
+      team: [
+        {
+          id: 3,
+          name: "Mike Johnson",
+          avatar: "https://i.pravatar.cc/150?img=3",
+        },
+      ],
+    },
+    {
+      id: 3,
+      name: "Marketing Campaign",
+      progress: 40,
+      status: "in_progress",
+      team: [
+        {
+          id: 4,
+          name: "Emily Brown",
+          avatar: "https://i.pravatar.cc/150?img=4",
+        },
+      ],
+    },
   ];
+
+  const recentTasks = [
+    {
+      id: 1,
+      title: "Design Homepage",
+      project: "Website Redesign",
+      assignee: "Jane Smith",
+      dueDate: "2024-03-15",
+      status: "in_progress",
+    },
+    {
+      id: 2,
+      title: "Implement Authentication",
+      project: "Website Redesign",
+      assignee: "Mike Johnson",
+      dueDate: "2024-03-20",
+      status: "todo",
+    },
+    {
+      id: 3,
+      title: "Create Database Schema",
+      project: "Website Redesign",
+      assignee: "Mike Johnson",
+      dueDate: "2024-03-10",
+      status: "done",
+    },
+  ];
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "completed":
+        return "green";
+      case "in_progress":
+        return "blue";
+      case "todo":
+        return "orange";
+      case "done":
+        return "green";
+      default:
+        return "default";
+    }
+  };
 
   return (
     <Motion.div
@@ -84,91 +125,104 @@ const Home = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="p-4 mx-auto space-y-12">
-        {/* Welcome Message */}
-        <Motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center"
-        >
-          <Title level={2} className="!text-3xl">
-            {t("welcomeBack")}, {users[0].fullName} 👋
-          </Title>
-          <Text type="secondary" className="text-gray-500">
-            {t("quickOverview")}
-          </Text>
-        </Motion.div>
+      <div className="space-y-8">
+        <Row gutter={16}>
+          <Col span={8}>
+            <Card>
+              <Statistic
+                title={t("totalProjects")}
+                value={stats.totalProjects}
+                prefix={<ProjectOutlined />}
+              />
+            </Card>
+          </Col>
+          <Col span={8}>
+            <Card>
+              <Statistic
+                title={t("completedProjects")}
+                value={stats.completedProjects}
+                prefix={<CheckCircleOutlined />}
+              />
+            </Card>
+          </Col>
+          <Col span={8}>
+            <Card>
+              <Statistic
+                title={t("inProgressProjects")}
+                value={stats.inProgressProjects}
+                prefix={<ClockCircleOutlined />}
+              />
+            </Card>
+          </Col>
+        </Row>
 
-        {/* Dashboard Summary */}
-        <Motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
-          <SummaryCard
-            icon={<ProjectOutlined />}
-            title={t("projects")}
-            description={`${ongoingProjects} ${t("ongoing")}`}
-          />
-          <SummaryCard
-            icon={<CheckCircleOutlined />}
-            title={t("completedTasks")}
-            description={`${completedTasksToday} ${t("today")}`}
-          />
-          <SummaryCard
-            icon={<TeamOutlined />}
-            title={t("activeMembers")}
-            description={`${activeMembers} ${t("members")}`}
-          />
-          <SummaryCard
-            icon={<BarChartOutlined />}
-            title={t("reports")}
-            description={`2 ${t("generated")}`}
-          />
-        </Motion.div>
-
-        {/* Schedule */}
-        <Motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          className="grid grid-cols-1 gap-6"
-        >
-          <CardSection
-            title={t("todaySchedule")}
-            items={todayTasks.map((task) => `${task.dueDate} – ${task.title}`)}
-            icon={<CalendarOutlined />}
-          />
-        </Motion.div>
-
-        {/* Recent Activity */}
-        <Motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <CardSection
-            title={t("recentActivity")}
-            items={recentActivities}
-            icon={<HistoryOutlined />}
-          />
-        </Motion.div>
-
-        {/* Quote */}
-        <Motion.div
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9 }}
-          className="text-center pt-8"
-        >
-          <Divider />
-          <div className="inline-flex items-center justify-center gap-2 text-gray-600 text-base italic">
-            <SmileOutlined />
-            <span>{t("quote")}</span>
-          </div>
-        </Motion.div>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Card title={t("recentProjects")} extra={<TeamOutlined />}>
+              <List
+                itemLayout="horizontal"
+                dataSource={recentProjects}
+                renderItem={(project) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      avatar={<ProjectOutlined style={{ fontSize: 24 }} />}
+                      title={project.name}
+                      description={
+                        <>
+                          <Progress percent={project.progress} size="small" />
+                          <div>
+                            {project.team.map((member) => (
+                              <Avatar
+                                key={member.id}
+                                src={member.avatar}
+                                size="small"
+                                style={{ marginRight: 4 }}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      }
+                    />
+                    <Tag color={getStatusColor(project.status)}>
+                      {t(project.status)}
+                    </Tag>
+                  </List.Item>
+                )}
+              />
+            </Card>
+          </Col>
+          <Col span={12}>
+            <Card title={t("recentTasks")} extra={<FileTextOutlined />}>
+              <List
+                itemLayout="horizontal"
+                dataSource={recentTasks}
+                renderItem={(task) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      title={task.title}
+                      description={
+                        <>
+                          <Text type="secondary">{task.project}</Text>
+                          <br />
+                          <Text>
+                            {t("assignee")}: {task.assignee}
+                          </Text>
+                          <br />
+                          <Text>
+                            {t("dueDate")}: {task.dueDate}
+                          </Text>
+                        </>
+                      }
+                    />
+                    <Tag color={getStatusColor(task.status)}>
+                      {t(task.status)}
+                    </Tag>
+                  </List.Item>
+                )}
+              />
+            </Card>
+          </Col>
+        </Row>
       </div>
     </Motion.div>
   );

@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Routes,
   Route,
@@ -22,15 +21,15 @@ import MyProfile from "./MyProfile";
 import NotificationSettings from "./NotificationSettings";
 import AppearanceSettings from "./AppearanceSettings";
 import PrivacySettings from "./PrivacySettings";
-import TimeZoneSettings from "./TimeZoneSettings";
 import SecuritySettings from "./SecuritySettings";
 
 const { Content, Sider } = Layout;
 
 // Styled Components
 const StyledLayout = styled(Layout)`
-  min-height: 80vh;
+  min-height: 75vh;
   padding: 1rem;
+  background: transparent;
 `;
 
 const StyledSider = styled(Sider)`
@@ -73,11 +72,6 @@ const SettingsMain = () => {
       label: t("privacy"),
     },
     {
-      key: "timezone",
-      icon: <GlobalOutlined />,
-      label: t("timeZone"),
-    },
-    {
       key: "security",
       icon: <LockOutlined />,
       label: t("security"),
@@ -89,18 +83,18 @@ const SettingsMain = () => {
     { path: "notifications", element: <NotificationSettings /> },
     { path: "appearance", element: <AppearanceSettings /> },
     { path: "privacy", element: <PrivacySettings /> },
-    { path: "timezone", element: <TimeZoneSettings /> },
     { path: "security", element: <SecuritySettings /> },
   ];
 
   return (
     <Motion.div
+      className="p-5"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
       <StyledLayout>
-        <StyledSider width={250} theme="light">
+        <StyledSider width={250}>
           <div className="p-4">
             <h1 className="text-xl font-semibold">{t("settings")}</h1>
           </div>
@@ -111,7 +105,7 @@ const SettingsMain = () => {
             onClick={({ key }) => navigate(`/settings/${key}`)}
           />
         </StyledSider>
-        <Content className="p-6 bg-gray-50">
+        <Content className="p-6 ">
           <div className="max-w-4xl mx-auto">
             <Routes>
               <Route index element={<Navigate to="profile" replace />} />

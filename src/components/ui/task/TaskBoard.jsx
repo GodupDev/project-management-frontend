@@ -48,7 +48,9 @@ const TaskBoard = ({ tasks = [], onTaskClick }) => {
       {columns.map((column) => (
         <div key={`column-${column.title}`} className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">{column.title}</h3>
+            <h3 className="text-lg font-medium text-[var(--color-text-primary)]">
+              {column.title}
+            </h3>
             <Tag color={column.color}>{column.tasks.length}</Tag>
           </div>
           <div className="!space-y-2">

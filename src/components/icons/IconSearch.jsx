@@ -1,5 +1,5 @@
 const IconSearch = ({
-  className = "w-5 h-5 text-[var(--color-text-tertiary)]",
+  className = "w-5 h-5 text-[var(--color-text-secondary)]",
 }) => {
   // Không cần khai báo color hay strokeWidth trong JS nữa
   return (

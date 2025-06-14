@@ -1,7 +1,6 @@
 import { motion as Motion } from "framer-motion";
 import { Image } from "antd";
 import { useSidebar } from "../../context/SidebarContext";
-import { useMockData } from "../../context/MockDataContext";
 import SearchBar from "../ui/SearchBar";
 import IMAGE from "../../assets/images/images";
 import IconThemeToggle from "../icons/IconThemeToggle";
@@ -10,11 +9,18 @@ import IconNotification from "../icons/IconNotification";
 import { useState, useRef, useEffect } from "react";
 import ProfileModal from "../modals/ProfileModal";
 import NotificationDropdown from "../dropdown/NotificationDropdown";
+import { useUserProfile } from "../../context/UserProfileContext";
+import { useAuth } from "../../context/AuthContext";
+import { Layout, Space, Avatar, Dropdown, Button } from "antd";
+import { UserOutlined } from "@ant-design/icons";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { selectProfile } from "../../store/slices/userProfileSlice";
 
 const Header = () => {
   const { toggleSidebar } = useSidebar();
-  const { settings, notifications } = useMockData();
-  const { userProfile } = settings;
+  const { profile } = useUserProfile();
+  const { user } = useAuth();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
@@ -42,7 +48,31 @@ const Header = () => {
   };
 
   // Tính số thông báo chưa đọc
-  const unreadCount = notifications.filter((n) => n.status === "unread").length;
+  const unreadCount = 2;
+
+  const profileRedux = useSelector(selectProfile);
+  const navigate = useNavigate();
+
+  const userMenuItems = [
+    {
+      key: "profile",
+      label: "Thông tin cá nhân",
+      onClick: () => navigate("/profile"),
+    },
+    {
+      key: "settings",
+      label: "Cài đặt",
+      onClick: () => navigate("/settings"),
+    },
+    {
+      key: "logout",
+      label: "Đăng xuất",
+      onClick: () => {
+        localStorage.removeItem("token");
+        navigate("/login");
+      },
+    },
+  ];
 
   return (
     <Motion.div
@@ -101,10 +131,7 @@ const Header = () => {
 
           {isNotificationOpen && (
             <div ref={notifRef} className="absolute right-0 top-full mt-2 z-50">
-              <NotificationDropdown
-                notifications={notifications}
-                onViewAll={handleViewAllNotifications}
-              />
+              <NotificationDropdown onViewAll={handleViewAllNotifications} />
             </div>
           )}
 
@@ -114,16 +141,16 @@ const Header = () => {
           >
             <div className="text-right flex-1">
               <p className="text-[1rem] font-medium text-[var(--color-text-primary)] truncate">
-                {userProfile.fullName}
+                {user?.username}
               </p>
               <p className="text-[0.7rem] text-[var(--color-text-secondary)] truncate">
-                {userProfile.role}
+                {profile?.fullName}
               </p>
             </div>
             <Image
               width={40}
               height={40}
-              src={userProfile.avatar}
+              src={profile?.avatarUrl || user?.avatar}
               preview={false}
               className="rounded-full object-cover border-2 border-[var(--color-border-light)] 
                          shadow-[var(--shadow-sm)]"
@@ -139,7 +166,6 @@ const Header = () => {
       <ProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
-        user={userProfile}
       />
     </Motion.div>
   );
