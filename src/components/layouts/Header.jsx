@@ -16,6 +16,7 @@ import { UserOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { selectProfile } from "../../store/slices/userProfileSlice";
+
 const Header = () => {
   const { toggleSidebar } = useSidebar();
   const { profile } = useUserProfile();
@@ -48,30 +49,6 @@ const Header = () => {
 
   // Tính số thông báo chưa đọc
   const unreadCount = 2;
-
-  const profileRedux = useSelector(selectProfile);
-  const navigate = useNavigate();
-
-  const userMenuItems = [
-    {
-      key: "profile",
-      label: "Thông tin cá nhân",
-      onClick: () => navigate("/profile"),
-    },
-    {
-      key: "settings",
-      label: "Cài đặt",
-      onClick: () => navigate("/settings"),
-    },
-    {
-      key: "logout",
-      label: "Đăng xuất",
-      onClick: () => {
-        localStorage.removeItem("token");
-        navigate("/login");
-      },
-    },
-  ];
 
   const profileRedux = useSelector(selectProfile);
   const navigate = useNavigate();
