@@ -9,7 +9,6 @@ export const fetchUserProfile = createAsyncThunk(
   async (userId, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("token");
-      console.log(token);
 
       if (!token) {
         throw new Error("Không tìm thấy token");

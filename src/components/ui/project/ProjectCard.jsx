@@ -7,7 +7,7 @@ const statusColorMap = {
   active: { color: "green", label: "Active" },
   completed: { color: "blue", label: "Completed" },
   pending: { color: "orange", label: "Pending" },
-  archived: { color: "gray", label: "Archived" },
+  cancelled: { color: "red", label: "Cancelled" },
 };
 
 const ProjectCard = ({ project }) => {

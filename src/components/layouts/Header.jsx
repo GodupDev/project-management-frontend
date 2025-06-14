@@ -9,15 +9,31 @@ import IconNotification from "../icons/IconNotification";
 import { useState, useRef, useEffect } from "react";
 import ProfileModal from "../modals/ProfileModal";
 import NotificationDropdown from "../dropdown/NotificationDropdown";
+import { useAuth } from "../../context/AuthContext";
 import { useUserProfile } from "../../context/UserProfileContext";
 
 const Header = () => {
   const { toggleSidebar } = useSidebar();
-  const { profile } = useUserProfile();
+  const { getProfileById } = useUserProfile();
+  const { user } = useAuth();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [profile, setProfile] = useState(null);
 
   const notifRef = useRef(null);
+
+  useEffect(() => {
+    if (!user || !user._id) return; // Thêm điều kiện này để tránh lỗi
+    const fetchProfile = async () => {
+      try {
+        const profileData = await getProfileById(user._id);
+        setProfile(profileData);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+    fetchProfile();
+  }, [user]);
 
   // Close notification dropdown when clicking outside
   useEffect(() => {
@@ -131,7 +147,6 @@ const Header = () => {
       <div className="sm:hidden flex justify-center mt-2">
         <SearchBar />
       </div>
-
       <ProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}

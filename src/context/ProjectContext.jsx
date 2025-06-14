@@ -19,40 +19,26 @@ export const ProjectProvider = ({ children }) => {
   const dispatch = useDispatch();
   const { t } = useLanguage();
   const [prompt, setPrompt] = useState("");
-  const [filteredProjects, setFilteredProjects] = useState([]);
   const [isProjectsLoaded, setIsProjectsLoaded] = useState(false);
 
   // Get project data from Redux store
-  const { projects, currentProject, loading, error } = useSelector(
+  const { projects, loading, total, page, limit } = useSelector(
     (state) => state.project,
   );
-
   // Handle getting all projects
-  const handleGetAllProjects = async () => {
+  const handleGetAllProjects = async (filter = {}) => {
     try {
-      if (!isProjectsLoaded) {
-        const result = await dispatch(getAllProjects()).unwrap();
-        setIsProjectsLoaded(true);
-        return result;
-      }
-      return projects;
+      // Nếu backend hỗ trợ filter, truyền filter vào action getAllProjects(filter)
+      const result = await dispatch(getAllProjects(filter)).unwrap();
+      console.log(projects);
+      setIsProjectsLoaded(true);
+      return result;
+      // ...phần filter ở client giữ lại để fallback nếu cần...
     } catch (error) {
       message.error(error.message || t("projectGetFailed"));
       throw error;
     }
   };
-
-  // Filter projects based on prompt
-  useEffect(() => {
-    if (prompt) {
-      const filtered = projects.filter((project) =>
-        project.projectName.toLowerCase().includes(prompt.toLowerCase()),
-      );
-      setFilteredProjects(filtered);
-    } else {
-      setFilteredProjects(projects);
-    }
-  }, [prompt, projects]);
 
   // Handle project creation
   const handleCreateProject = async (projectData) => {
@@ -68,7 +54,6 @@ export const ProjectProvider = ({ children }) => {
 
       const result = await dispatch(createProject(projectData)).unwrap();
       // Update local projects list
-      setFilteredProjects([...projects, result]);
       return result;
     } catch (error) {
       message.error(error.message || t("projectCreateFailed"));
@@ -152,10 +137,9 @@ export const ProjectProvider = ({ children }) => {
   };
 
   const value = {
-    projects: filteredProjects,
-    currentProject,
+    projects,
+    total,
     loading,
-    error,
     prompt,
     setPrompt,
     isProjectsLoaded,

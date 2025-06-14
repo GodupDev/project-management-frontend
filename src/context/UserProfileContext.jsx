@@ -19,19 +19,19 @@ export const UserProfileProvider = ({ children }) => {
   const { user } = useAuth();
   const { t } = useLanguage();
 
-  // Get profile data from Redux store
-  const profile = useSelector(selectProfile);
+  // Lấy profile từ Redux store
   const loading = useSelector(selectProfileLoading);
   const error = useSelector(selectProfileError);
+  const profile = useSelector(selectProfile);
 
-  // Fetch profile when user is logged in
+  // Fetch profile khi user._id thay đổi
   useEffect(() => {
-    if (user?._id) {
+    if (user && user._id) {
       dispatch(fetchUserProfile(user._id));
     }
-  }, [user?._id, dispatch]);
+  }, [user, dispatch]);
 
-  // Clear profile when user logs out
+  // Clear profile khi logout
   useEffect(() => {
     if (!user) {
       dispatch(clearProfile());
@@ -50,11 +50,22 @@ export const UserProfileProvider = ({ children }) => {
     }
   };
 
+  const handleGetProfileById = async (userId) => {
+    try {
+      const result = await dispatch(fetchUserProfile(userId)).unwrap();
+      return result;
+    } catch (error) {
+      message.error(error.message || t("getProfileFailed"));
+      throw error;
+    }
+  };
+
   const value = {
     profile,
     loading,
     error,
     updateProfile: handleUpdateProfile,
+    getProfileById: handleGetProfileById, // thêm vào context
   };
 
   return (

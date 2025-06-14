@@ -5,7 +5,7 @@ import { useProject } from "../../context/ProjectContext";
 
 const { RangePicker } = DatePicker;
 
-const CreateProjectForm = ({ onSuccess }) => {
+const CreateProjectForm = ({ setIsCreateModalOpen }) => {
   const [form] = Form.useForm();
   const { createProject } = useProject();
   const [submitting, setSubmitting] = React.useState(false);
@@ -28,8 +28,9 @@ const CreateProjectForm = ({ onSuccess }) => {
       if (result) {
         message.success("Project created successfully");
         form.resetFields();
-        if (onSuccess) onSuccess(result);
       }
+
+      setIsCreateModalOpen(false);
     } catch (error) {
       console.error("Create project error:", error);
     } finally {

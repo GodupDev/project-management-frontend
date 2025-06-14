@@ -98,7 +98,7 @@ export const getUserByEmail = createAsyncThunk(
       if (!token) {
         throw new Error("Không tìm thấy token");
       }
-      const response = await axios.get(`${API_URL}/auth/${email}`, {
+      const response = await axios.get(`${API_URL}/${email}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -182,19 +182,8 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         state.error = action.payload;
-      })
-      // Get User By Email
-      .addCase(getUserByEmail.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(getUserByEmail.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload;
-      })
-      .addCase(getUserByEmail.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
       });
+    // Get User By Email
   },
 });
 

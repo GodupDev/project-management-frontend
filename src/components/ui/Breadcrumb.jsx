@@ -2,24 +2,8 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Breadcrumb as AntBreadcrumb } from "antd";
 import IconHome from "../icons/IconHome";
-import { useLanguage } from "../../context/LanguageContext";
 
-// Map path segments to translation keys
-const pathToTranslationKey = {
-  projects: "navProjects",
-  tasks: "navTasks",
-  performance: "navPerformance",
-  worklogs: "navWorklogs",
-  settings: "navSettings",
-  profile: "navProfile",
-  notifications: "navNotifications",
-  appearance: "navAppearance",
-  privacy: "navPrivacy",
-  timezone: "navTimezone",
-  security: "navSecurity",
-};
-
-// Hàm viết hoa chữ cái đầu
+// Tự động viết hoa chữ cái đầu mỗi từ
 const toTitleCase = (str) =>
   decodeURIComponent(str || "")
     .replace(/-/g, " ")
@@ -27,8 +11,9 @@ const toTitleCase = (str) =>
 
 function Breadcrumb() {
   const location = useLocation();
-  const pathnames = location.pathname.split("/").filter(Boolean);
-  const { t } = useLanguage();
+
+  const pathSegments = location.pathname.split("/").filter(Boolean);
+  const customNames = location.state?.pathnames || [];
 
   const items = [
     {
@@ -41,31 +26,22 @@ function Breadcrumb() {
         </Link>
       ),
     },
-    ...pathnames.map((name, index) => {
-      const routeTo = `/${pathnames.slice(0, index + 1).join("/")}`;
-      const isLast = index === pathnames.length - 1;
-
-      // Try to get translation key from mapping first
-      let translatedName = pathToTranslationKey[name]
-        ? t(pathToTranslationKey[name])
-        : t(name.toLowerCase());
-
-      // If no translation found, use formatted name
-      if (translatedName === name.toLowerCase()) {
-        translatedName = toTitleCase(name);
-      }
+    ...pathSegments.map((seg, idx) => {
+      const path = "/" + pathSegments.slice(0, idx + 1).join("/");
+      const label = customNames[idx] || toTitleCase(seg);
+      const isLast = idx === pathSegments.length - 1;
 
       return {
         title: isLast ? (
           <span className="text-[var(--color-text-secondary)] font-semibold text-base">
-            {translatedName}
+            {label}
           </span>
         ) : (
           <Link
-            to={routeTo}
+            to={path}
             className="!text-[var(--color-text-secondary)] hover:text-blue-500 text-base transition-colors duration-200"
           >
-            {translatedName}
+            {label}
           </Link>
         ),
       };
