@@ -28,7 +28,6 @@ const CreateTask = ({ onSuccess }) => {
       startDate: values.startDate?.format("YYYY-MM-DD"),
       endDate: values.endDate?.format("YYYY-MM-DD"),
     };
-    console.log("Submitted Task:", taskData);
     message.success(t("taskCreatedSuccess"));
     form.resetFields();
     onSuccess?.();

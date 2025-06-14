@@ -1,13 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyledInput } from "../styledAntd";
 import IconSearch from "../icons/IconSearch";
 import { motion as Motion } from "framer-motion";
 import { useLanguage } from "../../context/LanguageContext";
+import { useSearch } from "../../context/SearchContext";
 
 const SearchBar = () => {
-  const [value, setValue] = useState("");
+  const [localValue, setLocalValue] = useState("");
   const [focused, setFocused] = useState(false);
   const { t } = useLanguage();
+  const { updateSearchTerm, clearSearch } = useSearch();
+
+  // Debounce search term updates
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localValue.trim()) {
+        updateSearchTerm(localValue.trim());
+      } else {
+        clearSearch();
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [localValue, updateSearchTerm, clearSearch]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && localValue.trim()) {
+      updateSearchTerm(localValue.trim());
+    }
+  };
 
   return (
     <Motion.div
@@ -24,12 +45,12 @@ const SearchBar = () => {
       <IconSearch />
       <StyledInput
         placeholder={t("searchPlaceholder")}
-        value={value}
+        value={localValue}
         allowClear
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => setLocalValue(e.target.value)}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        onPressEnter={() => console.log("Search:", value)}
+        onKeyDown={handleKeyDown}
       />
     </Motion.div>
   );

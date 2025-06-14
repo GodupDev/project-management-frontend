@@ -242,11 +242,38 @@ export const StyledPagination = styled(Pagination)`
 
   .ant-pagination-options {
     color: #1e293b !important;
-    background: #f8fafc !important;
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 
-  .ant-pagination-jump-prev,
-  .ant-pagination-jump-next {
-    color: #64748b !important;
+  /* Tùy chỉnh dropdown chọn page size */
+  .ant-select-selector {
+    background-color: #fff !important;
+    border-radius: 6px !important;
+    color: #1e293b !important;
+    min-width: 64px;
+    height: 32px !important;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    box-shadow: none !important;
+    transition: border 0.2s;
+  }
+
+  .ant-select-open .ant-select-selector,
+  .ant-select-focused .ant-select-selector {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 2px #2563eb22 !important;
+  }
+
+  // .ant-select-dropdown {
+  //   background: #fff !important;
+  //   border-radius: 6px !important;
+  // }
+
+  .ant-select-item-option-selected {
+    background: #e0e7ef !important;
+    color: #2563eb !important;
   }
 `;

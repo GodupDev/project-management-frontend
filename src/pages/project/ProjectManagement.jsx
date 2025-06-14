@@ -7,7 +7,9 @@ import dayjs from "dayjs";
 import ProjectCard from "../../components/ui/project/ProjectCard";
 import CreateProjectForm from "../../components/modals/CreateProject";
 import { useProject } from "../../context/ProjectContext";
+import { useSearch } from "../../context/SearchContext";
 import { useLanguage } from "../../context/LanguageContext";
+
 import { StyledPagination } from "../../components/styledAntd";
 
 const { RangePicker } = DatePicker;
@@ -16,14 +18,14 @@ const ProjectManagement = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { projects, getAllProjects, loading, total } = useProject();
+  const { searchTerm } = useSearch();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortFilter, setSortFilter] = useState("desc");
-  const [searchTerm, setSearchTerm] = useState("");
   const [dateRange, setDateRange] = useState([]);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(9);
+  const [limit, setLimit] = useState(5);
 
   // Fetch projects with filters
   useEffect(() => {
@@ -38,8 +40,6 @@ const ProjectManagement = () => {
       limit,
     });
   }, [statusFilter, sortFilter, searchTerm, dateRange, page, limit]);
-
-  console.log(projects, total);
 
   const handleNavigate = (project) => {
     navigate(`/projects/${project._id}`, {
@@ -112,7 +112,7 @@ const ProjectManagement = () => {
       </div>
 
       {/* Project Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-5 gap-6 w-full">
         {loading ? (
           <div className="col-span-full flex items-center justify-center py-20">
             <Empty description={t("loading")} />
@@ -136,7 +136,7 @@ const ProjectManagement = () => {
 
       {/* Pagination */}
       {!loading && projects?.length > 0 && (
-        <div className="flex justify-center pt-8">
+        <div className="flex flex-col items-center pt-8 gap-2">
           <StyledPagination
             current={page}
             pageSize={limit}
@@ -146,8 +146,11 @@ const ProjectManagement = () => {
               setLimit(l);
             }}
             showSizeChanger
-            pageSizeOptions={["6", "9", "12", "18"]}
+            pageSizeOptions={["5", "10", "15", "20"]}
           />
+          <span className="text-gray-500 text-sm">
+            {t("totalProjects")}: <b>{total}</b>
+          </span>
         </div>
       )}
 

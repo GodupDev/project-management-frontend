@@ -14,6 +14,7 @@ import {
   Avatar,
   Spin,
   Form,
+  Popconfirm,
 } from "antd";
 import {
   ArrowLeftOutlined,
@@ -94,7 +95,6 @@ export default function ProjectSpecific() {
   }, [projectId]);
 
   const clearEditedProject = () => {
-    console.log(editedProject);
     const clearedEditedProject = {
       projectName: editedProject.projectName,
       description: editedProject.description,
@@ -108,7 +108,6 @@ export default function ProjectSpecific() {
         role: member.role,
       })),
     };
-    console.log(clearedEditedProject);
     return clearedEditedProject;
   };
 
@@ -263,14 +262,17 @@ export default function ProjectSpecific() {
                 <Button type="primary" onClick={handleSave} loading={saving}>
                   {t("save")}
                 </Button>
-                <Button
-                  type="primary"
-                  danger
-                  onClick={handleDelete}
-                  loading={deleting}
+                <Popconfirm
+                  title="Delete the task"
+                  description="Are you sure to delete this task?"
+                  onConfirm={handleDelete}
+                  okText="Yes"
+                  cancelText="No"
                 >
-                  <DeleteOutlined />
-                </Button>
+                  <Button type="primary" danger>
+                    <DeleteOutlined /> Delete
+                  </Button>
+                </Popconfirm>
               </div>
             ) : (
               <Button onClick={() => setEditMode(true)} type="primary" ghost>

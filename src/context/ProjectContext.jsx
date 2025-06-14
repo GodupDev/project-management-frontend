@@ -30,7 +30,6 @@ export const ProjectProvider = ({ children }) => {
     try {
       // Nếu backend hỗ trợ filter, truyền filter vào action getAllProjects(filter)
       const result = await dispatch(getAllProjects(filter)).unwrap();
-      console.log(projects);
       setIsProjectsLoaded(true);
       return result;
       // ...phần filter ở client giữ lại để fallback nếu cần...

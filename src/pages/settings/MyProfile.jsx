@@ -33,8 +33,6 @@ const MyProfile = () => {
     });
   };
 
-  console.log(profile);
-
   const handleCancel = () => {
     setIsEditing(false);
     form.resetFields();

@@ -51,7 +51,6 @@ const Header = () => {
   }, [isNotificationOpen]);
 
   const handleViewAllNotifications = () => {
-    console.log("View all notifications");
     setIsNotificationOpen(false);
     // Your logic to navigate or show full notifications page
   };

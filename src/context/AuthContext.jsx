@@ -33,7 +33,6 @@ export const AuthProvider = ({ children }) => {
 
       try {
         const log = await dispatch(getCurrentUser()).unwrap(); // unwrap giúp bắt lỗi rõ hơn
-        console.log("🚀 User data:", log);
       } catch (error) {
         console.error("❌ Lỗi lấy thông tin người dùng:", error);
         localStorage.removeItem("token"); // token hỏng → xóa
@@ -128,10 +127,8 @@ export const AuthProvider = ({ children }) => {
   const handleGetUserByEmail = async (email) => {
     try {
       const result = await dispatch(getUserByEmail(email)).unwrap();
-      console.log("User by email:", result); // Log kết quả ra console
       return result;
     } catch (error) {
-      console.log("Không tìm thấy user:", error);
       return null;
     }
   };

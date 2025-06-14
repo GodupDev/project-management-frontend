@@ -5,6 +5,7 @@ import { LanguageProvider } from "./LanguageContext";
 import { AuthProvider } from "./AuthContext";
 import { UserProfileProvider } from "./UserProfileContext";
 import { ProjectProvider } from "./ProjectContext";
+import { SearchProvider } from "./SearchContext";
 import AppContextProvider from "./AppContextProvider";
 
 // Tạo một context chung cho toàn bộ ứng dụng
@@ -22,9 +23,11 @@ const AppProvider = ({ children }) => {
         <AuthProvider>
           <UserProfileProvider>
             <ProjectProvider>
-              <SidebarProvider>
-                <AppContextProvider>{children}</AppContextProvider>
-              </SidebarProvider>
+              <SearchProvider>
+                <SidebarProvider>
+                  <AppContextProvider>{children}</AppContextProvider>
+                </SidebarProvider>
+              </SearchProvider>
             </ProjectProvider>
           </UserProfileProvider>
         </AuthProvider>
