@@ -15,6 +15,8 @@ function Breadcrumb() {
   const pathSegments = location.pathname.split("/").filter(Boolean);
   const customNames = location.state?.pathnames || [];
 
+  console.log(customNames);
+
   const items = [
     {
       title: (

@@ -57,7 +57,6 @@ export default function ProjectSpecific() {
   const [editedProject, setEditedProject] = useState(null);
   const [loading, setLoading] = useState(projectData === null);
   const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [editedMembers, setEditedMembers] = useState();
   const [form] = Form.useForm();
   const { setProfileId } = useUserProfile();
@@ -65,7 +64,7 @@ export default function ProjectSpecific() {
   const projectStatuses = [
     { value: "active", label: t("active"), color: "green" },
     { value: "completed", label: t("completed"), color: "blue" },
-    { value: "onHold", label: t("onHold"), color: "orange" },
+    { value: "on_hold", label: t("onHold"), color: "orange" },
     { value: "cancelled", label: t("cancelled"), color: "red" },
   ];
 
@@ -105,7 +104,7 @@ export default function ProjectSpecific() {
         startDate: editedProject.dateRange.startDate,
         endDate: editedProject.dateRange.endDate,
       },
-      status: editedProject.status, // hoặc "active", tùy hệ thống bạn
+      status: editedProject.status,
       members: editedMembers.map((member) => ({
         userId: member.userId,
         role: member.role,
@@ -182,20 +181,28 @@ export default function ProjectSpecific() {
 
     try {
       setSaving(true);
-
-      const updatedProject = await updateProject(
-        projectData._id,
-        clearEditedProject(),
-      );
+      
+      // Get the cleaned project data first
+      const projectToUpdate = clearEditedProject();
+      
+      console.log('Updating project with data:', projectToUpdate);
+      
+      // Call the update function with proper parameters
+      const updatedProject = await updateProject(projectData._id, projectToUpdate);
+      
       if (!updatedProject) {
         throw new Error(t("projectUpdateFailed"));
       }
 
+      // Update local state with the response
       setProjectData(updatedProject);
       setEditedProject(updatedProject);
       setEditMode(false);
+      
+      message.success(t("projectUpdatedSuccessfully"));
     } catch (error) {
       console.error("Error updating project:", error);
+      message.error(error.message || t("projectUpdateFailed"));
     } finally {
       setSaving(false);
     }

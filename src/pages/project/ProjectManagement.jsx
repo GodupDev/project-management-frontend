@@ -41,8 +41,6 @@ const ProjectManagement = () => {
     });
   }, [statusFilter, sortFilter, searchTerm, dateRange, page, limit, total]);
 
-  console.log(projects);
-
   const handleNavigate = (project) => {
     navigate(`/projects/${project._id}`, {
       state: {
