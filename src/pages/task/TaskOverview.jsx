@@ -78,7 +78,7 @@ const TaskOverview = () => {
       .join(", ");
   };
 
-  console.log("Tasks:", tasks);
+  
   const mappedTasks = tasks.map((task) => ({
     id: task._id || task.id,
     title: task.taskTitle,
@@ -90,6 +90,8 @@ const TaskOverview = () => {
     project: task.projectId?.projectName || "",
   }));
 
+  console.log("Mapped Tasks:", mappedTasks);
+  
   const filteredTasks = mappedTasks.filter((task) => {
     const matchesSearch = (task.title || "")
       .toLowerCase()
@@ -98,10 +100,8 @@ const TaskOverview = () => {
       statusFilter === "all" || task.status === statusFilter;
     const matchesPriority =
       priorityFilter === "all" || task.priority === priorityFilter;
-    const matchesView =
-      viewMode === "all" ||
-      (viewMode === "mine" && task.assigneeIds.includes(currentUserId));
-    return matchesSearch && matchesStatus && matchesPriority && matchesView;
+    const isMine = task.assigneeIds.includes(currentUserId);
+    return matchesSearch && matchesStatus && matchesPriority && isMine;
   });
 
   const columns = [
@@ -147,6 +147,8 @@ const TaskOverview = () => {
       key: "project",
     },
   ];
+
+  console.log("Tasks:", filteredTasks);
 
   return (
     <motion.div
@@ -196,20 +198,8 @@ const TaskOverview = () => {
             />
           </div>
           <div className="flex gap-2 items-center">
-            <Button.Group>
-              <Button
-                type={viewMode === "all" ? "primary" : "default"}
-                onClick={() => setViewMode("all")}
-              >
-                {t("All Tasks")}
-              </Button>
-              <Button
-                type={viewMode === "mine" ? "primary" : "default"}
-                onClick={() => setViewMode("mine")}
-              >
-                {t("My Tasks")}
-              </Button>
-            </Button.Group>
+            
+            
             <Button
               type="primary"
               icon={<PlusOutlined />}

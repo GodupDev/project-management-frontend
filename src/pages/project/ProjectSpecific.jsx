@@ -25,6 +25,8 @@ import moment from "moment";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import TaskBoard from "../../components/ui/task/TaskBoard";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchUsers } from "../../store/slices/userSlice";
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -37,13 +39,15 @@ export default function ProjectSpecific() {
   const projectData = location.state?.projectData;
   const { t } = useLanguage();
 
-  // Hardcoded data
-  const users = [
-    { id: 1, fullName: "Alice Johnson", avatar: "" },
-    { id: 2, fullName: "Bob Smith", avatar: "" },
-    { id: 3, fullName: "Charlie Brown", avatar: "" },
-  ];
+  // Lấy users từ redux store
+  const users = useSelector((state) => state.users?.list || []);
+  const dispatch = useDispatch();
 
+  useEffect(() => {
+    dispatch(fetchUsers());
+  }, [dispatch]);
+
+  // Mock projects và tasks (có thể thay bằng lấy từ backend nếu có)
   const projects = [
     {
       id: 1,
@@ -52,7 +56,7 @@ export default function ProjectSpecific() {
       status: t("inProgress"),
       startDate: "2024-06-01T00:00:00Z",
       expectedEndDate: "2024-07-01T00:00:00Z",
-      managers: [users[0], users[1]],
+      managers: [], // sẽ set lại bên dưới
     },
   ];
 
@@ -83,18 +87,26 @@ export default function ProjectSpecific() {
     t("cancelled"),
   ];
 
+  // Khi users đã có, set managers cho project nếu cần
   useEffect(() => {
     if (projectData) {
-      setProject(projectData);
-      setEditedProject({ ...projectData });
+      // Nếu projectData.managers là mảng id, map sang user object
+      let managers = [];
+      if (Array.isArray(projectData.managers) && typeof projectData.managers[0] !== "object") {
+        managers = projectData.managers
+          .map((id) => users.find((u) => u._id === id))
+          .filter(Boolean);
+      } else {
+        managers = projectData.managers || [];
+      }
+      setProject({ ...projectData, managers });
+      setEditedProject({ ...projectData, managers });
     } else {
       const foundProject = projects.find((p) => p.name === projectName);
-      if (foundProject) {
-        setProject(foundProject);
-        setEditedProject({ ...foundProject });
-      }
+      setProject(foundProject);
+      setEditedProject({ ...foundProject });
     }
-  }, [projectData, projectName]);
+  }, [projectData, projectName, users]);
 
   useEffect(() => {
     const filteredTasks = tasks.filter((t) => t.project.id === project?.id);
@@ -109,13 +121,15 @@ export default function ProjectSpecific() {
   };
 
   const handleSave = () => {
-    const updatedProjects = projects.map((p) =>
-      p.id === editedProject.id ? editedProject : p,
-    );
-    setProject(editedProject);
+    // Cập nhật managers là object user
+    const updatedManagers = (editedProject.managers || [])
+      .map((id) => users.find((u) => u._id === id) || id)
+      .filter(Boolean);
+    const updatedProject = { ...editedProject, managers: updatedManagers };
+    setProject(updatedProject);
     setEditMode(false);
     message.success(t("projectUpdatedSuccess"));
-    // Since this is hardcoded, the update is local only
+    // Nếu có backend thì gọi API update ở đây
   };
 
   const handleTaskClick = (task) => {
@@ -214,16 +228,16 @@ export default function ProjectSpecific() {
             </Title>
             {!editMode ? (
               <Avatar.Group max={{ count: 3 }}>
-                {project.managers?.map((manager) => (
+                {(project.managers || []).map((manager) => (
                   <Tooltip
-                    key={`manager-${manager?.id || "unknown"}`}
-                    title={manager?.fullName || t("unknown")}
+                    key={`manager-${manager?._id || manager?.id || "unknown"}`}
+                    title={manager?.fullName || manager?.username || manager?.name || t("unknown")}
                   >
                     <Avatar
                       src={manager?.avatar}
                       icon={!manager?.avatar && <UserOutlined />}
                     >
-                      {!manager?.avatar && (manager?.fullName?.[0] || "?")}
+                      {!manager?.avatar && (manager?.fullName?.[0] || manager?.username?.[0] || manager?.name?.[0] || "?")}
                     </Avatar>
                   </Tooltip>
                 ))}
@@ -234,21 +248,22 @@ export default function ProjectSpecific() {
                 style={{ width: "100%" }}
                 placeholder={t("selectManagers")}
                 value={
-                  editedProject.managers?.map((m) => m?.id).filter(Boolean) ||
-                  []
+                  (editedProject.managers || [])
+                    .map((m) => m?._id || m?.id)
+                    .filter(Boolean)
                 }
                 onChange={(ids) =>
                   handleChange(
                     "managers",
                     ids
-                      .map((id) => users.find((u) => u.id === id))
+                      .map((id) => users.find((u) => u._id === id))
                       .filter(Boolean),
                   )
                 }
               >
                 {users.map((user) => (
-                  <Option key={`user-${user.id}`} value={user.id}>
-                    {user.fullName}
+                  <Option key={`user-${user._id}`} value={user._id}>
+                    {user.fullName || user.username || user.name}
                   </Option>
                 ))}
               </Select>
