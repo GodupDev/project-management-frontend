@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = "http://localhost:8000/api/profiles";
+const API_URL = `${import.meta.env.VITE_SERVER_API_URL}/profiles`;
 
 // Async thunks
 export const fetchUserProfile = createAsyncThunk(
@@ -76,11 +76,6 @@ const userProfileSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    updateUserProfileSettings: (state, action) => {
-      if (state.profile) {
-        state.profile.notificationSettings = action.payload;
-      }
-    },
   },
   extraReducers: (builder) => {
     builder
@@ -113,14 +108,8 @@ const userProfileSlice = createSlice({
   },
 });
 
-export const {
-  setProfile,
-  setLoading,
-  setError,
-  clearProfile,
-  clearError,
-  updateUserProfileSettings,
-} = userProfileSlice.actions;
+export const { setProfile, setLoading, setError, clearProfile, clearError } =
+  userProfileSlice.actions;
 
 // Selectors
 export const selectProfile = (state) => state.userProfile.profile;

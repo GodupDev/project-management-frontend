@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Avatar, Form, Input, Button, Upload, message } from "antd";
+import { Card, Avatar, Form, Input, Button, Upload } from "antd";
 import {
   UserOutlined,
   MailOutlined,
@@ -10,16 +10,42 @@ import {
   GithubOutlined,
   InfoCircleOutlined,
   SolutionOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import { useUserProfile } from "../../context/UserProfileContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { motion as Motion } from "framer-motion";
+import { uploadImage } from "../../services/cloudinary";
 
 const MyProfile = () => {
   const { profile, loading, updateProfile } = useUserProfile();
   const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
   const [form] = Form.useForm();
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(profile?.avatarUrl || "");
+
+  const beforeUpload = (file) => {
+    const isImage = file.type.startsWith("image/");
+    if (!isImage) {
+      return Upload.LIST_IGNORE;
+    }
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isLt2M) {
+      return Upload.LIST_IGNORE;
+    }
+
+    // Create preview URL
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      setAvatarPreview(reader.result);
+    };
+
+    // Store the file for later upload
+    setAvatarFile(file);
+    return false; // Prevent auto upload
+  };
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -34,38 +60,46 @@ const MyProfile = () => {
   };
 
   const handleCancel = () => {
+    // Reset avatar preview if user cancels
+    if (avatarFile) {
+      setAvatarFile(null);
+      setAvatarPreview(profile?.avatarUrl || "");
+    }
     setIsEditing(false);
     form.resetFields();
   };
 
   const handleSave = async (values) => {
-    await updateProfile(values);
-    setIsEditing(false);
-  };
+    try {
+      let newAvatarUrl = profile?.avatarUrl;
+      let newAvatarPublicId = profile?.avatarPublicId;
 
-  const handleAvatarChange = async (info) => {
-    const file = info.file.originFileObj;
-    const isImage = file.type.startsWith("image/");
-    if (!isImage) {
-      message.error(t("pleaseUploadImage"));
-      return;
-    }
+      // Upload new avatar if there's a file
+      if (avatarFile) {
+        const result = await uploadImage(
+          avatarFile,
+          `users/${profile?._id}`,
+          newAvatarPublicId,
+        );
+        if (result && result.url) {
+          newAvatarUrl = result.url;
+          newAvatarPublicId = result.public_id;
+        } else {
+          throw new Error("Failed to upload avatar");
+        }
+      }
 
-    // Convert file to base64 (or upload to server here)
-    const toBase64 = (file) =>
-      new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = (error) => reject(error);
+      // Update profile with new data and avatar
+      await updateProfile({
+        ...values,
+        avatarUrl: newAvatarUrl,
+        avatarPublicId: newAvatarPublicId,
       });
 
-    try {
-      const base64Image = await toBase64(file);
-      await updateProfile({ ...profile, avatarUrl: base64Image });
-      message.success(t("avatarUpdatedSuccessfully"));
+      setIsEditing(false);
+      setAvatarFile(null);
     } catch (error) {
-      message.error(t("uploadFailed"));
+      console.error("Update error:", error);
     }
   };
 
@@ -81,36 +115,37 @@ const MyProfile = () => {
     >
       <Card title={t("profileTitle")} className="mb-4">
         <div className="flex items-start gap-6">
-          <div className="relative w-[100px] h-[100px]">
+          <div className="flex-shrink-0">
             {isEditing ? (
               <Upload
+                name="avatar"
+                className="avatar-uploader"
                 showUploadList={false}
-                beforeUpload={() => false}
-                customRequest={({ file }) =>
-                  handleAvatarChange({ file: { originFileObj: file } })
-                }
+                beforeUpload={beforeUpload}
+                accept="image/*"
               >
-                <div className="cursor-pointer relative group w-full h-full">
+                <div className="relative group cursor-pointer flex flex-col items-center">
                   <Avatar
-                    size={100}
-                    src={profile?.avatarUrl}
+                    size={120}
+                    src={avatarPreview}
                     icon={<UserOutlined />}
-                    className="hover:opacity-70 transition w-full h-full"
+                    className="mb-2"
                   />
-                  <div className="absolute inset-0 bg-black bg-opacity-30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                    <span className="text-white text-xs">
-                      📷 {t("changeAvatar")}
-                    </span>
+                  <div className="flex items-center mt-2 gap-2 text-md font-bold text-blue-500 hover:text-blue-600 transition-colors">
+                    <UploadOutlined />
+                    Upload Avatar
                   </div>
                 </div>
               </Upload>
             ) : (
-              <Avatar
-                size={100}
-                src={profile?.avatarUrl}
-                icon={<UserOutlined />}
-                className="w-full h-full"
-              />
+              <div className="relative">
+                <Avatar
+                  size={120}
+                  src={profile?.avatarUrl}
+                  icon={<UserOutlined />}
+                  className="border-4 border-white shadow-xl"
+                />
+              </div>
             )}
           </div>
 
@@ -149,7 +184,7 @@ const MyProfile = () => {
                 </Form.Item>
 
                 <Form.Item
-                  name="about"
+                  name="bio"
                   label={t("profileAbout")}
                   rules={[
                     {
@@ -183,7 +218,7 @@ const MyProfile = () => {
                     <Input prefix={<LinkedinOutlined />} />
                   </Form.Item>
 
-                  <Form.Item name={["socialLinks", "github"]} label="Github">
+                  <Form.Item name={["socialLinks", "github"]} label="github">
                     <Input prefix={<GithubOutlined />} />
                   </Form.Item>
                 </div>
@@ -207,7 +242,7 @@ const MyProfile = () => {
                 </div>
 
                 <div className="space-y-2">
-                  {profile?.userId?.email && (
+                  {profile?.userId.email && (
                     <p className="flex items-center gap-2">
                       <MailOutlined /> {profile.userId.email}
                     </p>
@@ -224,10 +259,10 @@ const MyProfile = () => {
                   )}
                 </div>
 
-                {profile?.about && (
+                {profile?.bio && (
                   <div className="mt-4">
                     <h4 className="font-semibold mb-2">{t("profileAbout")}</h4>
-                    <p className="text-gray-600">{profile.about}</p>
+                    <p className="text-gray-600">{profile.bio}</p>
                   </div>
                 )}
 

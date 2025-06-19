@@ -1,179 +1,96 @@
-import React, { useState } from "react";
-import {
-  Typography,
-  Input,
-  Select,
-  DatePicker,
-  Button,
-  Form,
-  Space,
-} from "antd";
-import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
-import { motion as Motion } from "framer-motion";
+import React from "react";
+import { Form, Input, DatePicker, Button, message } from "antd";
+import dayjs from "dayjs";
+import { useProject } from "../../context/ProjectContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { useProject } from "../../context/ProjectContext";
 
-const { Title } = Typography;
-const { Option } = Select;
+const { RangePicker } = DatePicker;
 
-const roleOptions = ["Team Lead", "Developer", "Tester", "Designer", "QA"];
-
-const CreateProject = ({ onSuccess }) => {
+const CreateProjectForm = ({ setIsCreateModalOpen }) => {
   const [form] = Form.useForm();
-  const [members, setMembers] = useState([]);
-  const [newMember, setNewMember] = useState({ name: "", role: "" });
+  const { createProject } = useProject();
   const { t } = useLanguage();
-  const { createProject, loading } = useProject();
+  const [submitting, setSubmitting] = React.useState(false);
 
-  const handleRemoveMember = (id) => {
-    setMembers(members.filter((m) => m.id !== id));
-  };
+  const onFinish = async (values) => {
+    if (submitting) return;
 
-  const handleSubmit = async (values) => {
     try {
-      const projectData = {
-        ...values,
-        startDate: values.startDate?.format("YYYY-MM-DD"),
-        endDate: values.endDate?.format("YYYY-MM-DD"),
-        members,
+      setSubmitting(true);
+      const [startDate, endDate] = values.dateRange || [];
+
+      const payload = {
+        projectName: values.projectName,
+        description: values.description,
+        startDate: startDate?.toISOString(),
+        endDate: endDate?.toISOString(),
       };
 
-      await createProject(projectData);
-      form.resetFields();
-      setMembers([]);
-      onSuccess?.();
+      const result = await createProject(payload);
+      if (result) {
+        message.success(t("projectCreated"));
+        form.resetFields();
+      }
+
+      setIsCreateModalOpen(false);
     } catch (error) {
-      // Error is already handled in ProjectContext
-      console.error("Project creation failed:", error);
+      console.error(t("createProjectError"), error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <div className="p-4 !pb-1">
-      <Form layout="vertical" form={form} onFinish={handleSubmit}>
-        <Form.Item
-          label={
-            <span className="font-semibold">{t("modalProjectTitle")}</span>
-          }
-          name="title"
-          rules={[{ required: true, message: t("modalInputProjectTitle") }]}
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={onFinish}
+      initialValues={{
+        dateRange: [dayjs(), null],
+      }}
+    >
+      <Form.Item
+        label={<span className="font-semibold">{t("projectName")}</span>}
+        name="projectName"
+        rules={[{ required: true, message: t("projectNameRequired") }]}
+      >
+        <Input placeholder={t("enterProjectName")} />
+      </Form.Item>
+
+      <Form.Item
+        label={<span className="font-semibold">{t("description")}</span>}
+        name="description"
+      >
+        <Input.TextArea
+          placeholder={t("projectDescriptionPlaceholder")}
+          rows={4}
+        />
+      </Form.Item>
+
+      <Form.Item
+        label={<span className="font-semibold">{t("projectDuration")}</span>}
+        name="dateRange"
+      >
+        <RangePicker
+          format="DD/MM/YYYY"
+          className="w-full"
+          placeholder={[t("startDate"), t("endDate")]}
+        />
+      </Form.Item>
+
+      <Form.Item>
+        <Button
+          type="primary"
+          htmlType="submit"
+          className="w-full"
+          loading={submitting}
         >
-          <Input placeholder={t("modalEnterProjectTitle")} />
-        </Form.Item>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Form.Item
-            label={<span className="font-semibold">{t("modalStartDate")}</span>}
-            name="startDate"
-            rules={[{ required: true, message: t("modalSelectStartDate") }]}
-          >
-            <DatePicker
-              className="w-full"
-              placeholder={t("modalDateDescription")}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label={<span className="font-semibold">{t("modalEndDate")}</span>}
-            name="endDate"
-            rules={[{ required: true, message: t("modalSelectEndDate") }]}
-          >
-            <DatePicker
-              className="w-full"
-              placeholder={t("modalDateDescription")}
-            />
-          </Form.Item>
-        </div>
-
-        <Form.Item
-          label={
-            <span className="font-semibold">
-              {t("modalProjectDescription")}
-            </span>
-          }
-          name="description"
-        >
-          <Input.TextArea
-            rows={4}
-            placeholder={t("modalEnterProjectDescription")}
-            className="resize-vertical"
-          />
-        </Form.Item>
-
-        <Form.Item
-          label={
-            <span className="font-semibold">{t("modalAddProjectMember")}</span>
-          }
-        >
-          <div className="flex flex-col md:flex-row gap-4 w-full">
-            <Input
-              placeholder={t("modalMemberEmail")}
-              onChange={(e) =>
-                setNewMember({ ...newMember, name: e.target.value })
-              }
-              className="w-full max-w-[80%]"
-            />
-            <Button type="primary" className="w-full max-w-[20%]">
-              Add
-            </Button>
-          </div>
-        </Form.Item>
-
-        <div className="space-y-2">
-          {members.map((member) => (
-            <div
-              key={member.id}
-              className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg"
-            >
-              <span className="flex-1 font-semibold">{member.name}</span>
-              <Select
-                value={member.role}
-                onChange={(value) => {
-                  setMembers(
-                    members.map((m) =>
-                      m.id === member.id ? { ...m, role: value } : m,
-                    ),
-                  );
-                }}
-              >
-                {roleOptions.map((role) => (
-                  <Option key={role} value={role}>
-                    {role}
-                  </Option>
-                ))}
-              </Select>
-              <Button
-                type="text"
-                danger
-                icon={<DeleteOutlined />}
-                onClick={() => handleRemoveMember(member.id)}
-              />
-            </div>
-          ))}
-        </div>
-
-        <Form.Item className="flex justify-center !mt-10">
-          <Space>
-            <Motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button type="primary" htmlType="submit" loading={loading}>
-                {t("modalCreate")}
-              </Button>
-            </Motion.div>
-            <Button
-              htmlType="button"
-              danger
-              onClick={() => {
-                form.resetFields();
-                setMembers([]);
-              }}
-              disabled={loading}
-            >
-              {t("modalClear")}
-            </Button>
-          </Space>
-        </Form.Item>
-      </Form>
-    </div>
+          {t("createProject")}
+        </Button>
+      </Form.Item>
+    </Form>
   );
 };
 
-export default CreateProject;
+export default CreateProjectForm;

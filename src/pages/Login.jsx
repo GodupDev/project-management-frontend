@@ -2,21 +2,13 @@ import React, { useState } from "react";
 import { MailOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
 import { motion as Motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-import {
-  Form,
-  Input,
-  Button,
-  Card as AntdCard,
-  Typography,
-  message,
-} from "antd";
+import { Form, Input, Button, Card as AntdCard, Typography } from "antd";
 
 const { Title, Text } = Typography;
 
 const AuthForm = () => {
   const { login, signup, error } = useAuth();
   const [form] = Form.useForm();
-
   const [loading, setLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
 
@@ -25,22 +17,19 @@ const AuthForm = () => {
     try {
       if (isLogin) {
         await login(values.email, values.password);
-        message.success("Login successful!");
       } else {
         await signup(values.name, values.email, values.password);
-        message.success("Signup successful!");
       }
     } catch (err) {
-      message.error(
-        `${isLogin ? "Login failed" : "Signup failed"}: ${err.message}`,
-      );
+      // Error is handled in AuthContext
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
   const onFormFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
+    console.error("Failed:", errorInfo);
   };
 
   return (
@@ -65,12 +54,6 @@ const AuthForm = () => {
             Please enter your credentials to continue
           </Text>
         </div>
-
-        {error && (
-          <div className="mb-4 p-4 rounded-lg bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-100 font-medium">
-            {error}
-          </div>
-        )}
 
         <Form
           form={form}

@@ -38,6 +38,7 @@ export default function Comment({ comments = [], onAddComment }) {
     }
   }, [comments]);
 
+
   const handleAddComment = () => {
     if (!newComment.trim()) return;
     onAddComment(newComment.trim());

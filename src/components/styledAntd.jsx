@@ -1,5 +1,7 @@
 import styled from "styled-components";
-import { Input, Button, Card, Table, Modal, Select } from "antd";
+import { Input, Button, Card, Table, Modal, Select, Pagination } from "antd";
+
+// ...existing code...
 
 export const StyledInput = styled(Input)`
   background-color: transparent !important;
@@ -180,5 +182,98 @@ export const StyledSelect = styled(Select)`
 
   .ant-select-arrow {
     color: var(--color-text-secondary);
+  }
+`;
+
+export const StyledPagination = styled(Pagination)`
+  .ant-pagination-item {
+    background-color: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #1e293b !important;
+    transition: background 0.2s, color 0.2s !important;
+  }
+
+  .ant-pagination-item-active {
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+    color: #fff !important;
+  }
+
+  .ant-pagination-item:hover,
+  .ant-pagination-item-active:hover {
+    background-color: #e0e7ef !important;
+    color: #2563eb !important;
+  }
+
+  .ant-pagination-prev,
+  .ant-pagination-next {
+    background: #f8fafc !important;
+    color: #1e293b !important;
+    border: 1px solid #cbd5e1 !important;
+    transition: background 0.2s, color 0.2s !important;
+  }
+
+  .ant-pagination-prev:hover,
+  .ant-pagination-next:hover {
+    background: #e0e7ef !important;
+    color: #2563eb !important;
+  }
+
+  .ant-pagination-item-link {
+    background: #f8fafc !important;
+    color: #1e293b !important;
+    border-radius: 4px !important;
+    border: none !important;
+    transition: background 0.2s, color 0.2s !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ant-pagination-item-link:hover {
+    background: #e0e7ef !important;
+    color: #2563eb !important;
+  }
+
+  .ant-pagination-disabled .ant-pagination-item-link {
+    color: #cbd5e1 !important;
+    background: #f1f5f9 !important;
+  }
+
+  .ant-pagination-options {
+    color: #1e293b !important;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Tùy chỉnh dropdown chọn page size */
+  .ant-select-selector {
+    background-color: #fff !important;
+    border-radius: 6px !important;
+    color: #1e293b !important;
+    min-width: 64px;
+    height: 32px !important;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    box-shadow: none !important;
+    transition: border 0.2s;
+  }
+
+  .ant-select-open .ant-select-selector,
+  .ant-select-focused .ant-select-selector {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 2px #2563eb22 !important;
+  }
+
+  // .ant-select-dropdown {
+  //   background: #fff !important;
+  //   border-radius: 6px !important;
+  // }
+
+  .ant-select-item-option-selected {
+    background: #e0e7ef !important;
+    color: #2563eb !important;
   }
 `;

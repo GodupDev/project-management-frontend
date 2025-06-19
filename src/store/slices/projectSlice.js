@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = "http://localhost:8000/api/projects";
+const API_URL = `${import.meta.env.VITE_SERVER_API_URL}/projects`;
 
 // Async thunks
 export const createProject = createAsyncThunk(
@@ -25,16 +25,24 @@ export const createProject = createAsyncThunk(
 
 export const getAllProjects = createAsyncThunk(
   "project/getAll",
-  async (_, { rejectWithValue }) => {
+  async (filter = {}, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(API_URL, {
+      const params = new URLSearchParams();
+      Object.entries(filter).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          params.append(key, value);
+        }
+      });
+
+      const response = await axios.get(`${API_URL}?${params.toString()}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("ok", response);
-      return response.data.data;
+
+      // SỬA Ở ĐÂY: trả về nguyên response.data.data
+      return response.data;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to get projects",
@@ -170,6 +178,9 @@ const initialState = {
   currentProject: null,
   loading: false,
   error: null,
+  total: 0,
+  page: 1,
+  limit: 10,
 };
 
 const projectSlice = createSlice({
@@ -192,7 +203,13 @@ const projectSlice = createSlice({
       })
       .addCase(createProject.fulfilled, (state, action) => {
         state.loading = false;
-        state.projects.push(action.payload);
+        // Check if project already exists
+        const exists = state.projects.some(
+          (p) => p.projectName === action.payload.projectName,
+        );
+        if (!exists) {
+          state.projects.push(action.payload);
+        }
       })
       .addCase(createProject.rejected, (state, action) => {
         state.loading = false;
@@ -205,7 +222,9 @@ const projectSlice = createSlice({
       })
       .addCase(getAllProjects.fulfilled, (state, action) => {
         state.loading = false;
-        state.projects = action.payload;
+        // action.payload là object: { data, total, page, limit }
+        state.projects = action.payload.data;
+        state.total = action.payload.total;
       })
       .addCase(getAllProjects.rejected, (state, action) => {
         state.loading = false;

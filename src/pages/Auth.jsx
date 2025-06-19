@@ -4,22 +4,25 @@ import { motion as Motion } from "framer-motion";
 import { ThemeProvider } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import {
-  Form,
-  Input,
-  Button,
-  Card as AntdCard,
-  Typography,
-  message,
-} from "antd";
+import { Form, Input, Button, Card as AntdCard, Typography } from "antd";
 
 const { Title, Text } = Typography;
 
 const AuthForm = () => {
   const [form] = Form.useForm();
   const [isLogin, setIsLogin] = useState(true);
-  const { login, signup, loading, isAuthenticated } = useAuth();
+  const { login, signup, loading, isAuthenticated, checkToken } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const validateToken = async () => {
+      const isValid = await checkToken();
+      if (isValid) {
+        navigate("/");
+      }
+    };
+    validateToken();
+  }, [checkToken, navigate]);
 
   useEffect(() => {
     // Nếu đã đăng nhập, chuyển hướng về trang chủ
@@ -38,16 +41,15 @@ const AuthForm = () => {
           values.password,
           values.username,
         );
-        if (res) setIsLogin(!isLogin);
+        if (res) {
+          setIsLogin(true);
+          form.resetFields();
+        }
       }
     } catch (err) {
       // Lỗi đã được xử lý trong AuthContext
       console.error(err);
     }
-  };
-
-  const onFormFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
   };
 
   return (
@@ -68,12 +70,7 @@ const AuthForm = () => {
             </Text>
           </div>
 
-          <Form
-            form={form}
-            onFinish={onFormFinish}
-            onFinishFailed={onFormFinishFailed}
-            layout="vertical"
-          >
+          <Form form={form} onFinish={onFormFinish} layout="vertical">
             {!isLogin && (
               <Form.Item
                 label="Tên người dùng"

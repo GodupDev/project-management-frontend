@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { message } from "antd";
 import { useLanguage } from "./LanguageContext";
@@ -8,6 +8,8 @@ import {
   logout,
   register,
   getCurrentUser,
+  getUserByEmail,
+  clearError,
 } from "../store/slices/authSlice";
 
 const AuthContext = createContext();
@@ -20,26 +22,89 @@ export const AuthProvider = ({ children }) => {
     (state) => state.auth,
   );
 
+  const lastErrorMessageRef = useRef(null);
+
   // Check for token and fetch user data on mount
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      dispatch(getCurrentUser());
-      console.log(token);
-    }
+    const fetchUser = async () => {
+      const token = localStorage.getItem("token");
+      console.log("🚀 Token:", token);
+      if (!token) return;
+
+      try {
+        const log = await dispatch(getCurrentUser()).unwrap(); // unwrap giúp bắt lỗi rõ hơn
+      } catch (error) {
+        console.error("❌ Lỗi lấy thông tin người dùng:", error);
+        localStorage.removeItem("token"); // token hỏng → xóa
+      }
+    };
+
+    fetchUser();
   }, [dispatch]);
+
+  // Check token validity
+  const checkToken = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        return false;
+      }
+
+      // Try to get current user data to verify token
+      const result = await dispatch(getCurrentUser()).unwrap();
+      return !!result;
+    } catch (error) {
+      console.error(error);
+      // If there's an error, token is invalid
+      localStorage.removeItem("token");
+      return false;
+    }
+  };
 
   useEffect(() => {
     if (error) {
-      message.error(t(error));
+      const errorKey = "authError";
+      // Handle different error types
+      if (error.includes("Invalid credentials")) {
+        message.error({ content: t("invalidCredentials"), key: errorKey });
+      } else if (error.includes("Email not found")) {
+        message.error({ content: t("emailNotFound"), key: errorKey });
+      } else if (error.includes("Account not activated")) {
+        message.error({ content: t("accountNotActivated"), key: errorKey });
+      } else if (error.includes("Too many attempts")) {
+        message.error({ content: t("tooManyAttempts"), key: errorKey });
+      } else if (error.includes("Network Error")) {
+        message.error({ content: t("networkError"), key: errorKey });
+      } else if (error.includes("Email or username already exists")) {
+        message.error({ content: t("emailOrUsernameExists"), key: errorKey });
+      } else {
+        message.error({ content: t(error) || error, key: errorKey });
+      }
+      // Clear the error after displaying it
+      dispatch(clearError());
+    } else {
+      lastErrorMessageRef.current = null;
     }
-  }, [error, t]);
+  }, [error, t, dispatch]);
 
   const handleLogin = async (email, password) => {
-    const result = await dispatch(login({ email, password })).unwrap();
-    if (result) {
-      message.success(t("successLogin"));
-      navigate("/");
+    // eslint-disable-next-line no-useless-catch
+    try {
+      const result = await dispatch(login({ email, password })).unwrap();
+      if (result) {
+        // Show welcome back message if user has logged in before
+        const lastLogin = localStorage.getItem("lastLogin");
+        if (lastLogin) {
+          message.success(t("welcomeBack"));
+        } else {
+          message.success(t("successLogin"));
+        }
+        localStorage.setItem("lastLogin", new Date().toISOString());
+        navigate("/");
+      }
+    } catch (error) {
+      // Error is handled in the error effect
+      throw error;
     }
   };
 
@@ -49,14 +114,23 @@ export const AuthProvider = ({ children }) => {
     ).unwrap();
     if (result) {
       message.success(t("successCreate"));
-      navigate("/login");
+      return result;
     }
   };
 
   const handleLogout = async () => {
     await dispatch(logout()).unwrap();
-    navigate("/login");
     message.success(t("successLogout"));
+    navigate("/login");
+  };
+
+  const handleGetUserByEmail = async (email) => {
+    try {
+      const result = await dispatch(getUserByEmail(email)).unwrap();
+      return result;
+    } catch (error) {
+      return null;
+    }
   };
 
   const value = {
@@ -66,6 +140,8 @@ export const AuthProvider = ({ children }) => {
     login: handleLogin,
     signup: handleSignup,
     logout: handleLogout,
+    checkToken,
+    getUserByEmail: handleGetUserByEmail,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = "http://localhost:8000/api/users"; // Update with your backend URL
+const API_URL = `${import.meta.env.VITE_SERVER_API_URL}/users`; // Update with your backend URL
 
 // Async thunks
 export const login = createAsyncThunk(
@@ -15,6 +15,7 @@ export const login = createAsyncThunk(
       localStorage.setItem("token", response.data.token);
       return response.data;
     } catch (error) {
+      console.error("Login error:", error);
       return rejectWithValue(
         error.response?.data?.message || "Đăng nhập thất bại",
       );
@@ -33,6 +34,7 @@ export const register = createAsyncThunk(
       });
       return response.data;
     } catch (error) {
+      console.error("Register error:", error);
       return rejectWithValue(
         error.response?.data?.message || "Đăng ký thất bại",
       );
@@ -88,6 +90,28 @@ export const getCurrentUser = createAsyncThunk(
   },
 );
 
+export const getUserByEmail = createAsyncThunk(
+  "getUserByEmail",
+  async (email, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Không tìm thấy token");
+      }
+      const response = await axios.get(`${API_URL}/${email}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Không thể tìm người dùng",
+      );
+    }
+  },
+);
+
 const initialState = {
   user: null,
   token: localStorage.getItem("token"),
@@ -128,7 +152,6 @@ const authSlice = createSlice({
       })
       .addCase(register.fulfilled, (state, action) => {
         state.loading = false;
-        state.isAuthenticated = true;
         state.user = action.payload.data;
       })
       .addCase(register.rejected, (state, action) => {
@@ -160,6 +183,7 @@ const authSlice = createSlice({
         state.token = null;
         state.error = action.payload;
       });
+    // Get User By Email
   },
 });
 

@@ -2,7 +2,6 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { message } from "antd";
 import { useLanguage } from "./LanguageContext";
-import { useAuth } from "./AuthContext";
 import {
   createProject,
   getAllProjects,
@@ -19,50 +18,41 @@ const ProjectContext = createContext();
 export const ProjectProvider = ({ children }) => {
   const dispatch = useDispatch();
   const { t } = useLanguage();
-  const { user } = useAuth();
   const [prompt, setPrompt] = useState("");
-  const [filteredProjects, setFilteredProjects] = useState([]);
+  const [isProjectsLoaded, setIsProjectsLoaded] = useState(false);
 
   // Get project data from Redux store
-  const { projects, currentProject, loading, error } = useSelector(
+  const { projects, loading, total, page, limit } = useSelector(
     (state) => state.project,
   );
-
-  // Fetch projects when user is logged in
-  useEffect(() => {
-    if (user) {
-      handleGetAllProjects();
-    }
-  }, [user, dispatch]);
-
   // Handle getting all projects
-  const handleGetAllProjects = async () => {
+  const handleGetAllProjects = async (filter = {}) => {
     try {
-      const result = await dispatch(getAllProjects()).unwrap();
+      // Nếu backend hỗ trợ filter, truyền filter vào action getAllProjects(filter)
+      const result = await dispatch(getAllProjects(filter)).unwrap();
+      setIsProjectsLoaded(true);
       return result;
+      // ...phần filter ở client giữ lại để fallback nếu cần...
     } catch (error) {
       message.error(error.message || t("projectGetFailed"));
       throw error;
     }
   };
 
-  // Filter projects based on prompt
-  useEffect(() => {
-    if (prompt) {
-      const filtered = projects.filter((project) =>
-        project.name.toLowerCase().includes(prompt.toLowerCase()),
-      );
-      setFilteredProjects(filtered);
-    } else {
-      setFilteredProjects(projects);
-    }
-  }, [prompt, projects]);
-
   // Handle project creation
   const handleCreateProject = async (projectData) => {
     try {
+      // Check if project with same name already exists
+      const existingProject = projects.find(
+        (p) => p.projectName === projectData.projectName,
+      );
+      if (existingProject) {
+        message.error(t("projectNameExists"));
+        return null;
+      }
+
       const result = await dispatch(createProject(projectData)).unwrap();
-      message.success(t("projectCreatedSuccess"));
+      // Update local projects list
       return result;
     } catch (error) {
       message.error(error.message || t("projectCreateFailed"));
@@ -146,12 +136,12 @@ export const ProjectProvider = ({ children }) => {
   };
 
   const value = {
-    projects: filteredProjects,
-    currentProject,
+    projects,
+    total,
     loading,
-    error,
     prompt,
     setPrompt,
+    isProjectsLoaded,
     getAllProjects: handleGetAllProjects,
     createProject: handleCreateProject,
     updateProject: handleUpdateProject,
