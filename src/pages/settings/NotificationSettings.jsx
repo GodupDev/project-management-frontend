@@ -6,10 +6,6 @@ import { motion as Motion } from "framer-motion";
 const { Title } = Typography;
 const { Option } = Select;
 
-import { selectCurrentUser } from "@/store/slices/authSlice";
-import { updateUserProfileSettings } from "@/store/slices/userProfileSlice";
-import { api } from "@/services/api";
-
 const NotificationSettings = () => {
   const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
@@ -297,98 +293,4 @@ const NotificationSettings = () => {
   );
 };
 
-          {/* In-App Notifications */}
-          <div className="mb-6">
-            <Title level={5}>{t("inAppNotifications")}</Title>
-            <div className="space-y-4 mt-4">
-              <div className="flex justify-between items-center">
-                <span>{t("taskUpdates")}</span>
-                <Switch
-                  checked={settings.inAppNotifications.taskUpdates}
-                  onChange={(checked) =>
-                    handleSettingChange(
-                      "inAppNotifications",
-                      "taskUpdates",
-                      checked,
-                    )
-                  }
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="flex justify-between items-center">
-                <span>{t("projectUpdates")}</span>
-                <Switch
-                  checked={settings.inAppNotifications.projectUpdates}
-                  onChange={(checked) =>
-                    handleSettingChange(
-                      "inAppNotifications",
-                      "projectUpdates",
-                      checked,
-                    )
-                  }
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="flex justify-between items-center">
-                <span>{t("mentions")}</span>
-                <Switch
-                  checked={settings.inAppNotifications.mentions}
-                  onChange={(checked) =>
-                    handleSettingChange(
-                      "inAppNotifications",
-                      "mentions",
-                      checked,
-                    )
-                  }
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="flex justify-between items-center">
-                <span>{t("comments")}</span>
-                <Switch
-                  checked={settings.inAppNotifications.comments}
-                  onChange={(checked) =>
-                    handleSettingChange(
-                      "inAppNotifications",
-                      "comments",
-                      checked,
-                    )
-                  }
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="flex justify-between items-center">
-                <span>{t("systemUpdates")}</span>
-                <Switch
-                  checked={settings.inAppNotifications.systemUpdates}
-                  onChange={(checked) =>
-                    handleSettingChange(
-                      "inAppNotifications",
-                      "systemUpdates",
-                      checked,
-                    )
-                  }
-                  disabled={!isEditing}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Phần buttons dưới cùng */}
-          <div className="flex justify-end space-x-4">
-            {isEditing ? (
-              <>
-                <Button onClick={() => setIsEditing(false)}>
-                  {t("cancel")}
-                </Button>
-                <Button type="primary" onClick={handleSaveSettings} loading={isLoading}>
-                  {t("save")}
-                </Button>
-              </>
-            ) : (
-              <Button type="primary" onClick={() => setIsEditing(true)}>
-                {t("edit")}
-              </Button>
-            )}
-          </div>
-        </Card>      </div>    </Motion.div>  );};export default NotificationSettings;
+export default NotificationSettings;
